@@ -784,7 +784,8 @@
         .quality-toggle:focus-visible,
         .pill-btn:focus-visible,
         .volume-control input[type="range"]:focus-visible,
-        .progress-group input[type="range"]:focus-visible {
+        .progress-group input[type="range"]:focus-visible,
+        .theme-toggle-btn:focus-visible {
             outline: 2px solid var(--primary-color);
             outline-offset: 3px;
         }
@@ -831,6 +832,7 @@
             box-shadow: 0 6px 16px rgba(52,152,219,0.35);
             border: 2px solid #fff;
             transition: transform 0.2s ease;
+            margin-top: -5px;
         }
 
         .progress-group input[type="range"]::-moz-range-thumb {
@@ -953,6 +955,7 @@
             background: var(--primary-color);
             border: 2px solid #fff;
             box-shadow: 0 6px 16px rgba(52,152,219,0.35);
+            margin-top: -4px;
         }
 
         .volume-control input[type="range"]::-moz-range-thumb {
@@ -989,6 +992,13 @@
             cursor: pointer;
             box-shadow: 0 16px 40px rgba(52,152,219,0.35);
             transition: transform 0.2s ease, box-shadow 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .pill-btn .btn-text {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
 
         #audioPlayer {
@@ -1146,69 +1156,38 @@
             100% { transform: rotate(360deg); } 
         }
         
-        .theme-switch-wrapper { 
-            position: absolute; 
-            top: 0px; 
-            right: 0px; 
+        .theme-toggle-wrapper {
+            position: absolute;
+            top: 0px;
+            right: 0px;
         }
-        .theme-switch { 
-            display: inline-block; 
-            height: 24px; 
-            position: relative; 
-            width: 48px; 
+        .theme-toggle-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1px solid var(--border-color);
+            background: var(--component-bg);
+            color: var(--text-color);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+            transition: all 0.3s ease;
         }
-        .theme-switch input { 
-            display:none; 
+
+        .theme-toggle-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 36px rgba(0, 0, 0, 0.16);
         }
-        .slider { 
-            background-color: #ccc; 
-            bottom: 0; 
-            cursor: pointer; 
-            left: 0; 
-            position: absolute; 
-            right: 0; 
-            top: 0; 
-            transition: .4s; 
-            border-radius: 24px; 
+
+        .theme-toggle-btn i {
+            font-size: 1.1em;
+            transition: transform 0.3s ease;
         }
-        .slider:before { 
-            background-color: #fff; 
-            bottom: 3px; 
-            content: ""; 
-            height: 18px; 
-            left: 3px; 
-            position: absolute; 
-            transition: .4s; 
-            width: 18px; 
-            border-radius: 50%; 
-        }
-        .slider .fa-sun, .slider .fa-moon { 
-            position: absolute; 
-            top: 50%; 
-            transform: translateY(-50%); 
-            color: #fff; 
-            font-size: 12px; 
-            opacity: 0; 
-            transition: opacity 0.4s; 
-        }
-        .slider .fa-sun { 
-            left: 6px; 
-            opacity: 1; 
-        }
-        .slider .fa-moon { 
-            right: 6px; 
-        }
-        input:checked + .slider { 
-            background-color: var(--primary-color); 
-        }
-        input:checked + .slider:before { 
-            transform: translateX(24px); 
-        }
-        input:checked + .slider .fa-sun { 
-            opacity: 0; 
-        }
-        input:checked + .slider .fa-moon { 
-            opacity: 1; 
+
+        .theme-toggle-btn.is-dark i {
+            transform: rotate(-20deg);
         }
 
         /* 通知样式 */
@@ -1417,14 +1396,10 @@
     <div class="header">
         <h1>音乐播放器</h1>
         <div class="warning">仅供学习交流使用，请支持正版音乐奥。</div>
-        <div class="theme-switch-wrapper">
-            <label class="theme-switch" for="checkbox">
-                <input type="checkbox" id="checkbox" />
-                <div class="slider">
-                    <i class="fas fa-sun"></i>
-                    <i class="fas fa-moon"></i>
-                </div>
-            </label>
+        <div class="theme-toggle-wrapper">
+            <button id="themeToggleBtn" class="theme-toggle-btn" type="button" aria-label="切换为深色模式" title="切换为深色模式" aria-pressed="false">
+                <i class="fas fa-sun"></i>
+            </button>
         </div>
     </div>
 
@@ -1493,13 +1468,13 @@
         <div class="control-group extras-group">
             <div class="playback-quality">
                 <button class="quality-toggle" id="qualityToggle" title="播放音质" aria-haspopup="true" aria-expanded="false">
-                    <span id="qualityLabel">320 kbps</span>
+                    <span id="qualityLabel">超高音质</span>
                     <i class="fas fa-chevron-up"></i>
                 </button>
                 <div class="playback-quality-menu" id="qualityMenu">
-                    <button type="button" data-quality="128">标准音质 · 128 kbps</button>
-                    <button type="button" data-quality="192">高音质 · 192 kbps</button>
-                    <button type="button" data-quality="320">超高音质 · 320 kbps</button>
+                    <button type="button" data-quality="128">标准音质</button>
+                    <button type="button" data-quality="192">高音质</button>
+                    <button type="button" data-quality="320">超高音质</button>
                     <button type="button" data-quality="999">无损音质</button>
                 </div>
             </div>
@@ -1529,7 +1504,7 @@
         playlist: document.getElementById("playlist"),
         lyrics: document.getElementById("lyrics"),
         audioPlayer: document.getElementById("audioPlayer"),
-        themeToggle: document.getElementById("checkbox"),
+        themeToggle: document.getElementById("themeToggleBtn"),
         loadOnlineBtn: document.getElementById("loadOnlineBtn"),
         showPlaylistBtn: document.getElementById("showPlaylistBtn"),
         showLyricsBtn: document.getElementById("showLyricsBtn"),
@@ -1750,9 +1725,9 @@
     }
 
     const QUALITY_META = {
-        "128": { short: "128 kbps", description: "标准音质 · 128 kbps" },
-        "192": { short: "192 kbps", description: "高音质 · 192 kbps" },
-        "320": { short: "320 kbps", description: "超高音质 · 320 kbps" },
+        "128": { short: "标准音质", description: "标准音质（128 kbps）" },
+        "192": { short: "高音质", description: "高音质（192 kbps）" },
+        "320": { short: "超高音质", description: "超高音质（320 kbps）" },
         "999": { short: "无损音质", description: "无损音质" },
     };
 
@@ -1776,6 +1751,15 @@
             const isActive = button.dataset.quality === state.playbackQuality;
             button.classList.toggle("active", isActive);
         });
+    }
+
+    function updateThemeToggleButton(isDark) {
+        if (!dom.themeToggle) return;
+        dom.themeToggle.innerHTML = `<i class="fas ${isDark ? "fa-moon" : "fa-sun"}"></i>`;
+        dom.themeToggle.setAttribute("aria-label", isDark ? "切换为浅色模式" : "切换为深色模式");
+        dom.themeToggle.setAttribute("title", isDark ? "切换为浅色模式" : "切换为深色模式");
+        dom.themeToggle.setAttribute("aria-pressed", isDark ? "true" : "false");
+        dom.themeToggle.classList.toggle("is-dark", isDark);
     }
 
     function togglePlaybackQualityMenu() {
@@ -2037,15 +2021,21 @@
         updatePlayPauseButton();
 
         const savedTheme = safeGetLocalStorage("theme");
-        if (savedTheme) {
-            document.body.classList.toggle("dark-mode", savedTheme === "dark");
-            dom.themeToggle.checked = savedTheme === "dark";
+        const prefersDark = savedTheme
+            ? savedTheme === "dark"
+            : Boolean(window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+        document.body.classList.toggle("dark-mode", prefersDark);
+        updateThemeToggleButton(prefersDark);
+
+        if (dom.themeToggle) {
+            dom.themeToggle.addEventListener("click", () => {
+                const isCurrentlyDark = document.body.classList.contains("dark-mode");
+                const nextIsDark = !isCurrentlyDark;
+                document.body.classList.toggle("dark-mode", nextIsDark);
+                safeSetLocalStorage("theme", nextIsDark ? "dark" : "light");
+                updateThemeToggleButton(nextIsDark);
+            });
         }
-        dom.themeToggle.addEventListener("change", (e) => {
-            const isDark = e.target.checked;
-            document.body.classList.toggle("dark-mode", isDark);
-            safeSetLocalStorage("theme", isDark ? "dark" : "light");
-        });
 
         dom.loadOnlineBtn.addEventListener("click", exploreOnlineMusic);
 
@@ -2424,9 +2414,9 @@
                     <button class="action-btn download" onclick="showQualityMenu(event, ${index}, 'search')" title="下载">
                         <i class="fas fa-download"></i>
                         <div class="quality-menu">
-                            <div class="quality-option" onclick="downloadWithQuality(event, ${index}, 'search', '128')">标准音质 (128k)</div>
-                            <div class="quality-option" onclick="downloadWithQuality(event, ${index}, 'search', '192')">高音质 (192k)</div>
-                            <div class="quality-option" onclick="downloadWithQuality(event, ${index}, 'search', '320')">超高音质 (320k)</div>
+                        <div class="quality-option" onclick="downloadWithQuality(event, ${index}, 'search', '128')">标准音质</div>
+                        <div class="quality-option" onclick="downloadWithQuality(event, ${index}, 'search', '192')">高音质</div>
+                        <div class="quality-option" onclick="downloadWithQuality(event, ${index}, 'search', '320')">超高音质</div>
                             <div class="quality-option" onclick="downloadWithQuality(event, ${index}, 'search', '999')">无损音质</div>
                         </div>
                     </button>
@@ -2461,9 +2451,9 @@
         const menu = document.createElement("div");
         menu.className = "dynamic-quality-menu";
         menu.innerHTML = `
-            <div class="quality-option" onclick="downloadWithQuality(event, ${index}, '${type}', '128')">标准音质 (128k)</div>
-            <div class="quality-option" onclick="downloadWithQuality(event, ${index}, '${type}', '192')">高音质 (192k)</div>
-            <div class="quality-option" onclick="downloadWithQuality(event, ${index}, '${type}', '320')">超高音质 (320k)</div>
+            <div class="quality-option" onclick="downloadWithQuality(event, ${index}, '${type}', '128')">标准音质</div>
+            <div class="quality-option" onclick="downloadWithQuality(event, ${index}, '${type}', '192')">高音质</div>
+            <div class="quality-option" onclick="downloadWithQuality(event, ${index}, '${type}', '320')">超高音质</div>
             <div class="quality-option" onclick="downloadWithQuality(event, ${index}, '${type}', '999')">无损音质</div>
         `;
         
