@@ -1,0 +1,16 @@
+{
+  "name": "music-player",
+  "version": "1.0.0",
+  "description": "> 🌐 一个无需后端即可部署的现代化网页音乐播放器，整合音乐聚合接口，集搜索、播放、歌词与下载于一体。",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "jpeg-js": "^0.4.4"
+  }
+}
