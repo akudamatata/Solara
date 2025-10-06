@@ -1,4 +1,5 @@
-import decodeJpeg from "./lib/vendor/jpeg-decoder.js";
+import legacyDecodeJpeg from "./lib/vendor/jpeg-decoder.js";
+import { decode as robustDecodeJpeg } from "./lib/vendor/jpeg-js";
 
 const MAX_DIMENSION = 96;
 const TARGET_SAMPLE_COUNT = 2400;
@@ -287,6 +288,24 @@ function resizeImage(image: DecodedImage): DecodedImage {
   };
 }
 
+function toClampedArray(data: ArrayLike<number>): Uint8ClampedArray {
+  if (data instanceof Uint8ClampedArray) {
+    return data;
+  }
+
+  if (data instanceof Uint8Array) {
+    return new Uint8ClampedArray(data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength));
+  }
+
+  const length = data.length;
+  const clamped = new Uint8ClampedArray(length);
+  for (let index = 0; index < length; index += 1) {
+    const value = data[index];
+    clamped[index] = typeof value === "number" ? value : 0;
+  }
+  return clamped;
+}
+
 function decodeImage(arrayBuffer: ArrayBuffer, contentType: string): DecodedImage {
   const subtype = contentType.split("/")[1]?.split(";")[0]?.toLowerCase() ?? "";
   const supported: SupportedFormat[] = ["jpeg", "jpg", "pjpeg"];
@@ -295,18 +314,52 @@ function decodeImage(arrayBuffer: ArrayBuffer, contentType: string): DecodedImag
   }
 
   const bytes = new Uint8Array(arrayBuffer);
-  const decoded = decodeJpeg(bytes, {
-    useTArray: true,
-    formatAsRGBA: true,
-  });
 
-  const image: DecodedImage = {
-    width: decoded.width,
-    height: decoded.height,
-    data: new Uint8ClampedArray(decoded.data),
+  const decodeWithLegacy = () => {
+    const result = legacyDecodeJpeg(bytes, {
+      useTArray: true,
+      formatAsRGBA: true,
+    });
+
+    return {
+      width: result.width,
+      height: result.height,
+      data: toClampedArray(result.data),
+    };
   };
 
-  return resizeImage(image);
+  const decodeWithRobust = () => {
+    const result = robustDecodeJpeg(bytes, {
+      useTArray: true,
+      formatAsRGBA: true,
+      tolerantDecoding: true,
+    });
+
+    return {
+      width: result.width,
+      height: result.height,
+      data: toClampedArray(result.data),
+    };
+  };
+
+  let decoded: DecodedImage;
+  try {
+    decoded = decodeWithLegacy();
+  } catch (primaryError) {
+    console.warn("Legacy JPEG decoder failed, falling back to jpeg-js", primaryError);
+    try {
+      decoded = decodeWithRobust();
+    } catch (fallbackError) {
+      console.error("jpeg-js fallback decoder failed", fallbackError);
+      const primaryMessage = primaryError instanceof Error ? primaryError.message : String(primaryError);
+      const fallbackMessage = fallbackError instanceof Error ? fallbackError.message : String(fallbackError);
+      const combined = new Error(`Failed to decode JPEG image (primary: ${primaryMessage}; fallback: ${fallbackMessage})`);
+      (combined as Error & { cause?: unknown }).cause = fallbackError;
+      throw combined;
+    }
+  }
+
+  return resizeImage(decoded);
 }
 
 async function buildPalette(arrayBuffer: ArrayBuffer, contentType: string): Promise<PaletteResponse> {
