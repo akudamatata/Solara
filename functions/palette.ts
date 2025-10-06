@@ -1,9 +1,10 @@
 import decodeJpeg from "./lib/vendor/jpeg-decoder.js";
+import UPNG from "./lib/vendor/upng.js";
 
 const MAX_DIMENSION = 96;
 const TARGET_SAMPLE_COUNT = 2400;
 
-type SupportedFormat = "jpeg" | "jpg" | "pjpeg";
+type SupportedFormat = "jpeg" | "jpg" | "pjpeg" | "png" | "apng" | "x-png";
 
 interface DecodedImage {
   width: number;
@@ -287,30 +288,56 @@ function resizeImage(image: DecodedImage): DecodedImage {
   };
 }
 
-function decodeImage(arrayBuffer: ArrayBuffer, contentType: string): DecodedImage {
+async function decodeImage(arrayBuffer: ArrayBuffer, contentType: string): Promise<DecodedImage> {
   const subtype = contentType.split("/")[1]?.split(";")[0]?.toLowerCase() ?? "";
-  const supported: SupportedFormat[] = ["jpeg", "jpg", "pjpeg"];
-  if (!supported.includes(subtype as SupportedFormat)) {
-    throw new UnsupportedImageFormatError(subtype);
+  const normalizedSubtype = subtype === "" ? "" : subtype.replace(/^x-/, "");
+
+  const jpegFormats: SupportedFormat[] = ["jpeg", "jpg", "pjpeg"];
+  const pngFormats: SupportedFormat[] = ["png", "apng", "x-png"];
+
+  if (jpegFormats.includes(normalizedSubtype as SupportedFormat)) {
+    const bytes = new Uint8Array(arrayBuffer);
+    const decoded = decodeJpeg(bytes, {
+      useTArray: true,
+      formatAsRGBA: true,
+    });
+
+    const image: DecodedImage = {
+      width: decoded.width,
+      height: decoded.height,
+      data: new Uint8ClampedArray(decoded.data),
+    };
+
+    return resizeImage(image);
   }
 
-  const bytes = new Uint8Array(arrayBuffer);
-  const decoded = decodeJpeg(bytes, {
-    useTArray: true,
-    formatAsRGBA: true,
-  });
+  if (pngFormats.includes(normalizedSubtype as SupportedFormat)) {
+    const png = await UPNG.decode(arrayBuffer);
+    const frames = await UPNG.toRGBA8(png);
+    const frame = frames[0];
 
-  const image: DecodedImage = {
-    width: decoded.width,
-    height: decoded.height,
-    data: new Uint8ClampedArray(decoded.data),
-  };
+    if (!frame) {
+      throw new Error("PNG decoding returned no frames");
+    }
 
-  return resizeImage(image);
+    const frameView = frame instanceof ArrayBuffer
+      ? new Uint8Array(frame)
+      : new Uint8Array(frame.buffer, frame.byteOffset, frame.byteLength);
+
+    const image: DecodedImage = {
+      width: png.width,
+      height: png.height,
+      data: new Uint8ClampedArray(frameView),
+    };
+
+    return resizeImage(image);
+  }
+
+  throw new UnsupportedImageFormatError(subtype);
 }
 
 async function buildPalette(arrayBuffer: ArrayBuffer, contentType: string): Promise<PaletteResponse> {
-  const imageData = decodeImage(arrayBuffer, contentType);
+  const imageData = await decodeImage(arrayBuffer, contentType);
   const analyzed = analyzeImageColors(imageData);
   const gradientStops = buildGradientStops(analyzed.accent);
   const tokens = buildThemeTokens(analyzed.accent);
