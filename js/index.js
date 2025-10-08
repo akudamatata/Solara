@@ -34,6 +34,13 @@ const dom = {
     qualityToggle: document.getElementById("qualityToggle"),
     playerQualityMenu: document.getElementById("playerQualityMenu"),
     qualityLabel: document.getElementById("qualityLabel"),
+    searchPanel: document.getElementById("searchPanel"),
+    mobileOverlayBackdrop: document.getElementById("mobileOverlayBackdrop"),
+};
+
+const layout = {
+    isMobile: document.documentElement.classList.contains("is-mobile"),
+    isDesktop: document.documentElement.classList.contains("is-desktop"),
 };
 
 const PLACEHOLDER_HTML = `<div class="placeholder"><i class="fas fa-music"></i></div>`;
@@ -368,6 +375,122 @@ const state = {
     audioReadyForPalette: true,
     currentGradient: '',
 };
+
+let activeMobilePanel = null;
+let mobilePanelTriggers = [];
+
+function setMobilePanel(panel) {
+    if (!layout.isMobile) {
+        return;
+    }
+
+    const target = panel === "search" || panel === "playlist" ? panel : "";
+    if (target) {
+        document.body.setAttribute("data-mobile-panel", target);
+        document.body.classList.add("mobile-panel-open");
+        if (dom.mobileOverlayBackdrop) {
+            dom.mobileOverlayBackdrop.setAttribute("aria-hidden", "false");
+        }
+        if (dom.searchPanel) {
+            dom.searchPanel.setAttribute("aria-hidden", target === "search" ? "false" : "true");
+        }
+        if (dom.playlist) {
+            dom.playlist.setAttribute("aria-hidden", target === "playlist" ? "false" : "true");
+        }
+        if (target === "search" && dom.searchInput) {
+            window.setTimeout(() => {
+                try {
+                    dom.searchInput.focus({ preventScroll: true });
+                } catch (error) {
+                    dom.searchInput.focus();
+                }
+            }, 200);
+        } else if (dom.searchInput) {
+            dom.searchInput.blur();
+        }
+    } else {
+        document.body.removeAttribute("data-mobile-panel");
+        document.body.classList.remove("mobile-panel-open");
+        if (dom.mobileOverlayBackdrop) {
+            dom.mobileOverlayBackdrop.setAttribute("aria-hidden", "true");
+        }
+        if (dom.searchPanel) {
+            dom.searchPanel.setAttribute("aria-hidden", "true");
+        }
+        if (dom.playlist) {
+            dom.playlist.setAttribute("aria-hidden", "true");
+        }
+        if (dom.searchInput) {
+            dom.searchInput.blur();
+        }
+    }
+
+    activeMobilePanel = target || null;
+
+    if (mobilePanelTriggers.length) {
+        mobilePanelTriggers.forEach(trigger => {
+            const triggerTarget = trigger.getAttribute("data-mobile-panel-target");
+            const isActive = triggerTarget === activeMobilePanel;
+            trigger.setAttribute("aria-pressed", String(isActive));
+            trigger.setAttribute("aria-expanded", String(isActive));
+        });
+    }
+}
+
+function initializeMobilePanels() {
+    if (!layout.isMobile) {
+        return;
+    }
+
+    mobilePanelTriggers = Array.from(document.querySelectorAll("[data-mobile-panel-target]"));
+    const closeButtons = Array.from(document.querySelectorAll("[data-mobile-panel-close]"));
+
+    if (dom.searchPanel) {
+        dom.searchPanel.setAttribute("aria-hidden", "true");
+        dom.searchPanel.addEventListener("click", event => event.stopPropagation());
+    }
+    if (dom.playlist) {
+        dom.playlist.setAttribute("aria-hidden", "true");
+    }
+    if (dom.mobileOverlayBackdrop) {
+        dom.mobileOverlayBackdrop.setAttribute("aria-hidden", "true");
+    }
+
+    const togglePanel = (target) => {
+        if (activeMobilePanel === target) {
+            setMobilePanel(null);
+        } else {
+            setMobilePanel(target);
+        }
+    };
+
+    mobilePanelTriggers.forEach(trigger => {
+        const target = trigger.getAttribute("data-mobile-panel-target");
+        trigger.setAttribute("aria-pressed", "false");
+        trigger.setAttribute("aria-expanded", "false");
+        trigger.addEventListener("click", (event) => {
+            event.preventDefault();
+            togglePanel(target);
+        });
+    });
+
+    closeButtons.forEach(button => {
+        button.addEventListener("click", (event) => {
+            event.preventDefault();
+            setMobilePanel(null);
+        });
+    });
+
+    if (dom.mobileOverlayBackdrop) {
+        dom.mobileOverlayBackdrop.addEventListener("click", () => setMobilePanel(null));
+    }
+
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && activeMobilePanel) {
+            setMobilePanel(null);
+        }
+    });
+}
 
 let sourceMenuPositionFrame = null;
 let qualityMenuPositionFrame = null;
@@ -870,6 +993,9 @@ function toggleSearchMode(enable) {
 // 新增：显示搜索结果
 function showSearchResults() {
     toggleSearchMode(true);
+    if (layout.isMobile) {
+        setMobilePanel("search");
+    }
     if (state.sourceMenuOpen) {
         scheduleSourceMenuPositionUpdate();
     }
@@ -881,6 +1007,9 @@ function showSearchResults() {
 // 新增：隐藏搜索结果 - 优化立即收起
 function hideSearchResults() {
     toggleSearchMode(false);
+    if (layout.isMobile) {
+        setMobilePanel(null);
+    }
     if (state.sourceMenuOpen) {
         scheduleSourceMenuPositionUpdate();
     }
@@ -1427,6 +1556,10 @@ function setupInteractions() {
         applyDynamicGradient();
     }
 
+    if (layout.isMobile) {
+        initializeMobilePanels();
+    }
+
     captureThemeDefaults();
     const savedTheme = safeGetLocalStorage("theme");
     const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -1474,8 +1607,22 @@ function setupInteractions() {
 
     dom.loadOnlineBtn.addEventListener("click", exploreOnlineMusic);
 
-    dom.showPlaylistBtn.addEventListener("click", () => switchMobileView("playlist"));
-    dom.showLyricsBtn.addEventListener("click", () => switchMobileView("lyrics"));
+    if (dom.showPlaylistBtn && dom.showLyricsBtn) {
+        if (layout.isMobile) {
+            dom.showPlaylistBtn.addEventListener("click", (event) => {
+                event.preventDefault();
+                setMobilePanel("playlist");
+            });
+            dom.showLyricsBtn.addEventListener("click", (event) => {
+                event.preventDefault();
+                setMobilePanel(null);
+                switchMobileView("lyrics");
+            });
+        } else {
+            dom.showPlaylistBtn.addEventListener("click", () => switchMobileView("playlist"));
+            dom.showLyricsBtn.addEventListener("click", () => switchMobileView("lyrics"));
+        }
+    }
 
     // 播放模式按钮事件
     updatePlayModeUI();
@@ -2030,6 +2177,9 @@ async function playSearchResult(index) {
         // 立即隐藏搜索结果，显示播放界面
         hideSearchResults();
         dom.searchInput.value = "";
+        if (layout.isMobile) {
+            setMobilePanel(null);
+        }
 
         // 检查歌曲是否已在播放列表中
         const existingIndex = state.playlistSongs.findIndex(s => s.id === song.id && s.source === song.source);
@@ -2203,6 +2353,10 @@ async function playPlaylistSong(index) {
     const song = state.playlistSongs[index];
     state.currentTrackIndex = index;
     state.currentPlaylist = "playlist";
+
+    if (layout.isMobile) {
+        setMobilePanel(null);
+    }
 
     try {
         await playSong(song);
