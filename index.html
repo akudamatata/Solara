@@ -9,7 +9,34 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
-
+    <script>
+        (function () {
+            const ua = navigator.userAgent || "";
+            const isMobileUA = /android|iphone|ipad|ipod|mobile|blackberry|phone|opera mini|windows phone/i.test(ua);
+            const isSmallScreen = typeof window.matchMedia === "function" && window.matchMedia("(max-width: 820px)").matches;
+            const isMobile = isMobileUA || isSmallScreen;
+            window.__SOLARA_IS_MOBILE = isMobile;
+            if (!isMobile) {
+                return;
+            }
+            document.documentElement.classList.add("mobile-view");
+            const link = document.createElement("link");
+            link.rel = "stylesheet";
+            link.href = "css/mobile.css";
+            link.id = "mobileStylesheet";
+            document.head.appendChild(link);
+            const applyBodyClass = () => {
+                if (document.body) {
+                    document.body.classList.add("mobile-view");
+                }
+            };
+            if (document.readyState === "loading") {
+                document.addEventListener("DOMContentLoaded", applyBodyClass, { once: true });
+            } else {
+                applyBodyClass();
+            }
+        })();
+    </script>
 </head>
 <body>
     <div class="background-stage" id="backgroundStage" aria-hidden="true">
@@ -17,104 +44,132 @@
         <div class="background-stage__layer background-stage__layer--transition" id="backgroundTransitionLayer"></div>
     </div>
     <div class="container" id="mainContainer">
-    <div class="header">
-        <h1>Solara</h1>
-        <div class="warning">Made by Wet Dream Boy，免费API来自GD音乐台(music.gdstudio.xyz)，仅供学习交流使用，请支持正版音乐奥！</div>
-        <div class="theme-switch-wrapper">
-            <button id="themeToggleButton" class="theme-toggle-button" type="button" aria-label="切换深浅色模式">
-                <i class="fas fa-sun theme-icon theme-icon--sun" aria-hidden="true"></i>
-                <i class="fas fa-moon theme-icon theme-icon--moon" aria-hidden="true"></i>
+        <div class="mobile-toolbar" id="mobileToolbar" role="toolbar">
+            <button class="mobile-toolbar__button" id="mobileExploreButton" type="button" aria-label="探索雷达">
+                <i class="fas fa-satellite-dish" aria-hidden="true"></i>
             </button>
-        </div>
-    </div>
-
-    <div class="search-area">
-        <div class="search-container">
-            <input type="text" id="searchInput" class="search-input" placeholder="搜索歌曲、歌手或专辑...">
-            <div class="source-select-wrapper" id="sourceSelectWrapper">
-                <button id="sourceSelectButton" class="source-select-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
-                    <span id="sourceSelectLabel">网易云音乐</span>
-                    <i class="fas fa-chevron-down caret-icon" aria-hidden="true"></i>
+            <div class="mobile-toolbar__title" id="mobileToolbarTitle">Solara</div>
+            <div class="mobile-toolbar__actions">
+                <button class="mobile-toolbar__button" id="mobileSearchToggle" type="button" aria-label="打开搜索">
+                    <i class="fas fa-search" aria-hidden="true"></i>
                 </button>
-                <div id="sourceMenu" class="source-menu" role="listbox" aria-labelledby="sourceSelectButton"></div>
             </div>
-            <button id="searchBtn" class="search-btn">
-                <i class="fas fa-search"></i>
-                <span>搜索</span>
-            </button>
         </div>
-        <div id="searchResults" class="search-results"></div>
-    </div>
+        <div class="header">
+            <h1>Solara</h1>
+            <div class="warning">Made by Wet Dream Boy，免费API来自GD音乐台(music.gdstudio.xyz)，仅供学习交流使用，请支持正版音乐奥！</div>
+            <div class="theme-switch-wrapper">
+                <button id="themeToggleButton" class="theme-toggle-button" type="button" aria-label="切换深浅色模式">
+                    <i class="fas fa-sun theme-icon theme-icon--sun" aria-hidden="true"></i>
+                    <i class="fas fa-moon theme-icon theme-icon--moon" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
 
-    <div class="main-content">
-        <div class="cover-area">
-            <div class="album-cover" id="albumCover">
-                <div class="placeholder">
-                    <i class="fas fa-music"></i>
+        <div class="search-area" id="searchArea">
+            <button type="button" class="mobile-close-btn" id="mobileSearchClose" aria-label="关闭搜索">
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+            <div class="search-container">
+                <input type="text" id="searchInput" class="search-input" placeholder="搜索歌曲、歌手或专辑...">
+                <div class="source-select-wrapper" id="sourceSelectWrapper">
+                    <button id="sourceSelectButton" class="source-select-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
+                        <span id="sourceSelectLabel">网易云音乐</span>
+                        <i class="fas fa-chevron-down caret-icon" aria-hidden="true"></i>
+                    </button>
+                    <div id="sourceMenu" class="source-menu" role="listbox" aria-labelledby="sourceSelectButton"></div>
+                </div>
+                <button id="searchBtn" class="search-btn">
+                    <i class="fas fa-search"></i>
+                    <span>搜索</span>
+                </button>
+            </div>
+            <div id="searchResults" class="search-results"></div>
+        </div>
+
+        <div class="main-content">
+            <div class="cover-area">
+                <div class="mobile-turntable" id="mobileTurntable">
+                    <div class="mobile-turntable__platter">
+                        <div class="album-cover" id="albumCover">
+                            <div class="placeholder">
+                                <i class="fas fa-music"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="current-song-info">
+                    <div class="current-song-title" id="currentSongTitle">选择一首歌曲开始播放</div>
+                    <div class="current-song-artist" id="currentSongArtist">未知艺术家</div>
+                    <button class="mobile-quality-chip" id="mobileQualityToggle" type="button" aria-haspopup="menu" aria-expanded="false">
+                        <span id="mobileQualityLabel">极高音质</span>
+                        <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                    </button>
                 </div>
             </div>
-            <div class="current-song-info">
-                <div class="current-song-title" id="currentSongTitle">选择一首歌曲开始播放</div>
-                <div class="current-song-artist" id="currentSongArtist">未知艺术家</div>
+
+            <div class="mobile-panel" id="mobilePanel">
+                <div class="mobile-panel-header" id="mobilePanelHeader">
+                    <div class="mobile-panel-handle" aria-hidden="true"></div>
+                    <div class="mobile-panel-title" id="mobilePanelTitle">播放列表</div>
+                    <button id="mobilePanelClose" class="mobile-close-btn" type="button" aria-label="收起播放面板">
+                        <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                    </button>
+                </div>
+
+                <div class="playlist active empty" id="playlist">
+                    <button class="clear-playlist-btn" id="clearPlaylistBtn" onclick="clearPlaylist()" title="清空播放列表">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    <div class="playlist-scroll">
+                        <div class="playlist-items" id="playlistItems"></div>
+                    </div>
+                </div>
+                <div class="lyrics empty" id="lyrics" data-placeholder="default">
+                    <div class="lyrics-scroll" id="lyricsScroll">
+                        <div class="lyrics-content" id="lyricsContent"></div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="view-toggle">
-            <button id="showPlaylistBtn" class="active">播放列表</button>
-            <button id="showLyricsBtn">歌词</button>
-        </div>
-
-        <div class="playlist active empty" id="playlist">
-            <button class="clear-playlist-btn" id="clearPlaylistBtn" onclick="clearPlaylist()" title="清空播放列表">
-                <i class="fas fa-trash"></i>
-            </button>
-            <div class="playlist-scroll">
-                <div class="playlist-items" id="playlistItems"></div>
-            </div>
-        </div>
-        <div class="lyrics empty" id="lyrics" data-placeholder="default">
-            <div class="lyrics-scroll" id="lyricsScroll">
-                <div class="lyrics-content" id="lyricsContent"></div>
-            </div>
-        </div>
-    </div>
-
-    <div class="controls">
-        <div class="play-mode-controls">
-            <button class="play-mode-btn" id="playModeBtn" title="播放模式">
-                <i class="fas fa-repeat"></i>
-            </button>
-        </div>
-        <div class="transport-controls">
-            <button onclick="playPrevious()" title="上一曲"><i class="fas fa-backward-step"></i></button>
-            <button id="playPauseBtn" title="播放 / 暂停"><i class="fas fa-play"></i></button>
-            <button onclick="playNext()" title="下一曲"><i class="fas fa-forward-step"></i></button>
-        </div>
-        <div class="progress-container">
-            <span id="currentTimeDisplay">00:00</span>
-            <input type="range" id="progressBar" min="0" max="0" step="0.1" value="0">
-            <span id="durationDisplay">00:00</span>
-        </div>
-        <div class="audio-tools">
-            <div class="player-quality">
-                <button id="qualityToggle" class="player-quality-btn" type="button">
-                    <span id="qualityLabel">极高音质</span>
+        <div class="controls">
+            <div class="transport-controls">
+                <button class="play-mode-btn transport-button transport-button--mode" id="playModeBtn" type="button" title="播放模式">
+                    <i class="fas fa-repeat"></i>
                 </button>
-                <div id="playerQualityMenu" class="player-quality-menu"></div>
+                <button class="transport-button transport-button--prev" onclick="playPrevious()" type="button" title="上一曲"><i class="fas fa-backward-step"></i></button>
+                <button class="transport-button transport-button--play" id="playPauseBtn" type="button" title="播放 / 暂停"><i class="fas fa-play"></i></button>
+                <button class="transport-button transport-button--next" onclick="playNext()" type="button" title="下一曲"><i class="fas fa-forward-step"></i></button>
+                <button class="transport-button transport-button--queue" id="mobileQueueToggle" type="button" title="打开播放列表" aria-label="打开播放列表"><i class="fas fa-bars"></i></button>
             </div>
-            <div class="volume-container">
-                <i id="volumeIcon" class="fas fa-volume-up"></i>
-                <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.8">
+            <div class="progress-container">
+                <span id="currentTimeDisplay">00:00</span>
+                <input type="range" id="progressBar" min="0" max="0" step="0.1" value="0">
+                <span id="durationDisplay">00:00</span>
             </div>
+            <div class="audio-tools">
+                <div class="player-quality">
+                    <button id="qualityToggle" class="player-quality-btn" type="button">
+                        <span id="qualityLabel">极高音质</span>
+                    </button>
+                    <div id="playerQualityMenu" class="player-quality-menu"></div>
+                </div>
+                <div class="volume-container">
+                    <i id="volumeIcon" class="fas fa-volume-up"></i>
+                    <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.8">
+                </div>
+            </div>
+            <button id="loadOnlineBtn" title="聚合所有雷达，探索新音乐">
+                <span class="btn-text"><i class="fas fa-satellite-dish"></i> 探索雷达</span>
+                <span class="loader" style="display: none;"></span>
+            </button>
         </div>
-        <button id="loadOnlineBtn" title="聚合所有雷达，探索新音乐">
-            <span class="btn-text"><i class="fas fa-satellite-dish"></i> 探索雷达</span>
-            <span class="loader" style="display: none;"></span>
-        </button>
     </div>
-</div>
 
-<audio id="audioPlayer"></audio>
+    <div class="mobile-overlay-scrim" id="mobileOverlayScrim"></div>
+
+    <audio id="audioPlayer"></audio>
 
 <!-- 通知容器 -->
 <div id="notification" class="notification"></div>
@@ -124,5 +179,14 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="js/index.js"></script>
+<script>
+    if (window.__SOLARA_IS_MOBILE) {
+        const mobileScript = document.createElement('script');
+        mobileScript.src = 'js/mobile.js';
+        mobileScript.async = false;
+        mobileScript.defer = false;
+        document.body.appendChild(mobileScript);
+    }
+</script>
 </body>
 </html>

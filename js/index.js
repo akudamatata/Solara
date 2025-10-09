@@ -34,7 +34,76 @@ const dom = {
     qualityToggle: document.getElementById("qualityToggle"),
     playerQualityMenu: document.getElementById("playerQualityMenu"),
     qualityLabel: document.getElementById("qualityLabel"),
+    mobileToolbarTitle: document.getElementById("mobileToolbarTitle"),
+    mobileSearchToggle: document.getElementById("mobileSearchToggle"),
+    mobileSearchClose: document.getElementById("mobileSearchClose"),
+    mobilePanelClose: document.getElementById("mobilePanelClose"),
+    mobileOverlayScrim: document.getElementById("mobileOverlayScrim"),
+    mobileExploreButton: document.getElementById("mobileExploreButton"),
+    mobileQualityToggle: document.getElementById("mobileQualityToggle"),
+    mobileQualityLabel: document.getElementById("mobileQualityLabel"),
+    mobilePanel: document.getElementById("mobilePanel"),
+    mobilePanelTitle: document.getElementById("mobilePanelTitle"),
+    mobileQueueToggle: document.getElementById("mobileQueueToggle"),
+    searchArea: document.getElementById("searchArea"),
 };
+
+window.SolaraDom = dom;
+
+const isMobileView = Boolean(window.__SOLARA_IS_MOBILE);
+
+const mobileBridge = window.SolaraMobileBridge || {};
+mobileBridge.handlers = mobileBridge.handlers || {};
+mobileBridge.queue = Array.isArray(mobileBridge.queue) ? mobileBridge.queue : [];
+window.SolaraMobileBridge = mobileBridge;
+
+function invokeMobileHook(name, ...args) {
+    if (!isMobileView) {
+        return undefined;
+    }
+    const handler = mobileBridge.handlers[name];
+    if (typeof handler === "function") {
+        return handler(...args);
+    }
+    mobileBridge.queue.push({ name, args });
+    return undefined;
+}
+
+function initializeMobileUI() {
+    return invokeMobileHook("initialize");
+}
+
+function updateMobileToolbarTitle() {
+    return invokeMobileHook("updateToolbarTitle");
+}
+
+function openMobileSearch() {
+    return invokeMobileHook("openSearch");
+}
+
+function closeMobileSearch() {
+    return invokeMobileHook("closeSearch");
+}
+
+function toggleMobileSearch() {
+    return invokeMobileHook("toggleSearch");
+}
+
+function openMobilePanel(view = "playlist") {
+    return invokeMobileHook("openPanel", view);
+}
+
+function closeMobilePanel() {
+    return invokeMobileHook("closePanel");
+}
+
+function toggleMobilePanel(view = "playlist") {
+    return invokeMobileHook("togglePanel", view);
+}
+
+function closeAllMobileOverlays() {
+    return invokeMobileHook("closeAllOverlays");
+}
 
 const PLACEHOLDER_HTML = `<div class="placeholder"><i class="fas fa-music"></i></div>`;
 const paletteCache = new Map();
@@ -372,6 +441,7 @@ const state = {
 let sourceMenuPositionFrame = null;
 let qualityMenuPositionFrame = null;
 let floatingMenuListenersAttached = false;
+let qualityMenuAnchor = null;
 
 function runWithoutTransition(element, callback) {
     if (!element || typeof callback !== "function") return;
@@ -940,6 +1010,9 @@ function updatePlayPauseButton() {
     const isPlaying = !dom.audioPlayer.paused && !dom.audioPlayer.ended;
     dom.playPauseBtn.innerHTML = `<i class="fas ${isPlaying ? "fa-pause" : "fa-play"}"></i>`;
     dom.playPauseBtn.title = isPlaying ? "暂停" : "播放";
+    if (document.body) {
+        document.body.classList.toggle("is-playing", isPlaying);
+    }
 }
 
 function updateProgressBarBackground(value = Number(dom.progressBar.value), max = Number(dom.progressBar.max)) {
@@ -1235,28 +1308,80 @@ function buildQualityMenu() {
     }
 }
 
+function isElementNode(value) {
+    return Boolean(value) && typeof value === "object" && value.nodeType === 1;
+}
+
+function resolveQualityAnchor(anchor) {
+    if (isElementNode(anchor)) {
+        return anchor;
+    }
+    if (isElementNode(dom.qualityToggle)) {
+        return dom.qualityToggle;
+    }
+    if (isElementNode(dom.mobileQualityToggle)) {
+        return dom.mobileQualityToggle;
+    }
+    return null;
+}
+
+function setQualityAnchorState(anchor, expanded) {
+    if (!isElementNode(anchor)) {
+        return;
+    }
+    anchor.classList.toggle("active", Boolean(expanded));
+    if (typeof anchor.setAttribute === "function") {
+        anchor.setAttribute("aria-expanded", expanded ? "true" : "false");
+    }
+}
+
+function getQualityMenuAnchor() {
+    if (isElementNode(qualityMenuAnchor) && (!document.body || document.body.contains(qualityMenuAnchor))) {
+        return qualityMenuAnchor;
+    }
+    const fallback = resolveQualityAnchor();
+    qualityMenuAnchor = fallback;
+    return fallback;
+}
+
 function updateQualityLabel() {
     const option = QUALITY_OPTIONS.find(item => item.value === state.playbackQuality) || QUALITY_OPTIONS[0];
     if (!option) return;
     dom.qualityLabel.textContent = option.label;
     dom.qualityToggle.title = `音质: ${option.label} (${option.description})`;
+    if (dom.mobileQualityLabel) {
+        dom.mobileQualityLabel.textContent = option.label;
+    }
+    if (dom.mobileQualityToggle) {
+        dom.mobileQualityToggle.title = `音质: ${option.label} (${option.description})`;
+    }
 }
 
 function togglePlayerQualityMenu(event) {
-    event.preventDefault();
-    event.stopPropagation();
-    if (state.qualityMenuOpen) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    const anchor = resolveQualityAnchor(event && event.currentTarget ? event.currentTarget : qualityMenuAnchor);
+    if (!anchor) {
+        return;
+    }
+    if (state.qualityMenuOpen && qualityMenuAnchor === anchor) {
         closePlayerQualityMenu();
     } else {
-        openPlayerQualityMenu();
+        openPlayerQualityMenu(anchor);
     }
 }
 
 function updatePlayerQualityMenuPosition() {
-    if (!state.qualityMenuOpen || !dom.playerQualityMenu || !dom.qualityToggle) return;
+    if (!state.qualityMenuOpen || !dom.playerQualityMenu) return;
 
+    const anchor = getQualityMenuAnchor();
+    if (!isElementNode(anchor)) {
+        return;
+    }
     const menu = dom.playerQualityMenu;
-    const toggleRect = dom.qualityToggle.getBoundingClientRect();
+    const toggleRect = anchor.getBoundingClientRect();
     const viewportWidth = Math.max(window.innerWidth || 0, document.documentElement.clientWidth || 0);
     const viewportHeight = Math.max(window.innerHeight || 0, document.documentElement.clientHeight || 0);
     const spacing = 10;
@@ -1307,12 +1432,20 @@ function resetPlayerQualityMenuPosition() {
     dom.playerQualityMenu.style.width = "";
 }
 
-function openPlayerQualityMenu() {
-    if (!dom.playerQualityMenu || !dom.qualityToggle) return;
+function openPlayerQualityMenu(anchor) {
+    if (!dom.playerQualityMenu) return;
+    const targetAnchor = resolveQualityAnchor(anchor);
+    if (!targetAnchor) {
+        return;
+    }
+    if (qualityMenuAnchor && qualityMenuAnchor !== targetAnchor) {
+        setQualityAnchorState(qualityMenuAnchor, false);
+    }
+    qualityMenuAnchor = targetAnchor;
     state.qualityMenuOpen = true;
     ensureFloatingMenuListeners();
     const menu = dom.playerQualityMenu;
-    dom.qualityToggle.classList.add("active");
+    setQualityAnchorState(qualityMenuAnchor, true);
     menu.classList.add("floating");
     menu.classList.remove("show");
 
@@ -1331,10 +1464,11 @@ function openPlayerQualityMenu() {
 function closePlayerQualityMenu() {
     if (!dom.playerQualityMenu) return;
     dom.playerQualityMenu.classList.remove("show");
-    dom.qualityToggle.classList.remove("active");
     state.qualityMenuOpen = false;
     cancelPlayerQualityMenuPositionUpdate();
     resetPlayerQualityMenuPosition();
+    setQualityAnchorState(qualityMenuAnchor, false);
+    qualityMenuAnchor = null;
     releaseFloatingMenuListenersIfIdle();
 }
 
@@ -1470,12 +1604,43 @@ function setupInteractions() {
         dom.sourceMenu.addEventListener("click", handleSourceSelection);
     }
     dom.qualityToggle.addEventListener("click", togglePlayerQualityMenu);
+    if (dom.mobileQualityToggle) {
+        dom.mobileQualityToggle.addEventListener("click", togglePlayerQualityMenu);
+    }
+    setQualityAnchorState(dom.qualityToggle, false);
+    if (dom.mobileQualityToggle) {
+        setQualityAnchorState(dom.mobileQualityToggle, false);
+    }
     dom.playerQualityMenu.addEventListener("click", handlePlayerQualitySelection);
 
     dom.loadOnlineBtn.addEventListener("click", exploreOnlineMusic);
+    if (dom.mobileExploreButton) {
+        dom.mobileExploreButton.addEventListener("click", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            closeAllMobileOverlays();
+            exploreOnlineMusic();
+        });
+    }
 
-    dom.showPlaylistBtn.addEventListener("click", () => switchMobileView("playlist"));
-    dom.showLyricsBtn.addEventListener("click", () => switchMobileView("lyrics"));
+    if (dom.showPlaylistBtn) {
+        dom.showPlaylistBtn.addEventListener("click", () => {
+            if (isMobileView) {
+                openMobilePanel("playlist");
+            } else {
+                switchMobileView("playlist");
+            }
+        });
+    }
+    if (dom.showLyricsBtn) {
+        dom.showLyricsBtn.addEventListener("click", () => {
+            if (isMobileView) {
+                openMobilePanel("lyrics");
+            } else {
+                switchMobileView("lyrics");
+            }
+        });
+    }
 
     // 播放模式按钮事件
     updatePlayModeUI();
@@ -1511,6 +1676,9 @@ function setupInteractions() {
         if (e.key === "Escape" && state.sourceMenuOpen) {
             closeSourceMenu();
         }
+        if (isMobileView && e.key === "Escape") {
+            closeAllMobileOverlays();
+        }
     });
 
     // 搜索结果相关事件处理 - 修复加载更多按钮点击问题
@@ -1526,8 +1694,12 @@ function setupInteractions() {
         });
 
         if (state.qualityMenuOpen &&
-            !dom.playerQualityMenu.contains(e.target) &&
-            !dom.qualityToggle.contains(e.target)) {
+            dom.playerQualityMenu &&
+            !dom.playerQualityMenu.contains(e.target)) {
+            const anchor = isElementNode(qualityMenuAnchor) ? qualityMenuAnchor : resolveQualityAnchor();
+            if (anchor && anchor.contains(e.target)) {
+                return;
+            }
             closePlayerQualityMenu();
         }
 
@@ -1615,6 +1787,10 @@ function setupInteractions() {
     if (state.currentSong) {
         restoreCurrentSongState();
     }
+
+    if (isMobileView) {
+        initializeMobileUI();
+    }
 }
 
 // 修复：更新当前歌曲信息和封面
@@ -1622,6 +1798,7 @@ function updateCurrentSongInfo(song, options = {}) {
     const { loadArtwork = true } = options;
     state.currentSong = song;
     dom.currentSongTitle.textContent = song.name;
+    updateMobileToolbarTitle();
 
     // 修复艺人名称显示问题 - 使用正确的字段名
     const artistText = Array.isArray(song.artist) ? song.artist.join(', ') : (song.artist || '未知艺术家');
@@ -2110,6 +2287,7 @@ function removeFromPlaylist(index) {
             dom.durationDisplay.textContent = "00:00";
             updateProgressBarBackground(0, 1);
             dom.currentSongTitle.textContent = "选择一首歌曲开始播放";
+            updateMobileToolbarTitle();
             dom.currentSongArtist.textContent = "未知艺术家";
             showAlbumCoverPlaceholder();
             if (dom.lyricsContent) {
@@ -2173,6 +2351,7 @@ function clearPlaylist() {
         dom.durationDisplay.textContent = "00:00";
         updateProgressBarBackground(0, 1);
         dom.currentSongTitle.textContent = "选择一首歌曲开始播放";
+        updateMobileToolbarTitle();
         dom.currentSongArtist.textContent = "未知艺术家";
         showAlbumCoverPlaceholder();
         if (dom.lyricsContent) {
@@ -2753,15 +2932,29 @@ async function downloadSong(song, quality = "320") {
 // 修复：移动端视图切换
 function switchMobileView(view) {
     if (view === "playlist") {
-        dom.showPlaylistBtn.classList.add("active");
-        dom.showLyricsBtn.classList.remove("active");
+        if (dom.showPlaylistBtn) {
+            dom.showPlaylistBtn.classList.add("active");
+        }
+        if (dom.showLyricsBtn) {
+            dom.showLyricsBtn.classList.remove("active");
+        }
         dom.playlist.classList.add("active");
         dom.lyrics.classList.remove("active");
     } else if (view === "lyrics") {
-        dom.showLyricsBtn.classList.add("active");
-        dom.showPlaylistBtn.classList.remove("active");
+        if (dom.showLyricsBtn) {
+            dom.showLyricsBtn.classList.add("active");
+        }
+        if (dom.showPlaylistBtn) {
+            dom.showPlaylistBtn.classList.remove("active");
+        }
         dom.lyrics.classList.add("active");
         dom.playlist.classList.remove("active");
+    }
+    if (isMobileView && document.body) {
+        document.body.setAttribute("data-mobile-panel-view", view);
+        if (dom.mobilePanelTitle) {
+            dom.mobilePanelTitle.textContent = view === "lyrics" ? "歌词" : "播放列表";
+        }
     }
 }
 
