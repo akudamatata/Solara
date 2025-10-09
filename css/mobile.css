@@ -24,10 +24,90 @@ body.mobile-view {
     position: fixed;
     inset: 0;
     width: 100%;
+    --mobile-ring-inner-radius: clamp(280px, 70vw, 520px);
+    --mobile-ring-feather: clamp(120px, 24vw, 280px);
+    --mobile-ring-vertical-shift: calc((env(safe-area-inset-top, 0px) * 0.5) - 24px);
 }
 
 body.mobile-view .background-stage {
     display: none;
+}
+
+@media screen and (orientation: portrait) {
+    html.mobile-view,
+    body.mobile-view {
+        background: #06070d;
+    }
+
+    body.mobile-view {
+        --mobile-ring-vertical-shift: calc((env(safe-area-inset-top, 0px) * 0.55) - 28px);
+        --mobile-halo-width: clamp(300px, 74vw, 520px);
+        --mobile-halo-height: clamp(480px, 138vw, 780px);
+        --mobile-halo-radius: clamp(26px, 9vw, 42px);
+        --mobile-ring-feather: clamp(110px, 22vw, 260px);
+    }
+
+    body.mobile-view .background-stage {
+        display: block;
+        z-index: -4;
+        --mobile-halo-half-width: calc(var(--mobile-halo-width) / 2);
+        --mobile-halo-half-height: calc(var(--mobile-halo-height) / 2);
+        -webkit-mask-image:
+            linear-gradient(
+                to right,
+                transparent calc(50% - var(--mobile-halo-half-width) - var(--mobile-ring-feather)),
+                rgba(0, 0, 0, 0.92) calc(50% - var(--mobile-halo-half-width)),
+                rgba(0, 0, 0, 1) calc(50% + var(--mobile-halo-half-width)),
+                transparent calc(50% + var(--mobile-halo-half-width) + var(--mobile-ring-feather))
+            ),
+            linear-gradient(
+                to bottom,
+                transparent calc(50% - var(--mobile-halo-half-height) - var(--mobile-ring-feather)),
+                rgba(0, 0, 0, 0.92) calc(50% - var(--mobile-halo-half-height)),
+                rgba(0, 0, 0, 1) calc(50% + var(--mobile-halo-half-height)),
+                transparent calc(50% + var(--mobile-halo-half-height) + var(--mobile-ring-feather))
+            ),
+            radial-gradient(
+                circle at 50% calc(50% + var(--mobile-ring-vertical-shift)),
+                transparent calc(min(var(--mobile-halo-half-width), var(--mobile-halo-half-height)) - var(--mobile-halo-radius)),
+                rgba(0, 0, 0, 0.92) calc(min(var(--mobile-halo-half-width), var(--mobile-halo-half-height)) - var(--mobile-halo-radius) + var(--mobile-ring-feather)),
+                rgba(0, 0, 0, 1) 100%
+            );
+        mask-image:
+            linear-gradient(
+                to right,
+                transparent calc(50% - var(--mobile-halo-half-width) - var(--mobile-ring-feather)),
+                rgba(0, 0, 0, 0.92) calc(50% - var(--mobile-halo-half-width)),
+                rgba(0, 0, 0, 1) calc(50% + var(--mobile-halo-half-width)),
+                transparent calc(50% + var(--mobile-halo-half-width) + var(--mobile-ring-feather))
+            ),
+            linear-gradient(
+                to bottom,
+                transparent calc(50% - var(--mobile-halo-half-height) - var(--mobile-ring-feather)),
+                rgba(0, 0, 0, 0.92) calc(50% - var(--mobile-halo-half-height)),
+                rgba(0, 0, 0, 1) calc(50% + var(--mobile-halo-half-height)),
+                transparent calc(50% + var(--mobile-halo-half-height) + var(--mobile-ring-feather))
+            ),
+            radial-gradient(
+                circle at 50% calc(50% + var(--mobile-ring-vertical-shift)),
+                transparent calc(min(var(--mobile-halo-half-width), var(--mobile-halo-half-height)) - var(--mobile-halo-radius)),
+                rgba(0, 0, 0, 0.92) calc(min(var(--mobile-halo-half-width), var(--mobile-halo-half-height)) - var(--mobile-halo-radius) + var(--mobile-ring-feather)),
+                rgba(0, 0, 0, 1) 100%
+            );
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-size: 100% 100%;
+        mask-size: 100% 100%;
+        -webkit-mask-position: center;
+        mask-position: center;
+        -webkit-mask-composite: source-in, source-in;
+        mask-composite: intersect, intersect;
+    }
+
+    body.mobile-view .background-stage__layer {
+        transform: scale(1.12);
+        filter: saturate(112%);
+    }
 }
 
 body.mobile-view .container {
