@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solara 日志查询</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="css/logs.css">
+</head>
+<body>
+    <header class="page-header">
+        <div class="page-header__title">
+            <h1>Solara 日志查询</h1>
+            <p class="page-header__subtitle">查看 Cloudflare D1 中记录的代理请求与响应日志。</p>
+        </div>
+        <a class="page-header__home" href="/">返回首页</a>
+    </header>
+
+    <main class="page-main">
+        <section class="filters" aria-labelledby="filtersTitle">
+            <div class="filters__header">
+                <h2 id="filtersTitle">筛选条件</h2>
+                <button id="resetFilters" type="button" class="filters__reset">
+                    <i class="fas fa-eraser" aria-hidden="true"></i>
+                    重置
+                </button>
+            </div>
+            <form id="filtersForm" class="filters__form">
+                <label class="filters__item">
+                    <span>来源标识</span>
+                    <input type="text" name="source" placeholder="例如：solara-web">
+                </label>
+                <label class="filters__item">
+                    <span>HTTP 状态码</span>
+                    <input type="number" name="status" min="100" max="599" step="1" placeholder="200">
+                </label>
+                <label class="filters__item filters__item--grow">
+                    <span>关键词</span>
+                    <input type="text" name="query" placeholder="支持请求 URL / 请求体 / 响应体模糊查询">
+                </label>
+                <label class="filters__item">
+                    <span>起始时间</span>
+                    <input type="datetime-local" name="from">
+                </label>
+                <label class="filters__item">
+                    <span>结束时间</span>
+                    <input type="datetime-local" name="to">
+                </label>
+                <label class="filters__item">
+                    <span>每页条数</span>
+                    <select name="limit">
+                        <option value="20">20</option>
+                        <option value="50" selected>50</option>
+                        <option value="100">100</option>
+                        <option value="200">200</option>
+                    </select>
+                </label>
+                <div class="filters__actions">
+                    <button type="submit" class="filters__submit">
+                        <i class="fas fa-search" aria-hidden="true"></i>
+                        查询
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <section class="results" aria-live="polite">
+            <div class="results__header">
+                <h2>查询结果</h2>
+                <div id="resultsMeta" class="results__meta" role="status"></div>
+            </div>
+            <div id="resultsContainer" class="results__table-wrapper" tabindex="0">
+                <table class="results__table">
+                    <thead>
+                        <tr>
+                            <th>时间</th>
+                            <th>来源</th>
+                            <th>请求</th>
+                            <th>响应</th>
+                            <th>详情</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsBody">
+                        <tr>
+                            <td colspan="5" class="results__placeholder">尚未查询。</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="results__pagination" aria-label="分页控制">
+                <button id="prevPage" type="button" class="pagination__button" disabled>
+                    <i class="fas fa-arrow-left" aria-hidden="true"></i>
+                    上一页
+                </button>
+                <span id="paginationInfo" class="pagination__info"></span>
+                <button id="nextPage" type="button" class="pagination__button" disabled>
+                    下一页
+                    <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <template id="logRowTemplate">
+        <tr>
+            <td class="col-time"></td>
+            <td class="col-source"></td>
+            <td class="col-request"></td>
+            <td class="col-response"></td>
+            <td class="col-details"></td>
+        </tr>
+    </template>
+
+    <template id="logDetailsTemplate">
+        <details class="details">
+            <summary>展开</summary>
+            <div class="details__content">
+                <div class="details__block">
+                    <h3>请求体</h3>
+                    <pre class="details__pre"></pre>
+                </div>
+                <div class="details__block">
+                    <h3>响应体</h3>
+                    <pre class="details__pre"></pre>
+                </div>
+            </div>
+        </details>
+    </template>
+
+    <script type="module" src="js/logs.js"></script>
+</body>
+</html>
