@@ -1,6 +1,22 @@
+import {
+  Env,
+  readRequestBodySnippet,
+  readResponseBodySnippet,
+  recordProxyLog,
+} from "./lib/logging";
+
 const API_BASE_URL = "https://music-api.gdstudio.xyz/api.php";
 const KUWO_HOST_PATTERN = /(^|\.)kuwo\.cn$/i;
-const SAFE_RESPONSE_HEADERS = ["content-type", "cache-control", "accept-ranges", "content-length", "content-range", "etag", "last-modified", "expires"];
+const SAFE_RESPONSE_HEADERS = [
+  "content-type",
+  "cache-control",
+  "accept-ranges",
+  "content-length",
+  "content-range",
+  "etag",
+  "last-modified",
+  "expires",
+];
 
 function createCorsHeaders(init?: Headers): Headers {
   const headers = new Headers();
@@ -51,12 +67,17 @@ function normalizeKuwoUrl(rawUrl: string): URL | null {
   }
 }
 
-async function proxyKuwoAudio(targetUrl: string, request: Request): Promise<Response> {
+async function proxyKuwoAudio(targetUrl: string, request: Request, env: Env): Promise<Response> {
   const normalized = normalizeKuwoUrl(targetUrl);
   if (!normalized) {
-    return new Response("Invalid target", { status: 400 });
+    return new Response("Invalid target", {
+      status: 400,
+      headers: createCorsHeaders(),
+    });
   }
 
+  const requestBody = await readRequestBodySnippet(request.clone());
+  const startedAt = Date.now();
   const init: RequestInit = {
     method: request.method,
     headers: {
@@ -70,20 +91,51 @@ async function proxyKuwoAudio(targetUrl: string, request: Request): Promise<Resp
     (init.headers as Record<string, string>)["Range"] = rangeHeader;
   }
 
-  const upstream = await fetch(normalized.toString(), init);
-  const headers = createCorsHeaders(upstream.headers);
-  if (!headers.has("Cache-Control")) {
-    headers.set("Cache-Control", "public, max-age=3600");
-  }
+  try {
+    const upstream = await fetch(normalized.toString(), init);
+    const headers = createCorsHeaders(upstream.headers);
+    if (!headers.has("Cache-Control")) {
+      headers.set("Cache-Control", "public, max-age=3600");
+    }
 
-  return new Response(upstream.body, {
-    status: upstream.status,
-    statusText: upstream.statusText,
-    headers,
-  });
+    const cloneForLogging = upstream.clone();
+    const response = new Response(upstream.body, {
+      status: upstream.status,
+      statusText: upstream.statusText,
+      headers,
+    });
+
+    const responseBody = await readResponseBodySnippet(cloneForLogging);
+    await recordProxyLog(env, {
+      source: "kuwo",
+      requestMethod: request.method,
+      requestUrl: request.url,
+      targetUrl: normalized.toString(),
+      requestBody,
+      responseStatus: upstream.status,
+      responseBody,
+      durationMs: Date.now() - startedAt,
+    });
+
+    return response;
+  } catch (error) {
+    await recordProxyLog(env, {
+      source: "kuwo",
+      requestMethod: request.method,
+      requestUrl: request.url,
+      targetUrl: normalized.toString(),
+      requestBody,
+      responseStatus: 502,
+      responseBody: error instanceof Error ? error.stack ?? error.message : String(error),
+      durationMs: Date.now() - startedAt,
+    });
+    const headers = createCorsHeaders();
+    headers.set("Content-Type", "text/plain; charset=utf-8");
+    return new Response("Upstream fetch failed", { status: 502, headers });
+  }
 }
 
-async function proxyApiRequest(url: URL, request: Request): Promise<Response> {
+async function proxyApiRequest(url: URL, request: Request, env: Env): Promise<Response> {
   const apiUrl = new URL(API_BASE_URL);
   url.searchParams.forEach((value, key) => {
     if (key === "target" || key === "callback") {
@@ -93,43 +145,83 @@ async function proxyApiRequest(url: URL, request: Request): Promise<Response> {
   });
 
   if (!apiUrl.searchParams.has("types")) {
-    return new Response("Missing types", { status: 400 });
+    return new Response("Missing types", {
+      status: 400,
+      headers: createCorsHeaders(),
+    });
   }
 
-  const upstream = await fetch(apiUrl.toString(), {
-    headers: {
-      "User-Agent": request.headers.get("User-Agent") ?? "Mozilla/5.0",
-      "Accept": "application/json",
-    },
-  });
+  const requestBody = await readRequestBodySnippet(request.clone());
+  const startedAt = Date.now();
 
-  const headers = createCorsHeaders(upstream.headers);
-  if (!headers.has("Content-Type")) {
-    headers.set("Content-Type", "application/json; charset=utf-8");
+  try {
+    const upstream = await fetch(apiUrl.toString(), {
+      headers: {
+        "User-Agent": request.headers.get("User-Agent") ?? "Mozilla/5.0",
+        "Accept": "application/json",
+      },
+    });
+
+    const headers = createCorsHeaders(upstream.headers);
+    if (!headers.has("Content-Type")) {
+      headers.set("Content-Type", "application/json; charset=utf-8");
+    }
+
+    const cloneForLogging = upstream.clone();
+    const response = new Response(upstream.body, {
+      status: upstream.status,
+      statusText: upstream.statusText,
+      headers,
+    });
+
+    const responseBody = await readResponseBodySnippet(cloneForLogging);
+    await recordProxyLog(env, {
+      source: "api",
+      requestMethod: request.method,
+      requestUrl: request.url,
+      targetUrl: apiUrl.toString(),
+      requestBody,
+      responseStatus: upstream.status,
+      responseBody,
+      durationMs: Date.now() - startedAt,
+    });
+
+    return response;
+  } catch (error) {
+    await recordProxyLog(env, {
+      source: "api",
+      requestMethod: request.method,
+      requestUrl: request.url,
+      targetUrl: apiUrl.toString(),
+      requestBody,
+      responseStatus: 502,
+      responseBody: error instanceof Error ? error.stack ?? error.message : String(error),
+      durationMs: Date.now() - startedAt,
+    });
+    const headers = createCorsHeaders();
+    headers.set("Content-Type", "text/plain; charset=utf-8");
+    return new Response("Upstream fetch failed", { status: 502, headers });
   }
-
-  return new Response(upstream.body, {
-    status: upstream.status,
-    statusText: upstream.statusText,
-    headers,
-  });
 }
 
-export async function onRequest({ request }: { request: Request }): Promise<Response> {
+export async function onRequest({ request, env }: { request: Request; env: Env }): Promise<Response> {
   if (request.method === "OPTIONS") {
     return handleOptions();
   }
 
   if (request.method !== "GET" && request.method !== "HEAD") {
-    return new Response("Method not allowed", { status: 405 });
+    return new Response("Method not allowed", {
+      status: 405,
+      headers: createCorsHeaders(),
+    });
   }
 
   const url = new URL(request.url);
   const target = url.searchParams.get("target");
 
   if (target) {
-    return proxyKuwoAudio(target, request);
+    return proxyKuwoAudio(target, request, env);
   }
 
-  return proxyApiRequest(url, request);
+  return proxyApiRequest(url, request, env);
 }
