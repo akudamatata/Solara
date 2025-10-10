@@ -1,0 +1,13 @@
+{
+  "name": "solara-local-server",
+  "version": "1.0.0",
+  "description": "Local Node.js server for the Solara music player.",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --check server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

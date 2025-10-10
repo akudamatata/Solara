@@ -31,18 +31,28 @@
    git clone https://github.com/akudamatata/Music-Player.git
    cd Music-Player
    ```
-2. 🖥️ 启动任意静态服务器
-   - 使用 VS Code Live Server 扩展
-   - 或执行 Python 简易服务器：
+2. 🖥️ 启动本地服务器
+   - 推荐使用内置的 Node.js 服务端：
+     ```bash
+     npm install
+     npm start
+     ```
+     服务器默认运行在 `http://localhost:8788`，会自动处理接口代理与色彩调度。
+   - 如需使用其他静态服务器，也可执行 Python 简易服务器：
      ```bash
      python3 -m http.server 8080
      ```
-3. 🌍 打开浏览器访问 `http://localhost:8080/index.html`，即可体验播放器。
+3. 🌍 打开浏览器访问 `http://localhost:8788/index.html`（或你的服务器端口），即可体验播放器。
 
 > 💡 由于浏览器同源策略限制，直接双击 index.html 可能产生跨域请求错误，建议通过本地服务器访问。
 
 ## ☁️ 后端部署
 1. Fork 或克隆本仓库到你自己的 Cloudflare Pages 项目。
+
+## 🪟 Windows 本地代理说明
+- 新增 `server.js` Node.js 服务端，可在 Windows 环境一键启动完整后端能力。
+- 服务端同时提供 `/proxy` 聚合接口与 `/palette` 封面取色接口，修复本地播放与主题变色异常。
+- 默认端口为 `8788`，可通过环境变量 `PORT` 自定义。
 
 ## ⚙️ 配置提示
 - 🔗 API 基地址定义在 index.html 中的 `API.baseUrl`（约 1300 行），可替换为自建接口域名。
