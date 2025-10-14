@@ -93,6 +93,16 @@ body.mobile-view .container {
     box-sizing: border-box;
 }
 
+body.mobile-view .sidebar-panel,
+body.mobile-view .library-panel {
+    display: none !important;
+}
+
+body.mobile-view .now-playing-column {
+    display: flex;
+    flex-direction: column;
+}
+
 body.mobile-view .container::after {
     content: "";
     position: absolute;
@@ -780,6 +790,14 @@ body.mobile-view .search-area {
     justify-content: flex-start;
     opacity: 0;
     pointer-events: none;
+}
+
+body.mobile-view .mobile-search-results-host {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 body.mobile-view.mobile-search-open .search-area {

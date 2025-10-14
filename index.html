@@ -84,13 +84,21 @@
             </div>
         </div>
         <div class="header">
-            <h1>Solara</h1>
+            <div class="header__title">
+                <span class="header__badge" aria-hidden="true"></span>
+                <h1>Music</h1>
+            </div>
             <div class="warning">Made by Wet Dream Boy，免费API来自GD音乐台(music.gdstudio.xyz)，仅供学习交流使用，请支持正版音乐奥！</div>
-            <div class="theme-switch-wrapper">
-                <button id="themeToggleButton" class="theme-toggle-button" type="button" aria-label="切换深浅色模式">
-                    <i class="fas fa-sun theme-icon theme-icon--sun" aria-hidden="true"></i>
-                    <i class="fas fa-moon theme-icon theme-icon--moon" aria-hidden="true"></i>
+            <div class="header__actions">
+                <button class="header__ghost-btn" type="button" aria-label="打开个人资料">
+                    <i class="fas fa-user-circle" aria-hidden="true"></i>
                 </button>
+                <div class="theme-switch-wrapper">
+                    <button id="themeToggleButton" class="theme-toggle-button" type="button" aria-label="切换深浅色模式">
+                        <i class="fas fa-sun theme-icon theme-icon--sun" aria-hidden="true"></i>
+                        <i class="fas fa-moon theme-icon theme-icon--moon" aria-hidden="true"></i>
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -112,39 +120,10 @@
                     <span>搜索</span>
                 </button>
             </div>
-            <div id="searchResults" class="search-results"></div>
+            <div class="mobile-search-results-host" id="mobileSearchResultsHost"></div>
         </div>
 
         <div class="main-content">
-            <div class="cover-area">
-                <div class="mobile-turntable" id="mobileTurntable">
-                    <div class="mobile-turntable__platter">
-                        <div class="album-cover" id="albumCover">
-                            <div class="placeholder">
-                                <i class="fas fa-music"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="mobile-inline-lyrics" id="mobileInlineLyrics" aria-hidden="true">
-                    <div class="mobile-inline-lyrics__hint">
-                        <i class="fas fa-arrow-left"></i>
-                        轻触返回封面
-                    </div>
-                    <div class="mobile-inline-lyrics__scroll" id="mobileInlineLyricsScroll">
-                        <div class="mobile-inline-lyrics__content" id="mobileInlineLyricsContent"></div>
-                    </div>
-                </div>
-                <div class="current-song-info">
-                    <div class="current-song-title" id="currentSongTitle">选择一首歌曲开始播放</div>
-                    <div class="current-song-artist" id="currentSongArtist">未知艺术家</div>
-                    <button class="mobile-quality-chip" id="mobileQualityToggle" type="button" aria-haspopup="menu" aria-expanded="false">
-                        <span id="mobileQualityLabel">极高音质</span>
-                        <i class="fas fa-chevron-down" aria-hidden="true"></i>
-                    </button>
-                </div>
-            </div>
-
             <div class="mobile-panel" id="mobilePanel">
                 <div class="mobile-panel-header" id="mobilePanelHeader">
                     <div class="mobile-panel-handle" aria-hidden="true"></div>
@@ -167,13 +146,88 @@
                     </div>
                 </div>
 
-                <div class="playlist active empty" id="playlist">
-                    <div class="playlist-label" aria-hidden="true">播放列表</div>
-                    <button class="clear-playlist-btn" id="clearPlaylistBtn" onclick="clearPlaylist()" title="清空播放列表">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                    <div class="playlist-scroll">
-                        <div class="playlist-items" id="playlistItems"></div>
+                <div class="mobile-panel-host" id="mobilePanelPlaylistHost"></div>
+                <div class="mobile-panel-host" id="mobilePanelLyricsHost"></div>
+            </div>
+            <aside class="sidebar-panel" aria-label="媒体导航">
+                <div class="sidebar-inner">
+                    <div class="sidebar-brand">
+                        <span class="sidebar-brand__badge" aria-hidden="true"> Music</span>
+                        <div class="sidebar-brand__profile" aria-label="访客状态">
+                            <div class="sidebar-brand__name">访客用户</div>
+                            <div class="sidebar-brand__plan">Cloudflare Pages 试听</div>
+                        </div>
+                    </div>
+                    <nav class="sidebar-nav" aria-label="主导航">
+                        <button class="sidebar-nav__item is-active" type="button">
+                            <i class="fas fa-bolt" aria-hidden="true"></i>
+                            <span>立即聆听</span>
+                        </button>
+                        <button class="sidebar-nav__item" type="button">
+                            <i class="fas fa-compass" aria-hidden="true"></i>
+                            <span>浏览</span>
+                        </button>
+                        <button class="sidebar-nav__item" type="button">
+                            <i class="fas fa-broadcast-tower" aria-hidden="true"></i>
+                            <span>广播</span>
+                        </button>
+                        <button class="sidebar-nav__item" type="button">
+                            <i class="fas fa-music" aria-hidden="true"></i>
+                            <span>资料库</span>
+                        </button>
+                    </nav>
+                    <div class="sidebar-section">
+                        <div class="sidebar-section__title">正在播放</div>
+                        <div class="playlist active empty" id="playlist">
+                            <div class="playlist-label" aria-hidden="true">播放列表</div>
+                            <button class="clear-playlist-btn" id="clearPlaylistBtn" onclick="clearPlaylist()" title="清空播放列表">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            <div class="playlist-scroll">
+                                <div class="playlist-items" id="playlistItems"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <section class="library-panel" aria-label="音乐内容">
+                <div class="library-panel__header">
+                    <h2>音乐雷达</h2>
+                    <p>搜索喜欢的歌曲并将它们添加到播放列表。</p>
+                </div>
+                <div class="library-panel__body">
+                    <div id="searchResults" class="search-results"></div>
+                </div>
+            </section>
+
+            <div class="now-playing-column">
+                <div class="cover-area">
+                    <div class="mobile-turntable" id="mobileTurntable">
+                        <div class="mobile-turntable__platter">
+                            <div class="album-cover" id="albumCover">
+                                <div class="placeholder">
+                                    <i class="fas fa-music"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mobile-inline-lyrics" id="mobileInlineLyrics" aria-hidden="true">
+                        <div class="mobile-inline-lyrics__hint">
+                            <i class="fas fa-arrow-left"></i>
+                            轻触返回封面
+                        </div>
+                        <div class="mobile-inline-lyrics__scroll" id="mobileInlineLyricsScroll">
+                            <div class="mobile-inline-lyrics__content" id="mobileInlineLyricsContent"></div>
+                        </div>
+                    </div>
+                    <div class="current-song-info">
+                        <div class="current-song-title" id="currentSongTitle">选择一首歌曲开始播放</div>
+                        <div class="current-song-artist" id="currentSongArtist">未知艺术家</div>
+                        <button class="mobile-quality-chip" id="mobileQualityToggle" type="button" aria-haspopup="menu" aria-expanded="false">
+                            <span id="mobileQualityLabel">极高音质</span>
+                            <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                        </button>
                     </div>
                 </div>
                 <div class="lyrics empty" id="lyrics" data-placeholder="default">

@@ -1,43 +1,54 @@
 :root {
-    --font-main: 'Noto Sans SC', 'Segoe UI', Arial, sans-serif;
-    --bg-gradient: linear-gradient(140deg, #e0f5e9 0%, #c6f0e0 35%, #a3e4d7 100%);
-    --bg-gradient-next: var(--bg-gradient);
-    --container-bg: rgba(255, 255, 255, 0.6);
-    --container-shadow: rgba(0, 0, 0, 0.1);
-    --backdrop-blur: 12px;
-    --text-color: #2c3e50;
-    --text-secondary-color: #7f8c8d;
-    --primary-color: #1abc9c;
-    --primary-color-dark: #12836d;
-    --warning-color: #e74c3c;
-    --success-color: #2ecc71;
-    --item-hover-bg: rgba(26, 188, 156, 0.1);
-    --item-current-bg: rgba(26, 188, 156, 0.2);
-    --item-current-text: var(--primary-color);
-    --border-color: rgba(0, 0, 0, 0.1);
-    --lyrics-highlight-bg: rgba(46, 204, 113, 0.12);
-    --lyrics-highlight-text: #1e9f78;
-    --lyrics-highlight-shadow: rgba(46, 204, 113, 0.18);
-    --component-bg: rgba(255, 255, 255, 0.5);
-    --scrollbar-thumb-bg: rgba(0, 0, 0, 0.2);
-    --scrollbar-track-bg: transparent;
+    --font-main: 'SF Pro Display', 'SF Pro Text', 'Noto Sans SC', 'Segoe UI', Arial, sans-serif;
+    --bg-gradient: radial-gradient(circle at 20% -10%, #ffdee5 0%, rgba(255, 222, 229, 0) 60%),
+        radial-gradient(circle at 90% 0%, #ffd2f7 0%, rgba(255, 210, 247, 0) 55%),
+        linear-gradient(140deg, #f5f7ff 0%, #f0f2ff 40%, #f6e6ff 100%);
+    --bg-gradient-next: radial-gradient(circle at 10% 0%, #ffe2d8 0%, rgba(255, 226, 216, 0) 62%),
+        radial-gradient(circle at 80% 10%, #ffd8f0 0%, rgba(255, 216, 240, 0) 60%),
+        linear-gradient(150deg, #fdf3ff 0%, #f7f4ff 35%, #f1f6ff 100%);
+    --container-bg: rgba(255, 255, 255, 0.78);
+    --container-shadow: rgba(17, 25, 40, 0.18);
+    --backdrop-blur: 28px;
+    --text-color: #16181d;
+    --text-secondary-color: rgba(22, 24, 29, 0.62);
+    --primary-color: #ff375f;
+    --primary-color-dark: #d60f45;
+    --accent-purple: #5e5ce6;
+    --warning-color: #ff9f0a;
+    --success-color: #30d158;
+    --item-hover-bg: rgba(94, 92, 230, 0.08);
+    --item-current-bg: linear-gradient(120deg, rgba(255, 55, 95, 0.16), rgba(94, 92, 230, 0.16));
+    --item-current-text: #111827;
+    --border-color: rgba(255, 255, 255, 0.55);
+    --border-color-strong: rgba(17, 25, 40, 0.08);
+    --lyrics-highlight-bg: rgba(255, 55, 95, 0.18);
+    --lyrics-highlight-text: #ff375f;
+    --lyrics-highlight-shadow: rgba(255, 55, 95, 0.28);
+    --component-bg: rgba(255, 255, 255, 0.65);
+    --component-elevated-bg: rgba(255, 255, 255, 0.82);
+    --scrollbar-thumb-bg: rgba(99, 102, 241, 0.45);
+    --scrollbar-track-bg: rgba(255, 255, 255, 0.25);
 }
 
 .dark-mode {
-    --bg-gradient: linear-gradient(135deg, #0b1d1b 0%, #0f2f2c 45%, #123c36 100%);
-    --container-bg: rgba(30, 30, 30, 0.6);
-    --container-shadow: rgba(0, 0, 0, 0.3);
-    --text-color: #ecf0f1;
-    --text-secondary-color: #95a5a6;
-    --primary-color: #1abc9c;
-    --primary-color-dark: #17a589;
-    --item-hover-bg: rgba(26, 188, 156, 0.1);
-    --item-current-bg: rgba(26, 188, 156, 0.2);
-    --border-color: rgba(255, 255, 255, 0.15);
-    --lyrics-highlight-bg: rgba(26, 188, 156, 0.12);
-    --lyrics-highlight-text: #34d1b6;
-    --component-bg: rgba(44, 44, 44, 0.5);
-    --scrollbar-thumb-bg: rgba(255, 255, 255, 0.2);
+    --bg-gradient: radial-gradient(circle at 20% -10%, rgba(255, 92, 143, 0.22) 0%, rgba(7, 10, 19, 0) 58%),
+        radial-gradient(circle at 80% 10%, rgba(102, 126, 234, 0.28) 0%, rgba(7, 10, 19, 0) 55%),
+        linear-gradient(145deg, #05070d 0%, #090b16 35%, #141926 100%);
+    --container-bg: rgba(22, 26, 38, 0.72);
+    --container-shadow: rgba(0, 0, 0, 0.45);
+    --text-color: rgba(244, 247, 255, 0.95);
+    --text-secondary-color: rgba(196, 202, 229, 0.75);
+    --primary-color: #ff375f;
+    --primary-color-dark: #ff2d55;
+    --item-hover-bg: rgba(255, 55, 95, 0.12);
+    --item-current-bg: linear-gradient(120deg, rgba(255, 55, 95, 0.2), rgba(94, 92, 230, 0.2));
+    --border-color: rgba(94, 102, 121, 0.35);
+    --border-color-strong: rgba(105, 114, 138, 0.4);
+    --lyrics-highlight-bg: rgba(255, 55, 95, 0.24);
+    --lyrics-highlight-text: rgba(255, 149, 168, 0.95);
+    --component-bg: rgba(23, 28, 42, 0.75);
+    --component-elevated-bg: rgba(27, 32, 48, 0.92);
+    --scrollbar-thumb-bg: rgba(255, 255, 255, 0.32);
 }
 
 .dark-mode .quality-menu {
@@ -91,11 +102,12 @@ body {
     align-items: center;
     min-height: 100dvh;
     margin: 0;
-    padding: 20px;
+    padding: clamp(18px, 4vw, 32px);
     box-sizing: border-box;
     color: var(--text-color);
-    transition: color 0.5s;
-    background-color: #0f0f0f;
+    transition: color 0.6s ease, background 0.8s ease;
+    background: var(--bg-gradient);
+    background-attachment: fixed;
 }
 
 .background-stage {
@@ -129,79 +141,141 @@ body.background-transitioning .background-stage__layer--transition {
     opacity: 1;
 }
 
-/* 16:9 容器布局 */
+/* iPad 灵感的容器布局 */
 .container {
-    width: min(1200px, 100%);
+    width: min(1280px, 100%);
     margin: 0 auto;
     background: var(--container-bg);
-    border-radius: 24px;
-    padding: 30px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+    border-radius: 36px;
+    padding: clamp(24px, 3vw, 36px);
+    box-shadow:
+        0 28px 80px rgba(17, 25, 40, 0.22),
+        inset 0 1px 0 rgba(255, 255, 255, 0.65);
     border: 1px solid var(--border-color);
-    aspect-ratio: 16/9;
-    height: 80vh;
-    max-height: 700px;
+    backdrop-filter: blur(var(--backdrop-blur));
+    aspect-ratio: 4 / 3;
+    height: min(820px, 82vh);
     display: grid;
     grid-template-areas:
-        "header header header"
-        "search search search"
-        "cover playlist lyrics"
-        "controls controls controls";
-    grid-template-rows: auto auto 1fr 80px;
-    grid-template-columns: 300px 1fr 1fr;
-    gap: 20px;
-    transition: background 0.5s, box-shadow 0.5s;
-    overflow: visible;
+        "header header nowPlaying"
+        "search search nowPlaying"
+        "sidebar content nowPlaying"
+        "controls controls nowPlaying";
+    grid-template-rows: auto auto 1fr auto;
+    grid-template-columns: 260px minmax(320px, 1fr) 360px;
+    gap: clamp(18px, 2vw, 28px);
+    transition: background 0.6s ease, box-shadow 0.6s ease, border-color 0.6s ease;
+    overflow: hidden;
     position: relative;
 }
 
 /* 搜索模式下的容器布局 */
 .container.search-mode {
-    grid-template-areas: 
-        "header header header"
-        "search search search"
-        "search search search"
-        "controls controls controls";
+    grid-template-areas:
+        "header header nowPlaying"
+        "search search nowPlaying"
+        "search search nowPlaying"
+        "controls controls nowPlaying";
 }
 
-.header { 
+.header {
     grid-area: header;
-    text-align: center; 
-    position: relative; 
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-inline: clamp(8px, 1.2vw, 18px);
+    gap: clamp(12px, 1.6vw, 24px);
 }
-.header h1 { 
-    margin: 0; 
-    font-size: 2.2em; 
-    font-weight: 700; 
-    color: var(--primary-color); 
-    letter-spacing: 1px; 
+
+.header__title {
+    display: flex;
+    align-items: center;
+    gap: clamp(8px, 1vw, 16px);
 }
-.header .warning { 
-    color: var(--text-secondary-color); 
-    font-size: 0.9em; 
-    margin-top: 10px; 
-    font-style: italic; 
+
+.header__badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: clamp(32px, 3vw, 40px);
+    height: clamp(32px, 3vw, 40px);
+    border-radius: 10px;
+    background: linear-gradient(140deg, rgba(255, 55, 95, 0.18), rgba(94, 92, 230, 0.18));
+    color: var(--primary-color);
+    font-size: clamp(18px, 2vw, 22px);
+    font-weight: 600;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.header h1 {
+    margin: 0;
+    font-size: clamp(26px, 3vw, 34px);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--text-color);
+}
+
+.warning {
+    color: var(--text-secondary-color);
+    font-size: 0.92rem;
+    margin: 0;
+    flex: 1 1 auto;
+    opacity: 0.85;
+}
+
+.header__actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.header__ghost-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 14px;
+    border: 1px solid rgba(17, 25, 40, 0.12);
+    background: rgba(255, 255, 255, 0.7);
+    color: var(--text-color);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+    box-shadow: 0 8px 20px rgba(17, 25, 40, 0.15);
+}
+
+.header__ghost-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 28px rgba(17, 25, 40, 0.18);
+}
+
+.header__ghost-btn i {
+    font-size: 1.2rem;
 }
 
 /* 搜索区域样式 - 增强动效 */
 .search-area {
     grid-area: search;
     background: var(--component-bg);
-    border-radius: 16px;
-    padding: 20px;
-    border: 1px solid var(--border-color);
+    border-radius: 26px;
+    padding: clamp(18px, 2.5vw, 28px);
+    border: 1px solid var(--border-color-strong);
+    box-shadow:
+        0 14px 40px rgba(17, 25, 40, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.65);
     position: relative;
-    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 10;
-    overflow: visible;
+    transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: clamp(12px, 1.8vw, 20px);
 }
 
-.search-area *,
-.search-area *::before,
-.search-area *::after {
-    box-sizing: border-box;
+.search-area:focus-within {
+    box-shadow:
+        0 22px 52px rgba(17, 25, 40, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.75);
+    border-color: rgba(255, 255, 255, 0.75);
 }
 
 /* 搜索模式下的搜索区域 */
@@ -215,28 +289,33 @@ body.background-transitioning .background-stage__layer--transition {
 
 .search-container {
     display: flex;
-    gap: 10px;
+    gap: clamp(12px, 1.4vw, 18px);
     align-items: center;
-    margin-bottom: 15px;
-    flex-shrink: 0;
+    flex: 1 1 auto;
+    min-width: 0;
 }
 
 .search-input {
-    flex: 1;
-    padding: 12px 16px;
-    border: 2px solid var(--border-color);
-    border-radius: 12px;
-    background: var(--component-bg);
+    flex: 1 1 auto;
+    padding: clamp(14px, 1.8vw, 18px) clamp(18px, 2vw, 22px);
+    border: none;
+    border-radius: 18px;
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.92), rgba(247, 247, 255, 0.82));
     color: var(--text-color);
-    font-size: 16px;
+    font-size: clamp(15px, 1.4vw, 16px);
     font-family: inherit;
     outline: none;
-    transition: all 0.3s ease;
+    transition: box-shadow 0.25s ease, transform 0.2s ease;
+    box-shadow:
+        inset 0 0 0 1px rgba(17, 25, 40, 0.08),
+        0 10px 24px rgba(17, 25, 40, 0.08);
 }
 
 .search-input:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(26, 188, 156, 0.12);
+    box-shadow:
+        inset 0 0 0 2px rgba(94, 92, 230, 0.45),
+        0 14px 34px rgba(94, 92, 230, 0.25);
+    transform: translateY(-1px);
 }
 
 .source-select-wrapper {
@@ -245,40 +324,37 @@ body.background-transitioning .background-stage__layer--transition {
 }
 
 .source-select-btn {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     gap: 8px;
-    padding: 12px 18px;
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    background: var(--component-bg);
-    color: var(--text-color);
-    font-size: 16px;
-    font-family: inherit;
-    font-weight: 500;
+    padding: clamp(12px, 1.6vw, 16px) clamp(16px, 1.8vw, 20px);
+    border-radius: 18px;
+    background: linear-gradient(140deg, rgba(94, 92, 230, 0.12), rgba(255, 255, 255, 0.4));
+    border: 1px solid rgba(94, 92, 230, 0.35);
+    color: var(--accent-purple);
+    font-size: 0.95rem;
+    font-weight: 600;
     cursor: pointer;
-    transition: all 0.25s ease;
-    min-width: 150px;
-    position: relative;
-    box-shadow: none;
+    transition: transform 0.2s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    min-width: 160px;
+    box-shadow: 0 12px 24px rgba(94, 92, 230, 0.18);
 }
 
 .source-select-btn:hover,
 .source-select-btn.active {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
-    box-shadow: 0 10px 24px rgba(26, 188, 156, 0.2);
-    background: var(--component-bg);
+    transform: translateY(-1px);
+    border-color: rgba(94, 92, 230, 0.55);
+    box-shadow: 0 18px 38px rgba(94, 92, 230, 0.24);
 }
 
 .source-select-btn:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 3px rgba(26, 188, 156, 0.18);
+    box-shadow: 0 0 0 4px rgba(94, 92, 230, 0.2);
 }
 
 .source-select-btn .caret-icon {
-    font-size: 0.8em;
+    font-size: 0.85em;
     transition: transform 0.25s ease;
 }
 
@@ -359,102 +435,90 @@ body.background-transitioning .background-stage__layer--transition {
 }
 
 .search-btn {
-    background: var(--primary-color);
-    color: white;
+    background: linear-gradient(135deg, var(--primary-color), #ff6b81);
+    color: #ffffff;
     border: none;
-    border-radius: 12px;
-    padding: 12px 20px;
+    border-radius: 18px;
+    padding: clamp(12px, 1.6vw, 16px) clamp(18px, 2vw, 24px);
     cursor: pointer;
-    font-size: 16px;
-    transition: all 0.2s ease;
-    display: flex;
+    font-size: 0.98rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    transition: transform 0.25s ease, box-shadow 0.3s ease;
+    display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
+    box-shadow: 0 18px 32px rgba(255, 55, 95, 0.28);
 }
 
 .search-btn:hover {
-    background: var(--primary-color-dark);
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: 0 24px 48px rgba(255, 55, 95, 0.32);
 }
 
 .search-btn:disabled {
-    background: var(--text-secondary-color);
+    background: rgba(22, 24, 29, 0.18);
+    color: rgba(22, 24, 29, 0.38);
     cursor: not-allowed;
+    box-shadow: none;
     transform: none;
 }
 
-/* 搜索结果区域 - 增强动效 */
+/* 搜索结果区域 */
 .search-results {
-    max-height: 0;
-    overflow: hidden;
-    border-top: 1px solid var(--border-color);
-    margin-top: 15px;
-    margin-left: -20px;
-    margin-right: -20px;
-    margin-bottom: -20px;
-    padding-top: 0;
-    padding-left: 20px;
-    padding-right: 20px;
-    position: relative;
-    z-index: 1;
-    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    opacity: 0;
-    border-radius: 0 0 14px 14px;
-    flex: 1;
+    flex: 1 1 auto;
     min-height: 0;
+    overflow-y: auto;
+    padding: 6px;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scrollbar-width: thin;
 }
 
-/* 搜索模式下的搜索结果 */
 .container.search-mode .search-results {
-    max-height: none;
-    height: 100%;
-    padding-top: 15px;
-    padding-bottom: 20px;
     opacity: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
+}
+
+.search-results::-webkit-scrollbar {
+    width: 6px;
+}
+
+.search-results::-webkit-scrollbar-thumb {
+    background: rgba(94, 92, 230, 0.28);
+    border-radius: 999px;
 }
 
 .search-result-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px;
-    border-radius: 12px;
+    gap: clamp(12px, 2vw, 18px);
+    padding: clamp(14px, 1.8vw, 18px) clamp(18px, 2.4vw, 24px);
+    border-radius: 22px;
     cursor: pointer;
-    transition: all 0.3s ease;
-    margin-bottom: 8px;
-    background: rgba(255, 255, 255, 0.3);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    transform: translateY(20px);
-    opacity: 0;
-    animation: slideInUp 0.4s ease forwards;
-}
-
-.search-result-item:nth-child(1) { animation-delay: 0.1s; }
-.search-result-item:nth-child(2) { animation-delay: 0.15s; }
-.search-result-item:nth-child(3) { animation-delay: 0.2s; }
-.search-result-item:nth-child(4) { animation-delay: 0.25s; }
-.search-result-item:nth-child(5) { animation-delay: 0.3s; }
-
-@keyframes slideInUp {
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.92), rgba(244, 245, 255, 0.78));
+    border: 1px solid rgba(17, 25, 40, 0.06);
+    box-shadow:
+        0 18px 44px rgba(17, 25, 40, 0.14),
+        inset 0 1px 0 rgba(255, 255, 255, 0.7);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .search-result-item:hover {
-    background: var(--item-hover-bg);
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    box-shadow:
+        0 24px 56px rgba(17, 25, 40, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.78);
 }
 
 .search-result-info {
-    flex: 1;
+    flex: 1 1 auto;
     min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
 .search-result-title {
@@ -463,12 +527,12 @@ body.background-transitioning .background-stage__layer--transition {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-size: 15px;
-    margin-bottom: 4px;
+    font-size: 1.02rem;
+    letter-spacing: -0.01em;
 }
 
 .search-result-artist {
-    font-size: 13px;
+    font-size: 0.86rem;
     color: var(--text-secondary-color);
     white-space: nowrap;
     overflow: hidden;
@@ -476,9 +540,9 @@ body.background-transitioning .background-stage__layer--transition {
 }
 
 .search-result-actions {
-    display: flex;
-    gap: 8px;
-    margin-left: 15px;
+    display: inline-flex;
+    gap: 12px;
+    flex-shrink: 0;
 }
 
 .action-btn {
@@ -521,7 +585,7 @@ body.background-transitioning .background-stage__layer--transition {
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.container.search-mode .main-content {
+html.mobile-view .container.search-mode .main-content {
     display: none;
 }
 
@@ -1472,4 +1536,495 @@ input[type="range"]:active::-moz-range-thumb {
     justify-content: center;
     width: 100%;
     max-width: 220px;
+}
+
+/* 桌面端 Apple Music 风格布局 */
+html.desktop-view .mobile-panel {
+    display: none !important;
+}
+
+html.desktop-view .mobile-search-results-host {
+    display: none;
+}
+
+html.desktop-view .sidebar-panel {
+    grid-area: sidebar;
+    background: var(--component-bg);
+    border-radius: 28px;
+    padding: clamp(20px, 2.2vw, 28px);
+    border: 1px solid var(--border-color-strong);
+    box-shadow:
+        0 20px 55px rgba(17, 25, 40, 0.16),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+html.desktop-view .sidebar-inner {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(18px, 2vw, 28px);
+    height: 100%;
+}
+
+html.desktop-view .sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(17, 25, 40, 0.06);
+}
+
+html.desktop-view .sidebar-brand__badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: linear-gradient(120deg, rgba(255, 55, 95, 0.18), rgba(94, 92, 230, 0.18));
+    color: var(--primary-color);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+html.desktop-view .sidebar-brand__profile {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+html.desktop-view .sidebar-brand__name {
+    font-weight: 600;
+    color: var(--text-color);
+    font-size: 1rem;
+}
+
+html.desktop-view .sidebar-brand__plan {
+    font-size: 0.78rem;
+    color: var(--text-secondary-color);
+    opacity: 0.8;
+}
+
+html.desktop-view .sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 6px;
+}
+
+html.desktop-view .sidebar-nav__item {
+    border: 1px solid transparent;
+    border-radius: 18px;
+    background: rgba(94, 92, 230, 0.08);
+    color: var(--text-color);
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 12px 18px;
+    transition: transform 0.2s ease, box-shadow 0.25s ease, background 0.25s ease, color 0.25s ease;
+}
+
+html.desktop-view .sidebar-nav__item i {
+    color: var(--accent-purple);
+    font-size: 1.1rem;
+}
+
+html.desktop-view .sidebar-nav__item:hover {
+    transform: translateX(4px);
+    box-shadow: 0 16px 28px rgba(94, 92, 230, 0.18);
+}
+
+html.desktop-view .sidebar-nav__item.is-active {
+    background: linear-gradient(140deg, var(--primary-color), rgba(94, 92, 230, 0.85));
+    color: #ffffff;
+    box-shadow: 0 20px 40px rgba(255, 55, 95, 0.35);
+}
+
+html.desktop-view .sidebar-nav__item.is-active i {
+    color: #ffffff;
+}
+
+html.desktop-view .sidebar-section {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(17, 25, 40, 0.06);
+}
+
+html.desktop-view .sidebar-section__title {
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-secondary-color);
+}
+
+html.desktop-view .playlist {
+    background: transparent;
+    border: none;
+    padding: 0;
+    box-shadow: none;
+    align-items: stretch;
+    justify-content: flex-start;
+    height: 100%;
+}
+
+html.desktop-view .playlist-label {
+    position: static;
+    display: none;
+}
+
+html.desktop-view .clear-playlist-btn {
+    align-self: flex-end;
+    position: static;
+    width: 34px;
+    height: 34px;
+    border-radius: 12px;
+    border: 1px solid rgba(17, 25, 40, 0.08);
+    background: rgba(255, 255, 255, 0.72);
+    color: var(--text-color);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease, box-shadow 0.25s ease;
+}
+
+html.desktop-view .clear-playlist-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(17, 25, 40, 0.18);
+}
+
+html.desktop-view .playlist-scroll {
+    flex: 1 1 auto;
+    margin-right: -6px;
+    padding-right: 6px;
+}
+
+html.desktop-view .playlist-items {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+html.desktop-view .playlist-items .playlist-item {
+    padding: 12px 48px 12px 18px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.82);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(17, 25, 40, 0.05);
+    color: var(--text-color);
+    transition: transform 0.2s ease, box-shadow 0.25s ease;
+    font-size: 0.95rem;
+}
+
+html.desktop-view .playlist-items .playlist-item:hover {
+    transform: translateX(6px);
+    box-shadow: 0 14px 30px rgba(17, 25, 40, 0.18);
+    background: linear-gradient(120deg, rgba(255, 255, 255, 0.95), rgba(244, 245, 255, 0.82));
+}
+
+html.desktop-view .playlist-items .playlist-item.current {
+    background: linear-gradient(135deg, var(--primary-color), rgba(94, 92, 230, 0.85));
+    color: #ffffff;
+    box-shadow: 0 18px 36px rgba(255, 55, 95, 0.35);
+}
+
+html.desktop-view .playlist-item-download,
+html.desktop-view .playlist-item-remove {
+    width: 30px;
+    height: 30px;
+    border-radius: 12px;
+    background: rgba(94, 92, 230, 0.18);
+    color: var(--accent-purple);
+    border: none;
+}
+
+html.desktop-view .playlist-item-download {
+    right: 48px;
+}
+
+html.desktop-view .playlist-item-remove {
+    right: 14px;
+    background: rgba(255, 55, 95, 0.18);
+    color: var(--primary-color);
+}
+
+html.desktop-view .playlist-item-download:hover,
+html.desktop-view .playlist-item-remove:hover {
+    transform: translateY(-50%) scale(1.05);
+    box-shadow: 0 10px 20px rgba(17, 25, 40, 0.18);
+}
+
+html.desktop-view .playlist.empty::before {
+    content: "你的播放列表还是空的，搜索一些歌曲吧";
+    text-align: center;
+    color: var(--text-secondary-color);
+    font-size: 0.9rem;
+}
+
+html.desktop-view .library-panel {
+    grid-area: content;
+    background: var(--component-elevated-bg);
+    border-radius: 28px;
+    padding: clamp(22px, 2.4vw, 30px);
+    border: 1px solid var(--border-color-strong);
+    box-shadow:
+        0 24px 60px rgba(17, 25, 40, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.65);
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+html.desktop-view .library-panel__header {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+html.desktop-view .library-panel__header h2 {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+html.desktop-view .library-panel__header p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary-color);
+}
+
+html.desktop-view .library-panel__body {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+html.desktop-view .now-playing-column {
+    grid-area: nowPlaying;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(18px, 2vw, 26px);
+    min-width: 0;
+}
+
+html.desktop-view .cover-area {
+    background: var(--component-elevated-bg);
+    border-radius: 28px;
+    padding: clamp(24px, 2.6vw, 34px);
+    border: 1px solid var(--border-color-strong);
+    box-shadow:
+        0 22px 60px rgba(17, 25, 40, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+}
+
+html.desktop-view .album-cover {
+    width: min(260px, 85%);
+    aspect-ratio: 1 / 1;
+    border-radius: 24px;
+    background: linear-gradient(135deg, rgba(255, 55, 95, 0.4), rgba(94, 92, 230, 0.35));
+    box-shadow:
+        0 32px 60px rgba(17, 25, 40, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    margin-bottom: 0;
+}
+
+html.desktop-view .album-cover img {
+    border-radius: 24px;
+}
+
+html.desktop-view .album-cover .placeholder {
+    font-size: 52px;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+html.desktop-view .current-song-info {
+    text-align: center;
+}
+
+html.desktop-view .current-song-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+html.desktop-view .current-song-artist {
+    font-size: 0.92rem;
+    color: var(--text-secondary-color);
+}
+
+html.desktop-view .mobile-inline-lyrics {
+    display: none !important;
+}
+
+html.desktop-view .lyrics {
+    background: var(--component-elevated-bg);
+    border-radius: 28px;
+    padding: clamp(20px, 2.4vw, 30px);
+    border: 1px solid var(--border-color-strong);
+    box-shadow:
+        0 24px 60px rgba(17, 25, 40, 0.16),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+html.desktop-view .lyrics-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding-right: 8px;
+    margin-right: -8px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+html.desktop-view .lyrics-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+html.desktop-view .lyrics-scroll::-webkit-scrollbar-thumb {
+    background: rgba(94, 92, 230, 0.22);
+    border-radius: 999px;
+}
+
+html.desktop-view .lyrics-content {
+    font-size: 0.96rem;
+    line-height: 1.6;
+    color: var(--text-secondary-color);
+}
+
+html.desktop-view .lyrics .current {
+    color: var(--lyrics-highlight-text);
+    background: var(--lyrics-highlight-bg);
+    border-radius: 14px;
+}
+
+html.desktop-view .controls {
+    grid-area: controls;
+    background: var(--component-elevated-bg);
+    border-radius: 24px;
+    padding: clamp(18px, 2vw, 24px);
+    border: 1px solid var(--border-color-strong);
+    box-shadow:
+        0 24px 60px rgba(17, 25, 40, 0.14),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    align-items: center;
+    gap: clamp(18px, 2vw, 28px);
+}
+
+html.desktop-view .transport-controls {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+}
+
+html.desktop-view .transport-button {
+    width: 46px;
+    height: 46px;
+    border-radius: 16px;
+    border: none;
+    background: rgba(94, 92, 230, 0.14);
+    color: var(--accent-purple);
+    font-size: 1.1rem;
+    transition: transform 0.2s ease, box-shadow 0.25s ease;
+}
+
+html.desktop-view .transport-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(94, 92, 230, 0.2);
+}
+
+html.desktop-view .transport-button.transport-button--play {
+    width: 54px;
+    height: 54px;
+    background: linear-gradient(135deg, var(--primary-color), rgba(255, 107, 129, 0.92));
+    color: #ffffff;
+    box-shadow: 0 18px 32px rgba(255, 55, 95, 0.32);
+}
+
+html.desktop-view .progress-container {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+html.desktop-view #progressBar {
+    flex: 1 1 auto;
+    accent-color: var(--primary-color);
+    height: 6px;
+    border-radius: 999px;
+}
+
+html.desktop-view .audio-tools {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+}
+
+html.desktop-view .player-quality-btn {
+    border-radius: 18px;
+    padding: 10px 16px;
+    background: rgba(94, 92, 230, 0.15);
+    color: var(--accent-purple);
+    border: none;
+    font-weight: 600;
+}
+
+html.desktop-view .volume-container {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 16px;
+    background: rgba(94, 92, 230, 0.12);
+    color: var(--accent-purple);
+}
+
+html.desktop-view #volumeSlider {
+    accent-color: var(--accent-purple);
+}
+
+html.desktop-view #loadOnlineBtn {
+    border-radius: 18px;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, rgba(94, 92, 230, 0.85), rgba(255, 107, 129, 0.85));
+    color: #ffffff;
+    border: none;
+    box-shadow: 0 16px 32px rgba(94, 92, 230, 0.3);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+html.desktop-view .action-btn {
+    border-radius: 14px;
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    background: rgba(94, 92, 230, 0.12);
+    color: var(--accent-purple);
+    border: none;
+    box-shadow: none;
+}
+
+html.desktop-view .action-btn.play {
+    background: linear-gradient(135deg, var(--primary-color), rgba(255, 107, 129, 0.9));
+    color: #ffffff;
+    box-shadow: 0 14px 28px rgba(255, 55, 95, 0.3);
+}
+
+html.desktop-view .action-btn.download {
+    background: rgba(94, 92, 230, 0.18);
+    color: var(--accent-purple);
 }

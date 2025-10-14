@@ -128,6 +128,20 @@
         initialized = true;
 
         document.body.classList.add("mobile-view");
+
+        const playlistHost = document.getElementById("mobilePanelPlaylistHost");
+        const lyricsHost = document.getElementById("mobilePanelLyricsHost");
+        const searchResultsHost = document.getElementById("mobileSearchResultsHost");
+        if (playlistHost && dom.playlist && !playlistHost.contains(dom.playlist)) {
+            playlistHost.appendChild(dom.playlist);
+        }
+        if (lyricsHost && dom.lyrics && !lyricsHost.contains(dom.lyrics)) {
+            lyricsHost.appendChild(dom.lyrics);
+        }
+        if (searchResultsHost && dom.searchResults && !searchResultsHost.contains(dom.searchResults)) {
+            searchResultsHost.appendChild(dom.searchResults);
+        }
+
         const initialView = "playlist";
         document.body.setAttribute("data-mobile-panel-view", initialView);
         if (dom.mobilePanelTitle) {
