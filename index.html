@@ -66,7 +66,31 @@
         })();
     </script>
 </head>
-<body>
+<body class="auth-locked">
+    <div id="authOverlay" class="auth-overlay" data-state="checking" hidden>
+        <div class="auth-card" role="dialog" aria-modal="true" aria-labelledby="authMessage">
+            <div class="auth-card__logo" aria-hidden="true">Solara</div>
+            <div class="auth-spinner" id="authSpinner" aria-hidden="true"></div>
+            <p id="authMessage" class="auth-message">正在检查访问权限...</p>
+            <form id="authForm" class="auth-form" novalidate>
+                <label class="auth-label" for="authPassword">访问密码</label>
+                <input
+                    id="authPassword"
+                    class="auth-input"
+                    type="password"
+                    name="password"
+                    placeholder="输入密码"
+                    autocomplete="current-password"
+                    required
+                >
+                <button type="submit" class="auth-submit-btn">进入 Solara</button>
+            </form>
+            <p id="authError" class="auth-error" role="alert" hidden></p>
+        </div>
+    </div>
+    <noscript>
+        <div class="noscript-message">Solara 需要启用 JavaScript 才能正常工作。</div>
+    </noscript>
     <div class="background-stage" id="backgroundStage" aria-hidden="true">
         <div class="background-stage__layer background-stage__layer--base" id="backgroundBaseLayer"></div>
         <div class="background-stage__layer background-stage__layer--transition" id="backgroundTransitionLayer"></div>
@@ -285,6 +309,7 @@
 <!-- 调试信息容器 -->
 <div id="debugInfo" class="debug-info"></div>
 
+<script src="js/auth.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="js/index.js"></script>
 <script>

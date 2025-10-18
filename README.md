@@ -38,6 +38,7 @@
 ## ⚙️ 配置提示
 - 🔗 API 基地址定义在 index.html 中的 `API.baseUrl`（约 1300 行），可替换为自建接口域名。
 - 🎚️ 默认主题、播放模式等偏好可在 `state` 初始化逻辑中按需调整。
+- 🔐 如需启用访问密码，可在 Cloudflare Pages 项目的 **Environment Variables** 中新增 `ACCESS_PASSWORD` 并重新部署。站点会在进入前显示 Solara 风格的密码页；删除该变量后站点将恢复公开访问。
 
 ## 🎵 使用流程
 1. 输入关键词并选择想要的曲库后发起搜索。

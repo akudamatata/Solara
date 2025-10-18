@@ -79,6 +79,187 @@
     color: #ffffff;
 }
 
+.auth-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(10, 18, 16, 0.78);
+    backdrop-filter: blur(18px);
+    z-index: 999;
+}
+
+.auth-card {
+    width: min(420px, 100%);
+    padding: 32px 28px;
+    border-radius: 28px;
+    background: var(--container-bg);
+    box-shadow: 0 24px 56px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(var(--backdrop-blur));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    text-align: center;
+}
+
+.dark-mode .auth-overlay {
+    background: rgba(3, 10, 9, 0.82);
+}
+
+.dark-mode .auth-card {
+    background: rgba(32, 32, 32, 0.75);
+    box-shadow: 0 24px 56px rgba(0, 0, 0, 0.45);
+}
+
+.auth-card__logo {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--primary-color);
+}
+
+.auth-spinner {
+    width: 42px;
+    height: 42px;
+    border-radius: 999px;
+    border: 3px solid rgba(26, 188, 156, 0.25);
+    border-top-color: var(--primary-color);
+    animation: auth-spinner-rotate 0.9s linear infinite;
+    margin: 16px auto 8px;
+}
+
+.auth-overlay[data-state="form"] .auth-spinner[hidden] {
+    display: none !important;
+}
+
+.auth-overlay[data-state="checking"] .auth-form {
+    display: none;
+}
+
+.auth-message {
+    margin: 0;
+    font-size: 15px;
+    color: var(--text-secondary-color);
+    line-height: 1.6;
+}
+
+.auth-form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 8px;
+}
+
+.auth-form.is-busy {
+    opacity: 0.75;
+}
+
+.auth-label {
+    font-size: 13px;
+    font-weight: 600;
+    text-align: left;
+    color: var(--text-secondary-color);
+}
+
+.auth-input {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 16px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    background: rgba(255, 255, 255, 0.85);
+    font-size: 16px;
+    color: var(--text-color);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.dark-mode .auth-input {
+    background: rgba(20, 20, 20, 0.85);
+    border-color: rgba(255, 255, 255, 0.08);
+    color: var(--text-color);
+}
+
+.auth-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(26, 188, 156, 0.2);
+}
+
+.auth-submit-btn {
+    width: 100%;
+    padding: 14px 18px;
+    border: none;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-color-dark));
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.auth-submit-btn:hover,
+.auth-submit-btn:focus-visible {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px rgba(26, 188, 156, 0.3);
+}
+
+.auth-submit-btn:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+.auth-error {
+    min-height: 20px;
+    margin: 4px 0 0;
+    color: var(--warning-color);
+    font-size: 14px;
+}
+
+.noscript-message {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: #0f0f0f;
+    color: #ffffff;
+    font-size: 16px;
+    text-align: center;
+    z-index: 1000;
+}
+
+@keyframes auth-spinner-rotate {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 600px) {
+    .auth-card {
+        padding: 28px 22px;
+        border-radius: 24px;
+    }
+
+    .auth-card__logo {
+        font-size: 24px;
+    }
+
+    .auth-message {
+        font-size: 14px;
+    }
+
+    .auth-input,
+    .auth-submit-btn {
+        font-size: 15px;
+    }
+}
+
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--scrollbar-track-bg); }
 ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb-bg); border-radius: 3px; }
@@ -96,6 +277,27 @@ body {
     color: var(--text-color);
     transition: color 0.5s;
     background-color: #0f0f0f;
+}
+
+#mainContainer {
+    transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+body.auth-locked {
+    overflow: hidden;
+}
+
+body.auth-locked #mainContainer {
+    opacity: 0;
+    pointer-events: none;
+    user-select: none;
+    transform: translateY(12px) scale(0.99);
+}
+
+body.auth-ready #mainContainer {
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
 }
 
 .background-stage {
