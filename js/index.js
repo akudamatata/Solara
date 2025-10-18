@@ -368,6 +368,19 @@ function preferHttpsUrl(url) {
     }
 }
 
+function toAbsoluteUrl(url) {
+    if (!url) {
+        return "";
+    }
+
+    try {
+        const absolute = new URL(url, window.location.href);
+        return absolute.href;
+    } catch (_) {
+        return url;
+    }
+}
+
 function buildAudioProxyUrl(url) {
     if (!url || typeof url !== "string") return url;
 
@@ -607,6 +620,7 @@ const state = {
     searchSource: savedSearchSource,
     hasMoreResults: true,
     currentSong: savedCurrentSong,
+    currentArtworkUrl: null,
     debugMode: false,
     isSearchMode: false, // 新增：搜索模式状态
     playlistSongs: savedPlaylistSongs, // 新增：统一播放列表
@@ -632,6 +646,156 @@ const state = {
     currentGradient: '',
     isMobileInlineLyricsOpen: false,
 };
+
+// ==== Media Session integration (Safari/iOS Lock Screen) ====
+(() => {
+    const audio = dom.audioPlayer;
+    if (!('mediaSession' in navigator) || !audio) return;
+
+    let handlersBound = false;
+
+    function getArtworkMime(url) {
+        if (!url) {
+            return 'image/png';
+        }
+
+        const normalized = url.split('?')[0].toLowerCase();
+        if (normalized.endsWith('.jpg') || normalized.endsWith('.jpeg')) {
+            return 'image/jpeg';
+        }
+        if (normalized.endsWith('.webp')) {
+            return 'image/webp';
+        }
+        if (normalized.endsWith('.gif')) {
+            return 'image/gif';
+        }
+        if (normalized.endsWith('.bmp')) {
+            return 'image/bmp';
+        }
+        if (normalized.endsWith('.svg')) {
+            return 'image/svg+xml';
+        }
+        return 'image/png';
+    }
+
+    function getArtworkList(url) {
+        // iOS/Safari 建议多尺寸封面；你的 API 已有 pic_id -> pic url（300），这里做兜底多尺寸
+        // 注意：尽量提供 https 链接；你的项目里已有 preferHttpsUrl/buildAudioProxyUrl 工具函数
+        const src = (typeof preferHttpsUrl === 'function') ? preferHttpsUrl(url) : (url || '');
+        // 如果没有封面，用站点 favicon 兜底
+        const fallback = '/favicon.png';
+        const base = toAbsoluteUrl(src || fallback);
+        const type = getArtworkMime(base);
+        return [
+            { src: base, sizes: '512x512', type },
+            { src: base, sizes: '384x384', type },
+            { src: base, sizes: '256x256', type },
+            { src: base, sizes: '192x192', type },
+            { src: base, sizes: '128x128', type },
+            { src: base, sizes: '96x96',  type }
+        ];
+    }
+
+    function updateMediaMetadata() {
+        // 依赖现有全局 state.currentSong；已在项目中使用 localStorage 保存/恢复。:contentReference[oaicite:7]{index=7}
+        const song = state.currentSong || {};
+        const title = song.name || dom.currentSongTitle?.textContent || 'Solara';
+        const artist = song.artist || dom.currentSongArtist?.textContent || '';
+        const artworkUrl = state.currentArtworkUrl || '';
+
+        try {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title,
+                artist,
+                album: song.album || '',
+                artwork: getArtworkList(artworkUrl)
+            });
+        } catch (e) {
+            // 某些旧 iOS 可能对 artwork 尺寸挑剔，失败时用最小配置重试
+            try {
+                navigator.mediaSession.metadata = new MediaMetadata({ title, artist });
+            } catch (_) {}
+        }
+    }
+
+    function updatePositionState() {
+        // iOS 15+ 支持 setPositionState；用于让锁屏进度条可拖动与显示
+        if (typeof navigator.mediaSession.setPositionState !== 'function') return;
+        const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
+        const position = Number.isFinite(audio.currentTime) ? audio.currentTime : 0;
+        const playbackRate = Number.isFinite(audio.playbackRate) ? audio.playbackRate : 1;
+        navigator.mediaSession.setPositionState({ duration, position, playbackRate });
+    }
+
+    function bindActionHandlersOnce() {
+        if (handlersBound) return;
+        handlersBound = true;
+
+        // 播放/暂停交给 <audio> 默认行为即可
+        try {
+            navigator.mediaSession.setActionHandler('previoustrack', () => {
+                // 直接复用你已有的全局函数（HTML 里也在用）:contentReference[oaicite:9]{index=9}
+                if (typeof window.playPrevious === 'function') window.playPrevious();
+            });
+            navigator.mediaSession.setActionHandler('nexttrack', () => {
+                if (typeof window.playNext === 'function') window.playNext();
+            });
+
+            navigator.mediaSession.setActionHandler('seekbackward', null);
+            navigator.mediaSession.setActionHandler('seekforward', null);
+
+            // 关键：让锁屏支持拖动进度到任意位置
+            navigator.mediaSession.setActionHandler('seekto', (e) => {
+                if (!e || typeof e.seekTime !== 'number') return;
+                audio.currentTime = Math.max(0, Math.min(audio.duration || 0, e.seekTime));
+                if (e.fastSeek && typeof audio.fastSeek === 'function') {
+                    audio.fastSeek(audio.currentTime);
+                }
+                updatePositionState();
+            });
+
+            // 可选：切换播放状态（大部分系统自己会处理）
+            navigator.mediaSession.setActionHandler('play', async () => {
+                try { await audio.play(); } catch(_) {}
+            });
+            navigator.mediaSession.setActionHandler('pause', () => audio.pause());
+        } catch (_) {
+            // 某些平台不支持全部动作
+        }
+    }
+
+    // 监听 audio 事件，同步锁屏信息与进度
+    audio.addEventListener('loadedmetadata', () => {
+        updateMediaMetadata();
+        updatePositionState();
+        bindActionHandlersOnce();
+    });
+
+    audio.addEventListener('play', () => {
+        navigator.mediaSession.playbackState = 'playing';
+        updatePositionState();
+    });
+
+    audio.addEventListener('pause', () => {
+        navigator.mediaSession.playbackState = 'paused';
+        updatePositionState();
+    });
+
+    audio.addEventListener('timeupdate', () => {
+        // 频率很高，避免过度调用；这里轻量直接调一次
+        updatePositionState();
+    });
+
+    audio.addEventListener('durationchange', updatePositionState);
+    audio.addEventListener('ratechange', updatePositionState);
+    audio.addEventListener('seeking', updatePositionState);
+    audio.addEventListener('seeked', updatePositionState);
+
+    // 当你在应用内切歌（更新 state.currentSong / 封面 / 标题）时，也调用一次：
+    // window.__SOLARA_UPDATE_MEDIA_METADATA = updateMediaMetadata;
+    // 这样在你现有的切歌逻辑里，设置完新的 audio.src 后手动调用它可立即更新锁屏封面/文案。
+    window.__SOLARA_UPDATE_MEDIA_METADATA = updateMediaMetadata;
+})();
 
 let sourceMenuPositionFrame = null;
 let qualityMenuPositionFrame = null;
@@ -1026,12 +1190,21 @@ function attemptPaletteApplication() {
 function showAlbumCoverPlaceholder() {
     dom.albumCover.innerHTML = PLACEHOLDER_HTML;
     dom.albumCover.classList.remove("loading");
+    state.currentArtworkUrl = toAbsoluteUrl('/favicon.png');
     queueDefaultPalette();
+    if (typeof window.__SOLARA_UPDATE_MEDIA_METADATA === 'function') {
+        window.__SOLARA_UPDATE_MEDIA_METADATA();
+    }
 }
 
 function setAlbumCoverImage(url) {
-    dom.albumCover.innerHTML = `<img src="${url}" alt="专辑封面">`;
+    const safeUrl = toAbsoluteUrl(preferHttpsUrl(url));
+    state.currentArtworkUrl = safeUrl;
+    dom.albumCover.innerHTML = `<img src="${safeUrl}" alt="专辑封面">`;
     dom.albumCover.classList.remove("loading");
+    if (typeof window.__SOLARA_UPDATE_MEDIA_METADATA === 'function') {
+        window.__SOLARA_UPDATE_MEDIA_METADATA();
+    }
 }
 
 loadStoredPalettes();
@@ -2213,6 +2386,7 @@ function updateCurrentSongInfo(song, options = {}) {
     if (!loadArtwork) {
         dom.albumCover.classList.add("loading");
         dom.albumCover.innerHTML = PLACEHOLDER_HTML;
+        state.currentArtworkUrl = null;
         return Promise.resolve();
     }
 
@@ -2955,6 +3129,10 @@ async function playSong(song, options = {}) {
         scheduleDeferredSongAssets(song, playPromise);
 
         debugLog(`开始播放: ${song.name} @${quality}`);
+
+        if (typeof window.__SOLARA_UPDATE_MEDIA_METADATA === 'function') {
+            window.__SOLARA_UPDATE_MEDIA_METADATA();
+        }
     } catch (error) {
         console.error('播放歌曲失败:', error);
         throw error;
