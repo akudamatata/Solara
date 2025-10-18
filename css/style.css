@@ -114,30 +114,13 @@
     box-shadow: 0 24px 56px rgba(0, 0, 0, 0.45);
 }
 
+
 .auth-card__logo {
     font-size: 28px;
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--primary-color);
-}
-
-.auth-spinner {
-    width: 42px;
-    height: 42px;
-    border-radius: 999px;
-    border: 3px solid rgba(26, 188, 156, 0.25);
-    border-top-color: var(--primary-color);
-    animation: auth-spinner-rotate 0.9s linear infinite;
-    margin: 16px auto 8px;
-}
-
-.auth-overlay[data-state="form"] .auth-spinner[hidden] {
-    display: none !important;
-}
-
-.auth-overlay[data-state="checking"] .auth-form {
-    display: none;
 }
 
 .auth-message {
@@ -151,8 +134,9 @@
     width: 100%;
     display: flex;
     flex-direction: column;
+    align-items: stretch;
     gap: 16px;
-    margin-top: 8px;
+    margin-top: 12px;
 }
 
 .auth-form.is-busy {
@@ -160,6 +144,7 @@
 }
 
 .auth-label {
+    display: block;
     font-size: 13px;
     font-weight: 600;
     text-align: left;
@@ -175,6 +160,7 @@
     font-size: 16px;
     color: var(--text-color);
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    box-sizing: border-box;
 }
 
 .dark-mode .auth-input {
@@ -232,12 +218,6 @@
     font-size: 16px;
     text-align: center;
     z-index: 1000;
-}
-
-@keyframes auth-spinner-rotate {
-    to {
-        transform: rotate(360deg);
-    }
 }
 
 @media (max-width: 600px) {

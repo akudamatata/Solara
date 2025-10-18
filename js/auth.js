@@ -5,15 +5,29 @@
     const passwordInput = document.getElementById('authPassword');
     const errorMessage = document.getElementById('authError');
     const message = document.getElementById('authMessage');
-    const spinner = document.getElementById('authSpinner');
     const submitButton = form.querySelector('button[type="submit"]');
 
-    if (!overlay || !mainContainer || !form || !passwordInput || !errorMessage || !message || !spinner || !submitButton) {
+    if (!overlay || !mainContainer || !form || !passwordInput || !errorMessage || !message || !submitButton) {
         document.body.classList.remove('auth-locked');
         return;
     }
 
     let checking = false;
+    const promptMessage = '站点已设置访问密码，请输入以继续访问。';
+
+    mainContainer.setAttribute('aria-hidden', 'true');
+
+    const toBoolean = (value) => {
+        if (typeof value === 'boolean') {
+            return value;
+        }
+        if (typeof value === 'string') {
+            const normalized = value.trim().toLowerCase();
+            if (normalized === 'true') return true;
+            if (normalized === 'false') return false;
+        }
+        return Boolean(value);
+    };
 
     const setOverlayState = (state) => {
         if (!overlay) return;
@@ -33,6 +47,12 @@
         submitButton.disabled = isBusy;
     };
 
+    const lockApp = () => {
+        document.body.classList.remove('auth-ready');
+        document.body.classList.add('auth-locked');
+        mainContainer.setAttribute('aria-hidden', 'true');
+    };
+
     const showError = (text) => {
         if (!text) {
             errorMessage.textContent = '';
@@ -50,6 +70,12 @@
         setOverlayState('hidden');
     };
 
+    const showPrompt = (text) => {
+        lockApp();
+        message.textContent = text || promptMessage;
+        setOverlayState('form');
+    };
+
     const focusPasswordInput = () => {
         window.setTimeout(() => {
             passwordInput.focus({ preventScroll: true });
@@ -57,36 +83,42 @@
     };
 
     const checkStatus = async () => {
-        mainContainer.setAttribute('aria-hidden', 'true');
-        document.body.classList.add('auth-locked');
-        setOverlayState('checking');
         showError('');
-        message.textContent = '正在检查访问权限...';
-        spinner.removeAttribute('hidden');
 
         try {
             const response = await fetch('/auth', { credentials: 'include' });
+            if (response.status === 404) {
+                unlockApp();
+                return;
+            }
+
+            const payload = await response
+                .clone()
+                .json()
+                .catch(() => null);
+
             if (!response.ok) {
                 throw new Error('AUTH_STATUS_ERROR');
             }
-            const payload = await response.json();
+
             if (!payload || typeof payload !== 'object') {
-                throw new Error('AUTH_STATUS_INVALID');
+                unlockApp();
+                return;
             }
-            const { passwordRequired, authenticated } = payload;
+
+            const passwordRequired = toBoolean(payload.passwordRequired);
+            const authenticated = toBoolean(payload.authenticated);
+
             if (!passwordRequired || authenticated) {
                 unlockApp();
                 return;
             }
-            setOverlayState('form');
-            spinner.setAttribute('hidden', '');
-            message.textContent = '站点已设置访问密码，请输入以继续访问。';
+
+            showPrompt();
             focusPasswordInput();
         } catch (error) {
             console.error('[Solara] Failed to verify password status.', error);
-            setOverlayState('form');
-            spinner.setAttribute('hidden', '');
-            message.textContent = '无法连接到验证服务，请稍后重试。';
+            showPrompt('无法连接到验证服务，请稍后重试。');
             focusPasswordInput();
         }
     };
@@ -104,9 +136,7 @@
 
         showError('');
         setBusy(true);
-        setOverlayState('form');
-        spinner.removeAttribute('hidden');
-        message.textContent = '正在验证访问密码...';
+        showPrompt();
 
         try {
             const response = await fetch('/auth', {
@@ -122,8 +152,7 @@
             const { authenticated, error: authError } = payload;
 
             if (!response.ok || !authenticated) {
-                spinner.setAttribute('hidden', '');
-                message.textContent = '站点已设置访问密码，请输入以继续访问。';
+                showPrompt();
                 const errorText =
                     typeof authError === 'string' && authError.trim()
                         ? authError.trim()
@@ -137,8 +166,7 @@
             unlockApp();
         } catch (error) {
             console.error('[Solara] Failed to authenticate.', error);
-            spinner.setAttribute('hidden', '');
-            message.textContent = '验证过程中出现问题，请稍后重试。';
+            showPrompt('验证过程中出现问题，请稍后重试。');
             showError('验证过程中出现问题，请稍后重试。');
             focusPasswordInput();
         } finally {
