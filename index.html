@@ -112,7 +112,16 @@
                     <span>搜索</span>
                 </button>
             </div>
-            <div id="searchResults" class="search-results"></div>
+            <div id="searchResults" class="search-results">
+                <div class="search-results-toolbar">
+                    <button id="importSelectedBtn" class="import-selected-btn" type="button" disabled>
+                        <i class="fas fa-file-import" aria-hidden="true"></i>
+                        <span class="import-selected-label">导入已选</span>
+                        <span id="importSelectedCount" class="import-selected-count" aria-hidden="true"></span>
+                    </button>
+                </div>
+                <div id="searchResultsList" class="search-results-list"></div>
+            </div>
         </div>
 
         <div class="main-content">

@@ -44,7 +44,7 @@
 ## 🔐 访问控制建议
 - 若希望为站点加密访问，可在 Cloudflare Pages 站点设置中启用 **访问策略**，随后点击“管理”跳转至 Cloudflare Zero Trust。
 - 在 Zero Trust 控制台中新建策略，设置登录验证并限制仅允许特定邮箱访问。
-- 详细步骤可参考指南：https://blog.galois21.com/archives/2360。
+- 详细步骤可参考指南：https://blog.galois21.com/archives/2360 。
 - 配置了策略一定要在Zero Trust-应用程序里确认是否绑定 不绑定不生效
 ## 🎵 使用流程
 1. 输入关键词并选择想要的曲库后发起搜索。

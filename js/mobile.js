@@ -53,6 +53,12 @@
             return;
         }
         document.body.classList.remove("mobile-search-open");
+        const toggleSearchMode = window.toggleSearchMode;
+        if (typeof toggleSearchMode === "function") {
+            toggleSearchMode(false);
+        } else if (typeof window.hideSearchResults === "function") {
+            window.hideSearchResults();
+        }
         if (dom.searchArea) {
             dom.searchArea.setAttribute("aria-hidden", "true");
         }
@@ -85,11 +91,8 @@
         if (typeof window.switchMobileView === "function") {
             window.switchMobileView(targetView);
         }
+        closeMobileSearchImpl();
         document.body.classList.add("mobile-panel-open");
-        document.body.classList.remove("mobile-search-open");
-        if (dom.searchArea) {
-            dom.searchArea.setAttribute("aria-hidden", "true");
-        }
         document.body.setAttribute("data-mobile-panel-view", targetView);
         updateMobileOverlayScrim();
     }

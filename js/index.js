@@ -22,11 +22,14 @@ const dom = {
     sourceSelectLabel: document.getElementById("sourceSelectLabel"),
     sourceMenu: document.getElementById("sourceMenu"),
     searchResults: document.getElementById("searchResults"),
+    searchResultsList: document.getElementById("searchResultsList"),
     notification: document.getElementById("notification"),
     albumCover: document.getElementById("albumCover"),
     currentSongTitle: document.getElementById("currentSongTitle"),
     currentSongArtist: document.getElementById("currentSongArtist"),
     debugInfo: document.getElementById("debugInfo"),
+    importSelectedBtn: document.getElementById("importSelectedBtn"),
+    importSelectedCount: document.getElementById("importSelectedCount"),
     importPlaylistBtn: document.getElementById("importPlaylistBtn"),
     exportPlaylistBtn: document.getElementById("exportPlaylistBtn"),
     importPlaylistInput: document.getElementById("importPlaylistInput"),
@@ -653,6 +656,7 @@ const state = {
     audioReadyForPalette: true,
     currentGradient: '',
     isMobileInlineLyricsOpen: false,
+    selectedSearchResults: new Set(),
 };
 
 // ==== Media Session integration (Safari/iOS Lock Screen) ====
@@ -1481,8 +1485,12 @@ function hideSearchResults() {
         schedulePlayerQualityMenuPositionUpdate();
     }
     // 立即清空搜索结果内容
-    dom.searchResults.innerHTML = "";
+    const container = dom.searchResultsList || dom.searchResults;
+    if (container) {
+        container.innerHTML = "";
+    }
     state.renderedSearchCount = 0;
+    resetSelectedSearchResults();
 }
 
 const playModeTexts = {
@@ -2363,6 +2371,15 @@ function setupInteractions() {
         }
     });
 
+    updateImportSelectedButton();
+    if (dom.importSelectedBtn) {
+        dom.importSelectedBtn.addEventListener("click", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            importSelectedSearchResults();
+        });
+    }
+
     // 修复：点击搜索区域外部时隐藏搜索结果
     document.addEventListener("click", (e) => {
         const searchArea = document.querySelector(".search-area");
@@ -2604,6 +2621,11 @@ async function performSearch(isLiveSearch = false) {
         state.searchResults = [];
         state.hasMoreResults = true;
         state.renderedSearchCount = 0;
+        resetSelectedSearchResults();
+        const listContainer = dom.searchResultsList || dom.searchResults;
+        if (listContainer) {
+            listContainer.innerHTML = "";
+        }
         debugLog(`开始新搜索: ${query}, 来源: ${source}`);
     } else {
         state.searchKeyword = query;
@@ -2709,6 +2731,16 @@ function createSearchResultItem(song, index) {
     item.className = "search-result-item";
     item.dataset.index = String(index);
 
+    const selectionToggle = document.createElement("button");
+    selectionToggle.className = "search-result-select";
+    selectionToggle.type = "button";
+    selectionToggle.innerHTML = '<i class="fas fa-check"></i>';
+    selectionToggle.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        toggleSearchResultSelection(index);
+    });
+
     const info = document.createElement("div");
     info.className = "search-result-info";
 
@@ -2735,7 +2767,10 @@ function createSearchResultItem(song, index) {
     playButton.type = "button";
     playButton.title = "播放";
     playButton.innerHTML = '<i class="fas fa-play"></i> 播放';
-    playButton.addEventListener("click", () => playSearchResult(index));
+    playButton.addEventListener("click", (event) => {
+        event.stopPropagation();
+        playSearchResult(index);
+    });
 
     const downloadButton = document.createElement("button");
     downloadButton.className = "action-btn download";
@@ -2743,6 +2778,7 @@ function createSearchResultItem(song, index) {
     downloadButton.title = "下载";
     downloadButton.innerHTML = '<i class="fas fa-download"></i>';
     downloadButton.addEventListener("click", (event) => {
+        event.stopPropagation();
         showQualityMenu(event, index, "search");
     });
 
@@ -2771,10 +2807,160 @@ function createSearchResultItem(song, index) {
     actions.appendChild(playButton);
     actions.appendChild(downloadButton);
 
+    item.appendChild(selectionToggle);
     item.appendChild(info);
     item.appendChild(actions);
 
+    applySelectionStateToElement(item, state.selectedSearchResults.has(index));
+
+    item.addEventListener("click", (event) => {
+        if (event.target.closest(".search-result-actions")) {
+            return;
+        }
+        if (event.target.closest(".search-result-select")) {
+            return;
+        }
+        toggleSearchResultSelection(index);
+    });
+
     return item;
+}
+
+function ensureSelectedSearchResultsSet() {
+    if (!(state.selectedSearchResults instanceof Set)) {
+        state.selectedSearchResults = new Set();
+    }
+}
+
+function applySelectionStateToElement(item, isSelected) {
+    if (!item) {
+        return;
+    }
+    item.classList.toggle("selected", Boolean(isSelected));
+    const toggle = item.querySelector(".search-result-select");
+    if (toggle) {
+        toggle.setAttribute("aria-pressed", isSelected ? "true" : "false");
+        toggle.setAttribute("aria-label", isSelected ? "取消选择" : "选择歌曲");
+    }
+}
+
+function updateSearchResultSelectionUI(index) {
+    const container = dom.searchResultsList || dom.searchResults;
+    if (!container) {
+        return;
+    }
+    const numericIndex = Number(index);
+    const item = container.querySelector(`.search-result-item[data-index="${numericIndex}"]`);
+    ensureSelectedSearchResultsSet();
+    applySelectionStateToElement(item, state.selectedSearchResults.has(numericIndex));
+}
+
+function updateImportSelectedButton() {
+    const button = dom.importSelectedBtn;
+    if (!button) {
+        return;
+    }
+    ensureSelectedSearchResultsSet();
+    const count = state.selectedSearchResults.size;
+    button.disabled = count === 0;
+    button.setAttribute("aria-disabled", count === 0 ? "true" : "false");
+    const countLabel = dom.importSelectedCount;
+    if (countLabel) {
+        countLabel.textContent = count > 0 ? `(${count})` : "";
+    }
+    const label = count > 0 ? `导入已选 (${count})` : "导入已选";
+    button.title = label;
+    button.setAttribute("aria-label", count > 0 ? `导入已选 ${count} 首歌曲` : "导入已选");
+}
+
+function toggleSearchResultSelection(index) {
+    const numericIndex = Number(index);
+    if (!Number.isInteger(numericIndex) || numericIndex < 0) {
+        return;
+    }
+    ensureSelectedSearchResultsSet();
+    if (state.selectedSearchResults.has(numericIndex)) {
+        state.selectedSearchResults.delete(numericIndex);
+    } else {
+        state.selectedSearchResults.add(numericIndex);
+    }
+    updateSearchResultSelectionUI(numericIndex);
+    updateImportSelectedButton();
+}
+
+function resetSelectedSearchResults() {
+    ensureSelectedSearchResultsSet();
+    if (state.selectedSearchResults.size === 0) {
+        updateImportSelectedButton();
+        return;
+    }
+    const indices = Array.from(state.selectedSearchResults);
+    state.selectedSearchResults.clear();
+    indices.forEach(updateSearchResultSelectionUI);
+    updateImportSelectedButton();
+}
+
+function importSelectedSearchResults() {
+    ensureSelectedSearchResultsSet();
+    if (state.selectedSearchResults.size === 0) {
+        return;
+    }
+
+    const indices = Array.from(state.selectedSearchResults).filter((value) => Number.isInteger(value) && value >= 0);
+    if (indices.length === 0) {
+        resetSelectedSearchResults();
+        return;
+    }
+
+    const songsToAdd = indices
+        .map((index) => state.searchResults[index])
+        .filter((song) => song && typeof song === "object");
+
+    if (songsToAdd.length === 0) {
+        resetSelectedSearchResults();
+        showNotification("未找到可导入的歌曲", "warning");
+        return;
+    }
+
+    if (!Array.isArray(state.playlistSongs)) {
+        state.playlistSongs = [];
+    }
+
+    const existingKeys = new Set(
+        state.playlistSongs
+            .map(getSongKey)
+            .filter((key) => typeof key === "string" && key !== "")
+    );
+
+    let added = 0;
+    let duplicates = 0;
+
+    songsToAdd.forEach((song) => {
+        const key = getSongKey(song);
+        if (key && existingKeys.has(key)) {
+            duplicates++;
+            return;
+        }
+        state.playlistSongs.push(song);
+        if (key) {
+            existingKeys.add(key);
+        }
+        added++;
+    });
+
+    const processedIndices = [...indices];
+    state.selectedSearchResults.clear();
+    processedIndices.forEach(updateSearchResultSelectionUI);
+    updateImportSelectedButton();
+
+    if (added > 0) {
+        renderPlaylist();
+        const duplicateHint = duplicates > 0 ? `，${duplicates} 首已存在` : "";
+        showNotification(`成功导入 ${added} 首歌曲${duplicateHint}`, "success");
+    } else {
+        updatePlaylistActionStates();
+        showNotification("选中的歌曲已在播放列表中", "warning");
+    }
 }
 
 function createLoadMoreButton() {
@@ -2793,7 +2979,7 @@ function createLoadMoreButton() {
 
 function displaySearchResults(newItems, options = {}) {
     dom.playlist.classList.remove("empty");
-    const container = dom.searchResults;
+    const container = dom.searchResultsList || dom.searchResults;
     if (!container) {
         return;
     }
@@ -2803,6 +2989,7 @@ function displaySearchResults(newItems, options = {}) {
     if (reset) {
         container.innerHTML = "";
         state.renderedSearchCount = 0;
+        resetSelectedSearchResults();
     }
 
     const existingLoadMore = container.querySelector("#loadMoreBtn");

@@ -805,6 +805,22 @@ body.mobile-view .search-area .search-results {
     align-self: center;
 }
 
+body.mobile-view .search-results-toolbar {
+    width: min(100%, 340px);
+    margin: 0 auto;
+    padding-top: 8px;
+}
+
+body.mobile-view .import-selected-btn {
+    width: 100%;
+    justify-content: center;
+}
+
+body.mobile-view .search-results-list {
+    width: min(100%, 340px);
+    margin: 0 auto;
+}
+
 body.mobile-view .search-area > :not(.mobile-close-btn) {
     width: min(100%, 360px);
     align-self: center;
