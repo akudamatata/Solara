@@ -10,3 +10,51 @@ html.desktop-view .mobile-turntable__label,
 html.desktop-view .mobile-inline-lyrics {
     display: none;
 }
+
+/* Remove circular decoration from playlist action buttons on desktop */
+html.desktop-view .playlist-action-btn {
+    width: auto;
+    height: auto;
+    padding: 6px;
+    border: none;
+    border-radius: 6px;
+    background: none;
+    box-shadow: none;
+    color: var(--text-secondary-color);
+    transition: color 0.2s ease;
+}
+
+html.desktop-view body.dark-mode .playlist-action-btn {
+    background: none;
+    border: none;
+    box-shadow: none;
+    color: var(--text-secondary-color);
+}
+
+html.desktop-view .playlist-action-btn:hover:not(:disabled),
+html.desktop-view .playlist-action-btn:focus-visible:not(:disabled) {
+    transform: none;
+    box-shadow: none;
+    filter: none;
+    border: none;
+    color: var(--primary-color);
+}
+
+html.desktop-view .playlist-action-btn--clear {
+    color: rgba(231, 76, 60, 0.85);
+}
+
+html.desktop-view .playlist-action-btn--clear:hover:not(:disabled),
+html.desktop-view .playlist-action-btn--clear:focus-visible:not(:disabled) {
+    color: var(--warning-color);
+}
+
+html.desktop-view .playlist-action-btn:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+html.desktop-view .playlist-action-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}

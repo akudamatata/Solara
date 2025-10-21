@@ -413,6 +413,11 @@ body.background-transitioning .background-stage__layer--transition {
     align-items: center;
     gap: 8px;
     padding-top: 12px;
+    padding-bottom: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--container-bg);
 }
 
 .search-results-list {
