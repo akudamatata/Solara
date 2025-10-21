@@ -417,7 +417,7 @@ body.background-transitioning .background-stage__layer--transition {
     position: sticky;
     top: 0;
     z-index: 2;
-    background: var(--container-bg);
+    background: none;
 }
 
 .search-results-list {
