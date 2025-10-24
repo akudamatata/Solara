@@ -1,9 +1,17 @@
 import decodeJpeg from "./lib/vendor/jpeg-decoder.js";
+import { decodePng } from "./lib/vendor/png/decode.js";
+import { decodeWebP } from "./lib/vendor/webp/decode.js";
 
 const MAX_DIMENSION = 96;
 const TARGET_SAMPLE_COUNT = 2400;
 
-type SupportedFormat = "jpeg" | "jpg" | "pjpeg";
+type SupportedFormat =
+  | "jpeg"
+  | "jpg"
+  | "pjpeg"
+  | "png"
+  | "x-png"
+  | "webp";
 
 interface DecodedImage {
   width: number;
@@ -287,30 +295,52 @@ function resizeImage(image: DecodedImage): DecodedImage {
   };
 }
 
-function decodeImage(arrayBuffer: ArrayBuffer, contentType: string): DecodedImage {
+async function decodeImage(arrayBuffer: ArrayBuffer, contentType: string): Promise<DecodedImage> {
   const subtype = contentType.split("/")[1]?.split(";")[0]?.toLowerCase() ?? "";
-  const supported: SupportedFormat[] = ["jpeg", "jpg", "pjpeg"];
-  if (!supported.includes(subtype as SupportedFormat)) {
-    throw new UnsupportedImageFormatError(subtype);
+
+  switch (subtype as SupportedFormat) {
+    case "jpeg":
+    case "jpg":
+    case "pjpeg": {
+      const bytes = new Uint8Array(arrayBuffer);
+      const decoded = decodeJpeg(bytes, {
+        useTArray: true,
+        formatAsRGBA: true,
+      });
+
+      const image: DecodedImage = {
+        width: decoded.width,
+        height: decoded.height,
+        data: new Uint8ClampedArray(decoded.data),
+      };
+
+      return resizeImage(image);
+    }
+    case "png":
+    case "x-png": {
+      const decoded = decodePng(new Uint8Array(arrayBuffer));
+      const image: DecodedImage = {
+        width: decoded.width,
+        height: decoded.height,
+        data: new Uint8ClampedArray(decoded.data),
+      };
+      return resizeImage(image);
+    }
+    case "webp": {
+      const decoded = await decodeWebP(arrayBuffer);
+      return resizeImage({
+        width: decoded.width,
+        height: decoded.height,
+        data: decoded.data,
+      });
+    }
+    default:
+      throw new UnsupportedImageFormatError(subtype);
   }
-
-  const bytes = new Uint8Array(arrayBuffer);
-  const decoded = decodeJpeg(bytes, {
-    useTArray: true,
-    formatAsRGBA: true,
-  });
-
-  const image: DecodedImage = {
-    width: decoded.width,
-    height: decoded.height,
-    data: new Uint8ClampedArray(decoded.data),
-  };
-
-  return resizeImage(image);
 }
 
 async function buildPalette(arrayBuffer: ArrayBuffer, contentType: string): Promise<PaletteResponse> {
-  const imageData = decodeImage(arrayBuffer, contentType);
+  const imageData = await decodeImage(arrayBuffer, contentType);
   const analyzed = analyzeImageColors(imageData);
   const gradientStops = buildGradientStops(analyzed.accent);
   const tokens = buildThemeTokens(analyzed.accent);
@@ -398,26 +428,24 @@ export async function onRequest({ request }: { request: Request }): Promise<Resp
 
   let upstream: Response;
   try {
+    // 直接代理图片请求，移除 cf.image 配置以保留原始 CORS 头
     upstream = await fetch(target.toString(), {
+      headers: {
+        // 模拟浏览器请求头，提高从源服务器获取图片的成功率
+        "User-Agent": request.headers.get("User-Agent") || "Mozilla/5.0",
+        "Referer": new URL(target).origin + "/",
+      },
       cf: {
-        cacheTtl: 3600,
+        cacheTtl: 3600, // 仍然使用 Cloudflare 的缓存
         cacheEverything: true,
-        image: {
-          width: MAX_DIMENSION,
-          height: MAX_DIMENSION,
-          fit: "scale-down",
-          quality: 85,
-          format: "jpeg",
-        },
       },
     });
   } catch (error) {
-    console.warn("Image resizing fetch failed, falling back to original", error);
-    upstream = await fetch(target.toString(), {
-      cf: {
-        cacheTtl: 3600,
-        cacheEverything: true,
-      },
+    console.error("Image fetch failed for palette generation", error);
+    // 如果图片抓取失败，返回一个明确的服务器错误
+    return new Response(JSON.stringify({ error: "Failed to fetch upstream image" }), {
+      status: 502, // 502 Bad Gateway 更符合代理失败的场景
+      headers: createJsonHeaders(502),
     });
   }
 
