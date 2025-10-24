@@ -398,26 +398,24 @@ export async function onRequest({ request }: { request: Request }): Promise<Resp
 
   let upstream: Response;
   try {
+    // 直接代理图片请求，移除 cf.image 配置以保留原始 CORS 头
     upstream = await fetch(target.toString(), {
+      headers: {
+        // 模拟浏览器请求头，提高从源服务器获取图片的成功率
+        "User-Agent": request.headers.get("User-Agent") || "Mozilla/5.0",
+        "Referer": new URL(target).origin + "/",
+      },
       cf: {
-        cacheTtl: 3600,
+        cacheTtl: 3600, // 仍然使用 Cloudflare 的缓存
         cacheEverything: true,
-        image: {
-          width: MAX_DIMENSION,
-          height: MAX_DIMENSION,
-          fit: "scale-down",
-          quality: 85,
-          format: "jpeg",
-        },
       },
     });
   } catch (error) {
-    console.warn("Image resizing fetch failed, falling back to original", error);
-    upstream = await fetch(target.toString(), {
-      cf: {
-        cacheTtl: 3600,
-        cacheEverything: true,
-      },
+    console.error("Image fetch failed for palette generation", error);
+    // 如果图片抓取失败，返回一个明确的服务器错误
+    return new Response(JSON.stringify({ error: "Failed to fetch upstream image" }), {
+      status: 502, // 502 Bad Gateway 更符合代理失败的场景
+      headers: createJsonHeaders(502),
     });
   }
 
