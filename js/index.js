@@ -390,17 +390,20 @@ function toAbsoluteUrl(url) {
     }
 }
 
+const KUWO_HOST_PATTERN = /(^|\.)kuwo\.cn$/i;
+
 function buildAudioProxyUrl(url) {
     if (!url || typeof url !== "string") return url;
 
     try {
         const parsedUrl = new URL(url, window.location.href);
-        if (parsedUrl.protocol === "https:") {
-            return parsedUrl.toString();
+
+        if (KUWO_HOST_PATTERN.test(parsedUrl.hostname)) {
+            return `${API.baseUrl}?target=${encodeURIComponent(parsedUrl.toString())}`;
         }
 
-        if (parsedUrl.protocol === "http:" && /(^|\.)kuwo\.cn$/i.test(parsedUrl.hostname)) {
-            return `${API.baseUrl}?target=${encodeURIComponent(parsedUrl.toString())}`;
+        if (parsedUrl.protocol === "https:") {
+            return parsedUrl.toString();
         }
 
         return parsedUrl.toString();

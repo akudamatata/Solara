@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solara 访问验证</title>
+    <meta name="color-scheme" content="dark light">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="shortcut icon" href="/favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png">
+    <link rel="stylesheet" href="css/verify.css">
+</head>
+<body>
+    <div class="verify-layout">
+        <div class="verify-card" role="dialog" aria-labelledby="verifyTitle">
+            <div class="verify-card__brand">
+                <span class="verify-logo" aria-hidden="true">
+                    <span class="verify-logo__flare"></span>
+                </span>
+                <h1 id="verifyTitle">欢迎来到 Solara</h1>
+                <p class="verify-subtitle">请输入访问口令继续体验音乐旅程</p>
+            </div>
+            <form class="verify-form" method="post" autocomplete="off">
+                <label class="verify-field" for="verifyPassword">
+                    <span class="verify-field__label">访问口令</span>
+                    <div class="verify-input-group">
+                        <span class="verify-input-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" focusable="false">
+                                <path d="M12 2a6 6 0 00-6 6v3H5.5A1.5 1.5 0 004 12.5v7A1.5 1.5 0 005.5 21h13a1.5 1.5 0 001.5-1.5v-7A1.5 1.5 0 0018.5 11H18V8a6 6 0 00-6-6zm-4 6a4 4 0 018 0v3H8V8zm4 5a1.5 1.5 0 11-1.5 1.5A1.5 1.5 0 0112 13z"/>
+                            </svg>
+                        </span>
+                        <input
+                            id="verifyPassword"
+                            class="verify-input"
+                            type="password"
+                            name="password"
+                            placeholder="输入访问口令"
+                            autocomplete="current-password"
+                            required
+                            aria-required="true"
+                        >
+                        <button type="button" class="verify-toggle" aria-pressed="false" aria-label="显示口令">
+                            <svg class="verify-toggle__icon verify-toggle__icon--show" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                                <path d="M12 5C7 5 2.73 8.11 1 12c1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7zm0 12a5 5 0 115-5 5 5 0 01-5 5zm0-8a3 3 0 103 3 3 3 0 00-3-3z"/>
+                            </svg>
+                            <svg class="verify-toggle__icon verify-toggle__icon--hide" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                                <path d="M3.53 2.47L2.47 3.53 5.31 6.4A11.7 11.7 0 001 12c1.73 3.89 6 7 11 7a12.45 12.45 0 006.52-1.81l3 3 1.06-1.06zM12 17c-3.54 0-6.76-2.19-8.47-5 1.04-1.8 2.69-3.26 4.64-4.12l1.57 1.57a3 3 0 003.81 3.81l1.57 1.57A6.92 6.92 0 0112 17zm10-5a11.73 11.73 0 01-1.64 2.6l-1.07-1.06a9.76 9.76 0 001.11-1.54c-1.73-3.89-6-7-11-7a11.4 11.4 0 00-2.28.23l-1.24-1.24A12.81 12.81 0 0112 5c5 0 9.27 3.11 11 7z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </label>
+                <button type="submit" class="verify-submit">登录</button>
+            </form>
+            <p class="verify-hint">如果尚未配置访问策略，可在 Cloudflare Zero Trust 中为 Solara 添加登录验证。</p>
+        </div>
+    </div>
+    <script>
+        (function () {
+            const passwordInput = document.getElementById("verifyPassword");
+            const toggleButton = document.querySelector(".verify-toggle");
+            if (!passwordInput || !toggleButton) {
+                return;
+            }
+            const labelText = {
+                show: "显示口令",
+                hide: "隐藏口令"
+            };
+            toggleButton.addEventListener("click", () => {
+                const isPassword = passwordInput.getAttribute("type") === "password";
+                passwordInput.setAttribute("type", isPassword ? "text" : "password");
+                toggleButton.setAttribute("aria-pressed", String(isPassword));
+                toggleButton.setAttribute("aria-label", isPassword ? labelText.hide : labelText.show);
+                toggleButton.classList.toggle("is-active", isPassword);
+            });
+        })();
+    </script>
+</body>
+</html>
