@@ -157,7 +157,7 @@ body.mobile-view .main-content {
     flex-direction: column;
     gap: clamp(16px, 5vw, 28px);
     z-index: 1;
-    flex: 1 1 auto;
+    flex: 0 1 auto;
     justify-content: flex-start;
     min-height: 0;
 }
