@@ -16,7 +16,7 @@ body.mobile-view {
     min-height: var(--mobile-vh, 100dvh);
     display: flex;
     justify-content: center;
-    align-items: stretch;
+    align-items: center;
     padding: calc(env(safe-area-inset-top) + 12px) clamp(12px, 5vw, 24px) calc(env(safe-area-inset-bottom) + 20px);
     font-family: var(--font-main);
     background-attachment: fixed;
@@ -89,7 +89,7 @@ body.mobile-view .container {
     position: relative;
     overflow: visible;
     flex: 1 1 auto;
-    min-height: calc(var(--mobile-vh, 100dvh) - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    min-height: auto;
     box-sizing: border-box;
 }
 
@@ -157,7 +157,7 @@ body.mobile-view .main-content {
     flex-direction: column;
     gap: clamp(16px, 5vw, 28px);
     z-index: 1;
-    flex: 1 1 auto;
+    flex: 0 1 auto;
     justify-content: flex-start;
     min-height: 0;
 }
