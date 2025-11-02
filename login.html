@@ -277,11 +277,26 @@
       overflow: hidden;
     }
 
-    .logo-circle img {
+    .logo-symbol {
       width: 70%;
-      height: 70%;
+      aspect-ratio: 1;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow:
+        0 10px 24px rgba(82, 233, 210, 0.16),
+        inset 0 0 10px rgba(146, 255, 236, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .logo-symbol img {
+      width: 68%;
+      height: 68%;
       object-fit: contain;
       filter: brightness(0) invert(1) drop-shadow(0 0 10px rgba(146, 255, 236, 0.6));
+      display: block;
     }
 
     .title-group {
@@ -480,7 +495,9 @@
     <section class="login-container">
       <header class="login-header">
         <div class="logo-circle" aria-hidden="true">
-          <img src="/favicon.svg" alt="">
+          <span class="logo-symbol">
+            <img src="/favicon.svg" alt="">
+          </span>
         </div>
         <div class="title-group">
           <h1 class="login-title">Solara</h1>
