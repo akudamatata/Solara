@@ -4,10 +4,11 @@ html.mobile-view,
 body.mobile-view {
     background:
         radial-gradient(120% 140% at 50% 0%, #1b1d24 0%, #0d1018 70%, #05070c 100%),
-        var(--bg-gradient, linear-gradient(135deg, #1b1d24 0%, #0d1018 70%, #05070c 100%));
+        linear-gradient(135deg, #0e111a 0%, #090b12 70%, #05070c 100%);
     background-repeat: no-repeat;
     background-size: cover, cover;
     background-position: center, center;
+    background-color: #05070c;
     color: #f2f5f9;
     height: var(--mobile-vh, 100dvh);
     min-height: var(--mobile-vh, 100dvh);
@@ -43,10 +44,11 @@ body.mobile-view .background-stage {
     body.mobile-view {
         background:
             radial-gradient(112% 134% at 50% 0%, #11131c 0%, #080a12 72%, #06070d 100%),
-            var(--bg-gradient, #06070d);
+            linear-gradient(145deg, #090b13 0%, #070910 72%, #05070c 100%);
         background-repeat: no-repeat;
         background-size: cover, cover;
         background-position: center, center;
+        background-color: #05070c;
     }
 
     body.mobile-view {
