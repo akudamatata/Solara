@@ -218,9 +218,8 @@ body.mobile-view .album-cover {
     border-radius: 50%;
     overflow: hidden;
     box-shadow:
-        inset 0 0 0 3px rgba(0, 0, 0, 0.55),
         0 18px 38px rgba(0, 0, 0, 0.45);
-    background: rgba(0, 0, 0, 0.35);
+    background: transparent;
     z-index: 2;
 }
 
