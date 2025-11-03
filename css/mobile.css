@@ -184,7 +184,7 @@ body.mobile-view .mobile-turntable__platter {
     width: min(78vw, 320px);
     aspect-ratio: 1 / 1;
     border-radius: 50%;
-    background: radial-gradient(circle at 48% 50%, #1a1d25 0%, #05070c 65%, #000 100%);
+    background: radial-gradient(circle at 48% 50%, #1a1d25 0%, #05070c 80%, transparent 100%);
     box-shadow: 0 32px 70px rgba(0, 0, 0, 0.55);
     position: relative;
     display: flex;
@@ -218,9 +218,8 @@ body.mobile-view .album-cover {
     border-radius: 50%;
     overflow: hidden;
     box-shadow:
-        inset 0 0 0 3px rgba(0, 0, 0, 0.55),
         0 18px 38px rgba(0, 0, 0, 0.45);
-    background: rgba(0, 0, 0, 0.35);
+    background: transparent;
     z-index: 2;
 }
 
