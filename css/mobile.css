@@ -159,7 +159,6 @@ body.mobile-view .main-content {
     z-index: 1;
     flex: 0 1 auto;
     justify-content: flex-start;
-    margin-block: auto;
     min-height: 0;
 }
 
