@@ -56,34 +56,6 @@ body.mobile-view .background-stage {
         --mobile-ring-feather: clamp(110px, 22vw, 260px);
         --mobile-ring-vertical-shift: calc((env(safe-area-inset-top, 0px) * 0.55) - 28px);
     }
-
-    body.mobile-view .background-stage {
-        display: block;
-        z-index: -4;
-        -webkit-mask-image: radial-gradient(
-            circle at 50% calc(50% + var(--mobile-ring-vertical-shift)),
-            transparent calc(var(--mobile-ring-inner-radius)),
-            rgba(0, 0, 0, 0.92) calc(var(--mobile-ring-inner-radius) + var(--mobile-ring-feather)),
-            rgba(0, 0, 0, 1) 100%
-        );
-        mask-image: radial-gradient(
-            circle at 50% calc(50% + var(--mobile-ring-vertical-shift)),
-            transparent calc(var(--mobile-ring-inner-radius)),
-            rgba(0, 0, 0, 0.92) calc(var(--mobile-ring-inner-radius) + var(--mobile-ring-feather)),
-            rgba(0, 0, 0, 1) 100%
-        );
-        -webkit-mask-repeat: no-repeat;
-        mask-repeat: no-repeat;
-        -webkit-mask-size: cover;
-        mask-size: cover;
-        -webkit-mask-position: center;
-        mask-position: center;
-    }
-
-    body.mobile-view .background-stage__layer {
-        transform: scale(1.12);
-        filter: saturate(112%);
-    }
 }
 
 body.mobile-view .container {
