@@ -87,7 +87,8 @@ body.mobile-view .background-stage {
 body.mobile-view .container {
     width: 100%;
     max-width: 420px;
-    background: linear-gradient(180deg, rgba(27, 29, 36, 0.92), rgba(7, 9, 14, 0.95));
+    background: linear-gradient(180deg, #1b1d24 0%, #0a0d14 55%, #05070c 100%);
+    background-color: #0a0d14;
     border-radius: 32px;
     padding: clamp(16px, 5vw, 28px);
     padding-top: calc(env(safe-area-inset-top) + clamp(18px, 6vw, 32px));
