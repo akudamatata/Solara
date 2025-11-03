@@ -2,7 +2,13 @@
 
 html.mobile-view,
 body.mobile-view {
-    background: radial-gradient(120% 140% at 50% 0%, #1b1d24 0%, #0d1018 70%, #05070c 100%);
+    background:
+        radial-gradient(120% 140% at 50% 0%, #1b1d24 0%, #0d1018 70%, #05070c 100%),
+        linear-gradient(135deg, #0e111a 0%, #090b12 70%, #05070c 100%);
+    background-repeat: no-repeat;
+    background-size: cover, cover;
+    background-position: center, center;
+    background-color: #05070c;
     color: #f2f5f9;
     height: var(--mobile-vh, 100dvh);
     min-height: var(--mobile-vh, 100dvh);
@@ -36,7 +42,13 @@ body.mobile-view .background-stage {
 @media screen and (orientation: portrait) {
     html.mobile-view,
     body.mobile-view {
-        background: #06070d;
+        background:
+            radial-gradient(112% 134% at 50% 0%, #11131c 0%, #080a12 72%, #06070d 100%),
+            linear-gradient(145deg, #090b13 0%, #070910 72%, #05070c 100%);
+        background-repeat: no-repeat;
+        background-size: cover, cover;
+        background-position: center, center;
+        background-color: #05070c;
     }
 
     body.mobile-view {
@@ -77,7 +89,8 @@ body.mobile-view .background-stage {
 body.mobile-view .container {
     width: 100%;
     max-width: 420px;
-    background: linear-gradient(180deg, rgba(27, 29, 36, 0.92), rgba(7, 9, 14, 0.95));
+    background: linear-gradient(180deg, #1b1d24 0%, #0a0d14 55%, #05070c 100%);
+    background-color: #0a0d14;
     border-radius: 32px;
     padding: clamp(16px, 5vw, 28px);
     padding-top: calc(env(safe-area-inset-top) + clamp(18px, 6vw, 32px));
