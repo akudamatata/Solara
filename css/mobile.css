@@ -399,6 +399,8 @@ body.mobile-view .mobile-quality-chip.active {
 }
 
 body.mobile-view .controls {
+    display: flex;
+    flex-direction: column;
     background: transparent;
     border: none;
     box-shadow: none;
@@ -407,6 +409,8 @@ body.mobile-view .controls {
     gap: clamp(16px, 5vw, 24px);
     align-items: stretch;
     margin-top: auto;
+    grid-template-columns: unset;
+    grid-template-areas: unset;
 }
 
 body.mobile-view #loadOnlineBtn {
@@ -414,6 +418,7 @@ body.mobile-view #loadOnlineBtn {
 }
 
 body.mobile-view .progress-container {
+    grid-area: unset;
     order: 1;
     width: 100%;
     display: grid;
@@ -454,6 +459,7 @@ body.mobile-view .progress-container span:last-of-type {
 }
 
 body.mobile-view .transport-controls {
+    grid-area: unset;
     order: 2;
     width: 100%;
     display: flex;
@@ -500,6 +506,10 @@ body.mobile-view #mobileQueueToggle {
 }
 
 body.mobile-view .audio-tools {
+    display: none;
+}
+
+body.mobile-view .control-trailing {
     display: none;
 }
 

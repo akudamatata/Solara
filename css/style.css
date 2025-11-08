@@ -1565,11 +1565,13 @@ html.mobile-view .favorites .favorite-item-action--remove {
 /* 控制区域 */
 .controls {
     grid-area: controls;
-    display: flex;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: 300px minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas: "transport progress trailing";
     align-items: center;
-    gap: 20px;
-    flex-wrap: wrap;
+    column-gap: 20px;
+    row-gap: 12px;
+    width: 100%;
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .controls button {
@@ -1623,13 +1625,10 @@ html.mobile-view .favorites .favorite-item-action--remove {
     box-shadow: none; 
 }
 .transport-controls {
+    grid-area: transport;
     display: flex;
     align-items: center;
-    gap: 12px;
-}
-
-html:not(.mobile-view) #playModeBtn {
-    margin-right: 8px;
+    justify-self: flex-start;
 }
 
 #mobileQueueToggle {
@@ -1643,11 +1642,22 @@ html:not(.mobile-view) #playModeBtn {
 }
 
 .progress-container {
+    grid-area: progress;
     display: flex;
     align-items: center;
     gap: 12px;
-    flex: 1 1 320px;
     min-width: 260px;
+    width: 100%;
+    justify-self: stretch;
+}
+
+.control-trailing {
+    grid-area: trailing;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 20px;
 }
 
 .progress-container span {
@@ -1665,22 +1675,41 @@ html:not(.mobile-view) #playModeBtn {
     transition: background 0.2s ease;
 }
 
-.audio-tools {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    flex-wrap: wrap;
+html.desktop-view .transport-controls {
+    width: 100%;
+    justify-content: space-between;
+    gap: 0;
+}
+
+html.desktop-view .transport-controls .transport-button {
+    flex: 0 0 auto;
+}
+
+html.desktop-view .control-trailing {
+    justify-content: space-between;
+    gap: clamp(18px, 3vw, 32px);
+    flex-wrap: nowrap;
+}
+
+html.desktop-view .control-trailing > * {
+    flex: 0 0 auto;
+    min-width: 0;
+}
+
+.transport-button--shuffle[aria-pressed="true"],
+.transport-button--shuffle.is-active {
+    background: var(--primary-color-dark);
 }
 
 .volume-container {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     min-width: 140px;
 }
 
 .volume-container input[type="range"] {
-    width: 120px;
+    width: 110px;
     height: 6px;
     border-radius: 999px;
     background: linear-gradient(to right, var(--primary-color) 0%, var(--primary-color) var(--volume-progress, 100%), rgba(255, 255, 255, 0.2) var(--volume-progress, 100%), rgba(255, 255, 255, 0.1) 100%);

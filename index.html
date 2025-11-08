@@ -464,12 +464,15 @@
 
         <div class="controls">
             <div class="transport-controls">
-                <button class="play-mode-btn transport-button transport-button--mode" id="playModeBtn" type="button" title="播放模式">
+                <button class="transport-button transport-button--loop play-mode-btn" id="playModeBtn" type="button" title="播放模式">
                     <i class="fas fa-repeat"></i>
                 </button>
                 <button class="transport-button transport-button--prev" onclick="playPrevious()" type="button" title="上一曲"><i class="fas fa-backward-step"></i></button>
                 <button class="transport-button transport-button--play" id="playPauseBtn" type="button" title="播放 / 暂停"><i class="fas fa-play"></i></button>
                 <button class="transport-button transport-button--next" onclick="playNext()" type="button" title="下一曲"><i class="fas fa-forward-step"></i></button>
+                <button class="transport-button transport-button--shuffle" id="shuffleToggleBtn" type="button" title="随机播放" aria-label="切换随机播放" aria-pressed="false">
+                    <i class="fas fa-shuffle"></i>
+                </button>
                 <button class="transport-button transport-button--queue" id="mobileQueueToggle" type="button" title="打开播放列表" aria-label="打开播放列表"><i class="fas fa-bars"></i></button>
             </div>
             <div class="progress-container">
@@ -477,7 +480,7 @@
                 <input type="range" id="progressBar" min="0" max="0" step="0.1" value="0">
                 <span id="durationDisplay">00:00</span>
             </div>
-            <div class="audio-tools">
+            <div class="control-trailing">
                 <div class="player-quality">
                     <button id="qualityToggle" class="player-quality-btn" type="button">
                         <span id="qualityLabel">极高音质</span>
@@ -488,11 +491,11 @@
                     <i id="volumeIcon" class="fas fa-volume-up"></i>
                     <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.8">
                 </div>
+                <button id="loadOnlineBtn" title="聚合所有雷达，探索新音乐">
+                    <span class="btn-text"><i class="fas fa-satellite-dish"></i> 探索雷达</span>
+                    <span class="loader" style="display: none;"></span>
+                </button>
             </div>
-            <button id="loadOnlineBtn" title="聚合所有雷达，探索新音乐">
-                <span class="btn-text"><i class="fas fa-satellite-dish"></i> 探索雷达</span>
-                <span class="loader" style="display: none;"></span>
-            </button>
         </div>
     </div>
 

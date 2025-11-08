@@ -42,6 +42,7 @@ const dom = {
     mobileImportPlaylistBtn: document.getElementById("mobileImportPlaylistBtn"),
     mobileExportPlaylistBtn: document.getElementById("mobileExportPlaylistBtn"),
     playModeBtn: document.getElementById("playModeBtn"),
+    shuffleToggleBtn: document.getElementById("shuffleToggleBtn"),
     playPauseBtn: document.getElementById("playPauseBtn"),
     progressBar: document.getElementById("progressBar"),
     currentTimeDisplay: document.getElementById("currentTimeDisplay"),
@@ -502,11 +503,27 @@ const savedCurrentFavoriteIndex = (() => {
     return Number.isInteger(index) && index >= 0 ? index : 0;
 })();
 
+let legacyFavoriteShuffleEnabled = false;
 const savedFavoritePlayMode = (() => {
     const stored = safeGetLocalStorage("favoritePlayMode");
-    const normalized = stored === "order" ? "list" : stored;
-    const modes = ["list", "single", "random"];
+    let normalized = stored === "order" ? "list" : stored;
+    if (normalized === "random") {
+        legacyFavoriteShuffleEnabled = true;
+        normalized = "list";
+    }
+    const modes = ["list", "single"];
     return modes.includes(normalized) ? normalized : "list";
+})();
+
+const savedFavoriteShuffleEnabled = (() => {
+    const stored = safeGetLocalStorage("favoriteShuffleEnabled");
+    if (stored === true || stored === "true") {
+        return true;
+    }
+    if (stored === false || stored === "false") {
+        return false;
+    }
+    return legacyFavoriteShuffleEnabled;
 })();
 
 const savedFavoritePlaybackTime = (() => {
@@ -526,10 +543,26 @@ const savedCurrentTrackIndex = (() => {
     return Number.isInteger(index) ? index : -1;
 })();
 
+let legacyShuffleEnabled = false;
 const savedPlayMode = (() => {
     const stored = safeGetLocalStorage("playMode");
-    const modes = ["list", "single", "random"];
+    if (stored === "random") {
+        legacyShuffleEnabled = true;
+        return "list";
+    }
+    const modes = ["list", "single"];
     return modes.includes(stored) ? stored : "list";
+})();
+
+const savedShuffleEnabled = (() => {
+    const stored = safeGetLocalStorage("shuffleEnabled");
+    if (stored === true || stored === "true") {
+        return true;
+    }
+    if (stored === false || stored === "false") {
+        return false;
+    }
+    return legacyShuffleEnabled;
 })();
 
 const savedPlaybackQuality = normalizeQuality(safeGetLocalStorage("playbackQuality"));
@@ -714,11 +747,13 @@ const state = {
     debugMode: false,
     isSearchMode: false, // 新增：搜索模式状态
     playlistSongs: savedPlaylistSongs, // 新增：统一播放列表
-    playMode: savedPlayMode, // 新增：播放模式 'list', 'single', 'random'
+    playMode: savedPlayMode, // 新增：播放模式 'list', 'single'
+    shuffleEnabled: savedShuffleEnabled,
     favoriteSongs: savedFavoriteSongs,
     currentFavoriteIndex: savedCurrentFavoriteIndex,
     currentList: savedCurrentList,
     favoritePlayMode: savedFavoritePlayMode,
+    favoriteShuffleEnabled: savedFavoriteShuffleEnabled,
     favoritePlaybackTime: savedFavoritePlaybackTime,
     playbackQuality: savedPlaybackQuality,
     volume: savedVolume,
@@ -1522,6 +1557,7 @@ function savePlayerState() {
     safeSetLocalStorage("playlistSongs", JSON.stringify(state.playlistSongs));
     safeSetLocalStorage("currentTrackIndex", String(state.currentTrackIndex));
     safeSetLocalStorage("playMode", state.playMode);
+    safeSetLocalStorage("shuffleEnabled", state.shuffleEnabled ? "true" : "false");
     safeSetLocalStorage("playbackQuality", state.playbackQuality);
     safeSetLocalStorage("playerVolume", String(state.volume));
     safeSetLocalStorage("currentPlaylist", state.currentPlaylist);
@@ -1538,6 +1574,7 @@ function saveFavoriteState() {
     safeSetLocalStorage("favoriteSongs", JSON.stringify(state.favoriteSongs));
     safeSetLocalStorage("currentFavoriteIndex", String(state.currentFavoriteIndex));
     safeSetLocalStorage("favoritePlayMode", state.favoritePlayMode);
+    safeSetLocalStorage("favoriteShuffleEnabled", state.favoriteShuffleEnabled ? "true" : "false");
     safeSetLocalStorage("favoritePlaybackTime", String(state.favoritePlaybackTime || 0));
 }
 
@@ -1617,29 +1654,46 @@ function hideSearchResults() {
 
 const playModeTexts = {
     "list": "列表循环",
-    "single": "单曲循环",
-    "random": "随机播放"
+    "single": "单曲循环"
 };
 
 const playModeIcons = {
     "list": "fa-repeat",
-    "single": "fa-redo",
-    "random": "fa-shuffle"
+    "single": "fa-redo"
 };
 
 function getActivePlayMode() {
     return state.currentList === "favorite" ? state.favoritePlayMode : state.playMode;
 }
 
+function getActiveShuffleState() {
+    return state.currentList === "favorite" ? state.favoriteShuffleEnabled : state.shuffleEnabled;
+}
+
+function updateShuffleUI() {
+    const button = dom.shuffleToggleBtn;
+    if (!button) {
+        return;
+    }
+    const enabled = getActiveShuffleState() && getActivePlayMode() !== "single";
+    button.setAttribute("aria-pressed", enabled ? "true" : "false");
+    button.classList.toggle("is-active", enabled);
+    button.title = `随机播放: ${enabled ? "开启" : "关闭"}`;
+}
+
 function updatePlayModeUI() {
+    if (!dom.playModeBtn) {
+        return;
+    }
     const mode = getActivePlayMode();
     dom.playModeBtn.innerHTML = `<i class="fas ${playModeIcons[mode] || playModeIcons.list}"></i>`;
     dom.playModeBtn.title = `播放模式: ${playModeTexts[mode] || playModeTexts.list}`;
+    updateShuffleUI();
 }
 
 // 新增：播放模式切换
 function togglePlayMode() {
-    const modes = ["list", "single", "random"];
+    const modes = ["list", "single"];
     const currentMode = getActivePlayMode();
     const currentIndex = modes.indexOf(currentMode);
     const nextIndex = (currentIndex + 1) % modes.length;
@@ -1647,9 +1701,15 @@ function togglePlayMode() {
 
     if (state.currentList === "favorite") {
         state.favoritePlayMode = nextMode;
+        if (nextMode === "single") {
+            state.favoriteShuffleEnabled = false;
+        }
         saveFavoriteState();
     } else {
         state.playMode = nextMode;
+        if (nextMode === "single") {
+            state.shuffleEnabled = false;
+        }
         savePlayerState();
     }
     updatePlayModeUI();
@@ -1657,6 +1717,39 @@ function togglePlayMode() {
     const modeText = playModeTexts[nextMode] || playModeTexts.list;
     showNotification(`播放模式: ${modeText}`);
     debugLog(`播放模式切换为: ${nextMode} (列表: ${state.currentList})`);
+}
+
+function toggleShuffle() {
+    const usingFavorites = state.currentList === "favorite";
+    const currentEnabled = getActiveShuffleState();
+    const nextEnabled = !currentEnabled;
+    const previousMode = getActivePlayMode();
+    let modeAdjusted = false;
+
+    if (usingFavorites) {
+        state.favoriteShuffleEnabled = nextEnabled;
+        if (nextEnabled && state.favoritePlayMode === "single") {
+            state.favoritePlayMode = "list";
+            modeAdjusted = true;
+        }
+        saveFavoriteState();
+    } else {
+        state.shuffleEnabled = nextEnabled;
+        if (nextEnabled && state.playMode === "single") {
+            state.playMode = "list";
+            modeAdjusted = true;
+        }
+        savePlayerState();
+    }
+
+    updatePlayModeUI();
+
+    let message = nextEnabled ? "随机播放: 已开启" : "随机播放: 已关闭";
+    if (nextEnabled && modeAdjusted && previousMode === "single") {
+        message = "随机播放: 已开启（已切换为列表循环）";
+    }
+    showNotification(message);
+    debugLog(`随机播放${nextEnabled ? "开启" : "关闭"} (列表: ${state.currentList}, 循环模式: ${state.currentList === "favorite" ? state.favoritePlayMode : state.playMode})`);
 }
 
 function formatTime(seconds) {
@@ -2716,7 +2809,12 @@ function setupInteractions() {
 
     // 播放模式按钮事件
     updatePlayModeUI();
-    dom.playModeBtn.addEventListener("click", togglePlayMode);
+    if (dom.playModeBtn) {
+        dom.playModeBtn.addEventListener("click", togglePlayMode);
+    }
+    if (dom.shuffleToggleBtn) {
+        dom.shuffleToggleBtn.addEventListener("click", toggleShuffle);
+    }
 
     // 搜索相关事件 - 修复搜索下拉框显示问题
     dom.searchBtn.addEventListener("click", (e) => {
@@ -4816,14 +4914,17 @@ function playNext() {
         if (favorites.length === 0) {
             return;
         }
-        const mode = state.favoritePlayMode || "list";
+        const loopMode = state.favoritePlayMode || "list";
+        const shuffle = state.favoriteShuffleEnabled && loopMode !== "single";
         let nextIndex = state.currentFavoriteIndex;
-        if (mode === "random") {
+        if (loopMode === "single") {
+            nextIndex = state.currentFavoriteIndex >= 0 ? state.currentFavoriteIndex : 0;
+        } else if (shuffle) {
             nextIndex = Math.floor(Math.random() * favorites.length);
-        } else if (mode === "list") {
+        } else {
             nextIndex = (state.currentFavoriteIndex + 1) % favorites.length;
         }
-        if (mode !== "single") {
+        if (loopMode !== "single") {
             state.currentFavoriteIndex = nextIndex;
         }
         playFavoriteSong(state.currentFavoriteIndex);
@@ -4843,22 +4944,21 @@ function playNext() {
 
     if (playlist.length === 0) return;
 
-    const mode = state.playMode || "list";
-    if (mode === "random") {
-        // 随机播放
-        nextIndex = Math.floor(Math.random() * playlist.length);
-    } else if (mode === "list") {
-        // 列表循环
-        nextIndex = (state.currentTrackIndex + 1) % playlist.length;
-    } else if (mode === "single") {
+    const loopMode = state.playMode || "list";
+    const shuffle = state.shuffleEnabled && loopMode !== "single";
+    if (loopMode === "single") {
         nextIndex = state.currentTrackIndex >= 0 ? state.currentTrackIndex : 0;
+    } else if (shuffle) {
+        nextIndex = Math.floor(Math.random() * playlist.length);
+    } else {
+        nextIndex = (state.currentTrackIndex + 1) % playlist.length;
     }
 
-    if (mode !== "single") {
+    if (loopMode !== "single") {
         state.currentTrackIndex = nextIndex;
     }
 
-    const targetIndex = mode === "single" ? state.currentTrackIndex : nextIndex;
+    const targetIndex = loopMode === "single" ? state.currentTrackIndex : nextIndex;
 
     if (state.currentPlaylist === "playlist") {
         playPlaylistSong(targetIndex);
@@ -4876,17 +4976,20 @@ function playPrevious() {
         if (favorites.length === 0) {
             return;
         }
-        const mode = state.favoritePlayMode || "list";
+        const loopMode = state.favoritePlayMode || "list";
+        const shuffle = state.favoriteShuffleEnabled && loopMode !== "single";
         let prevIndex = state.currentFavoriteIndex;
-        if (mode === "random") {
+        if (loopMode === "single") {
+            prevIndex = state.currentFavoriteIndex >= 0 ? state.currentFavoriteIndex : 0;
+        } else if (shuffle) {
             prevIndex = Math.floor(Math.random() * favorites.length);
-        } else if (mode === "list") {
+        } else {
             prevIndex = state.currentFavoriteIndex - 1;
             if (prevIndex < 0) {
                 prevIndex = favorites.length - 1;
             }
         }
-        if (mode !== "single") {
+        if (loopMode !== "single") {
             state.currentFavoriteIndex = prevIndex;
         }
         playFavoriteSong(state.currentFavoriteIndex);
@@ -4906,23 +5009,22 @@ function playPrevious() {
 
     if (playlist.length === 0) return;
 
-    const mode = state.playMode || "list";
-    if (mode === "random") {
-        // 随机播放
+    const loopMode = state.playMode || "list";
+    const shuffle = state.shuffleEnabled && loopMode !== "single";
+    if (loopMode === "single") {
+        prevIndex = state.currentTrackIndex >= 0 ? state.currentTrackIndex : 0;
+    } else if (shuffle) {
         prevIndex = Math.floor(Math.random() * playlist.length);
-    } else if (mode === "list") {
-        // 列表循环
+    } else {
         prevIndex = state.currentTrackIndex - 1;
         if (prevIndex < 0) prevIndex = playlist.length - 1;
-    } else if (mode === "single") {
-        prevIndex = state.currentTrackIndex >= 0 ? state.currentTrackIndex : 0;
     }
 
-    if (mode !== "single") {
+    if (loopMode !== "single") {
         state.currentTrackIndex = prevIndex;
     }
 
-    const targetIndex = mode === "single" ? state.currentTrackIndex : prevIndex;
+    const targetIndex = loopMode === "single" ? state.currentTrackIndex : prevIndex;
 
     if (state.currentPlaylist === "playlist") {
         playPlaylistSong(targetIndex);
