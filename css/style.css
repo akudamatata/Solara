@@ -1874,6 +1874,13 @@ input[type="range"]:active::-moz-range-thumb {
     align-items: center;
 }
 
+/* 移动端适配：隐藏独立的随机播放按钮（#shuffleToggleBtn） */
+@media (max-width: 820px) {
+    .transport-button--shuffle {
+        display: none !important;
+    }
+}
+
 .play-mode-btn {
     background: var(--primary-color);
     color: white;

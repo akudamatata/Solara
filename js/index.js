@@ -1654,12 +1654,14 @@ function hideSearchResults() {
 
 const playModeTexts = {
     "list": "列表循环",
-    "single": "单曲循环"
+    "single": "单曲循环",
+    "random": "随机播放" // 新增随机播放模式文本
 };
 
 const playModeIcons = {
     "list": "fa-repeat",
-    "single": "fa-redo"
+    "single": "fa-redo",
+    "random": "fa-shuffle" // 新增随机播放模式图标
 };
 
 function getActivePlayMode() {
@@ -1671,14 +1673,24 @@ function getActiveShuffleState() {
 }
 
 function updateShuffleUI() {
+    // PC端独立随机按钮的UI更新，移动端不使用
     const button = dom.shuffleToggleBtn;
     if (!button) {
         return;
     }
-    const enabled = getActiveShuffleState() && getActivePlayMode() !== "single";
-    button.setAttribute("aria-pressed", enabled ? "true" : "false");
-    button.classList.toggle("is-active", enabled);
-    button.title = `随机播放: ${enabled ? "开启" : "关闭"}`;
+    // 只有在非移动端且播放模式不是随机时，才根据 shuffleEnabled 状态更新 UI
+    const isMobile = window.__SOLARA_IS_MOBILE;
+    const activeMode = getActivePlayMode();
+    const enabled = getActiveShuffleState();
+    
+    // PC端：独立按钮只反映 shuffleEnabled 状态
+    if (!isMobile) {
+        button.setAttribute("aria-pressed", enabled ? "true" : "false");
+        button.classList.toggle("is-active", enabled);
+        button.title = `随机播放: ${enabled ? "开启" : "关闭"}`;
+    } else {
+        // 移动端：独立按钮应该被隐藏，这里不做任何操作
+    }
 }
 
 function updatePlayModeUI() {
@@ -1686,18 +1698,55 @@ function updatePlayModeUI() {
         return;
     }
     const mode = getActivePlayMode();
+    // 移动端：#playModeBtn 切换 列表循环/单曲循环/随机播放
+    // PC端：#playModeBtn 切换 列表循环/单曲循环，#shuffleToggleBtn 切换随机
+    
+    // 统一更新 #playModeBtn 的图标和标题
     dom.playModeBtn.innerHTML = `<i class="fas ${playModeIcons[mode] || playModeIcons.list}"></i>`;
     dom.playModeBtn.title = `播放模式: ${playModeTexts[mode] || playModeTexts.list}`;
+    
+    // PC端：如果当前模式是随机播放，#playModeBtn 应该显示随机图标
+    // 移动端：#playModeBtn 负责所有模式切换
+    
     updateShuffleUI();
 }
 
 // 新增：播放模式切换
 function togglePlayMode() {
-    const modes = ["list", "single"];
+    // 移动端/PC端共用逻辑：切换 列表循环 -> 单曲循环 -> 随机播放
+    const modes = ["list", "single", "random"]; // 增加随机播放模式
     const currentMode = getActivePlayMode();
     const currentIndex = modes.indexOf(currentMode);
     const nextIndex = (currentIndex + 1) % modes.length;
     const nextMode = modes[nextIndex];
+
+    const usingFavorites = state.currentList === "favorite";
+
+    if (usingFavorites) {
+        state.favoritePlayMode = nextMode;
+        // 播放模式切换到随机播放时，需要同步更新 shuffleEnabled 状态
+        if (nextMode === "random") {
+            state.favoriteShuffleEnabled = true;
+        } else {
+            state.favoriteShuffleEnabled = false;
+        }
+        saveFavoriteState();
+    } else {
+        state.playMode = nextMode;
+        // 播放模式切换到随机播放时，需要同步更新 shuffleEnabled 状态
+        if (nextMode === "random") {
+            state.shuffleEnabled = true;
+        } else {
+            state.shuffleEnabled = false;
+        }
+        savePlayerState();
+    }
+    updatePlayModeUI();
+
+    const modeText = playModeTexts[nextMode] || playModeTexts.list;
+    showNotification(`播放模式: ${modeText}`);
+    debugLog(`播放模式切换为: ${nextMode} (列表: ${state.currentList})`);
+}
 
     if (state.currentList === "favorite") {
         state.favoritePlayMode = nextMode;
@@ -1720,6 +1769,7 @@ function togglePlayMode() {
 }
 
 function toggleShuffle() {
+    // PC端独立随机按钮的逻辑
     const usingFavorites = state.currentList === "favorite";
     const currentEnabled = getActiveShuffleState();
     const nextEnabled = !currentEnabled;
@@ -1728,14 +1778,26 @@ function toggleShuffle() {
 
     if (usingFavorites) {
         state.favoriteShuffleEnabled = nextEnabled;
+        // 如果开启随机，且当前是单曲循环，则切换到列表循环
         if (nextEnabled && state.favoritePlayMode === "single") {
+            state.favoritePlayMode = "list";
+            modeAdjusted = true;
+        }
+        // 如果关闭随机，且当前是随机播放模式，则切换到列表循环
+        if (!nextEnabled && state.favoritePlayMode === "random") {
             state.favoritePlayMode = "list";
             modeAdjusted = true;
         }
         saveFavoriteState();
     } else {
         state.shuffleEnabled = nextEnabled;
+        // 如果开启随机，且当前是单曲循环，则切换到列表循环
         if (nextEnabled && state.playMode === "single") {
+            state.playMode = "list";
+            modeAdjusted = true;
+        }
+        // 如果关闭随机，且当前是随机播放模式，则切换到列表循环
+        if (!nextEnabled && state.playMode === "random") {
             state.playMode = "list";
             modeAdjusted = true;
         }
@@ -1747,6 +1809,8 @@ function toggleShuffle() {
     let message = nextEnabled ? "随机播放: 已开启" : "随机播放: 已关闭";
     if (nextEnabled && modeAdjusted && previousMode === "single") {
         message = "随机播放: 已开启（已切换为列表循环）";
+    } else if (!nextEnabled && modeAdjusted && previousMode === "random") {
+        message = "随机播放: 已关闭（已切换为列表循环）";
     }
     showNotification(message);
     debugLog(`随机播放${nextEnabled ? "开启" : "关闭"} (列表: ${state.currentList}, 循环模式: ${state.currentList === "favorite" ? state.favoritePlayMode : state.playMode})`);
