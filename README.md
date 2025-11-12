@@ -32,6 +32,19 @@
 ## 🚀 快速上手
 根据使用的托管平台，推荐使用 Cloudflare Pages 进行部署：
 
+### 💻 本地部署
+
+```bash
+# 安装 wrangler 工具
+npm install -g wrangler
+
+# 登录 Cloudflare 账号
+wrangler login
+
+# 启动本地开发环境（带 KV 绑定 ）
+wrangler pages dev . --kv=SONG_STATUS_KV
+```
+
 ### ✅ Cloudflare Pages
 1. Fork 或克隆本仓库。
 2. 按照 Cloudflare Pages 文档创建站点，并将本仓库作为构建来源或直接上传静态资源。

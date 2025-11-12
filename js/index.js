@@ -566,19 +566,22 @@ const savedCurrentPlaylist = (() => {
     return playlists.includes(stored) ? stored : "playlist";
 })();
 
-// API配置 - 修复API地址和请求方式
+// API配置
 const API = {
     baseUrl: "/proxy",
+    statusUrl: "/api/status", // <-- 新增功能: 状态检查API的地址
 
     generateSignature: () => {
         return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     },
 
-    fetchJson: async (url) => {
+    fetchJson: async (url, options = {}) => {
         try {
             const response = await fetch(url, {
+                ...options,
                 headers: {
                     "Accept": "application/json",
+                    ...(options.headers || {}),
                 },
             });
 
@@ -598,6 +601,30 @@ const API = {
             throw error;
         }
     },
+
+    // <-- 新增功能: 检查歌曲状态 -->
+    // 这个函数会向后端 /api/status 发送一个POST请求，批量查询歌曲的有效性
+    checkSongsStatus: async (keys) => {
+        // 如果没有 keys 或者 keys 数组为空，直接返回空对象，不做任何请求
+        if (!Array.isArray(keys) || keys.length === 0) {
+            return {};
+        }
+        try {
+            // 使用 fetchJson 发送POST请求
+            const data = await API.fetchJson(API.statusUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                // 请求体是一个JSON对象，包含一个名为 "keys" 的数组
+                body: JSON.stringify({ keys }),
+            });
+            // 成功则返回后端的数据，否则返回空对象
+            return data || {};
+        } catch (error) {
+            console.error("检查歌曲状态失败:", error);
+            return {}; // 出错时返回空对象，避免阻塞后续流程
+        }
+    },
+    // <-- 新增结束 -->
 
     search: async (keyword, source = "netease", count = 20, page = 1) => {
         const signature = API.generateSignature();
@@ -1617,21 +1644,25 @@ function showSearchResults() {
     }
 }
 
-// 新增：隐藏搜索结果 - 优化立即收起
+/**
+ * 隐藏搜索结果视图。
+ * 经过修改后，此函数不再清空搜索结果的DOM内容和状态，
+ * 仅仅通过移除 'search-mode' 类来隐藏视图。
+ * 这样，当用户再次聚焦搜索框或触发 showSearchResults 时，
+ * 上一次的搜索结果可以被完整地保留和恢复。
+ */
 function hideSearchResults() {
+    // 核心改动：只切换视图模式，不再清除 state.searchResults 或 DOM innerHTML
     toggleSearchMode(false);
+
+    // 以下逻辑保持不变，用于处理弹出菜单的定位和重置选中状态
     if (state.sourceMenuOpen) {
         scheduleSourceMenuPositionUpdate();
     }
     if (state.qualityMenuOpen) {
         schedulePlayerQualityMenuPositionUpdate();
     }
-    // 立即清空搜索结果内容
-    const container = dom.searchResultsList || dom.searchResults;
-    if (container) {
-        container.innerHTML = "";
-    }
-    state.renderedSearchCount = 0;
+    // 当用户离开搜索视图时，清空已选中的项目是一个好的用户体验，所以保留
     resetSelectedSearchResults();
     closeImportSelectedMenu();
 }
@@ -2826,7 +2857,16 @@ function setupInteractions() {
         dom.shuffleToggleBtn.addEventListener("click", toggleShuffleMode);
     }
 
-    // 搜索相关事件 - 修复搜索下拉框显示问题
+    // --- 修改点: 优化搜索交互 ---
+    // 为搜索输入框添加 focus 事件监听器
+    dom.searchInput.addEventListener("focus", () => {
+        // 如果当前不处于搜索模式，则切换到搜索模式
+        if (!state.isSearchMode) {
+            showSearchResults();
+            debugLog("通过聚焦搜索框回到搜索视图");
+        }
+    });
+
     dom.searchBtn.addEventListener("click", (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -2847,8 +2887,9 @@ function setupInteractions() {
 
     // 修复：点击搜索区域外部时隐藏搜索结果
     document.addEventListener("click", (e) => {
-        const searchArea = document.querySelector(".search-area");
-        if (searchArea && !searchArea.contains(e.target) && state.isSearchMode) {
+        // --- 修改点: 调整判断逻辑 ---
+        // 只有当搜索模式开启，且点击的目标不在搜索区域内时，才隐藏搜索结果
+        if (state.isSearchMode && dom.searchArea && !dom.searchArea.contains(e.target)) {
             debugLog("点击搜索区域外部，隐藏搜索结果");
             hideSearchResults();
         }
@@ -2863,38 +2904,7 @@ function setupInteractions() {
         }
     });
 
-    // 搜索结果相关事件处理 - 修复加载更多按钮点击问题
-    document.addEventListener("click", (e) => {
-        const qualityMenus = document.querySelectorAll(".quality-menu");
-        qualityMenus.forEach(menu => {
-            if (!menu.contains(e.target) &&
-                !e.target.closest(".playlist-item-download")) {
-                menu.classList.remove("show");
-                const parentItem = menu.closest(".search-result-item");
-                if (parentItem) parentItem.classList.remove("menu-active");
-            }
-        });
-
-        if (state.qualityMenuOpen &&
-            dom.playerQualityMenu &&
-            !dom.playerQualityMenu.contains(e.target)) {
-            const anchor = isElementNode(qualityMenuAnchor) ? qualityMenuAnchor : resolveQualityAnchor();
-            if (anchor && anchor.contains(e.target)) {
-                return;
-            }
-            closePlayerQualityMenu();
-        }
-
-        if (state.sourceMenuOpen &&
-            dom.sourceMenu &&
-            dom.sourceSelectButton &&
-            !dom.sourceMenu.contains(e.target) &&
-            !dom.sourceSelectButton.contains(e.target)) {
-            closeSourceMenu();
-        }
-    });
-
-    // 修复：使用更强健的事件委托处理加载更多按钮点击
+    // 搜索结果相关事件处理
     dom.searchResults.addEventListener("click", (e) => {
         debugLog(`点击事件触发: ${e.target.tagName} ${e.target.className} ${e.target.id}`);
 
@@ -3192,15 +3202,77 @@ async function loadMoreResults() {
     }
 }
 
+// --- 新增功能：更新单个搜索结果项的UI ---
+function updateSearchResultItemUI(songKey, status) {
+    const container = dom.searchResultsList || dom.searchResults;
+    if (!container) return;
+
+    // 通过 data-song-key 属性查找DOM元素
+    const item = container.querySelector(`.search-result-item[data-song-key="${songKey}"]`);
+    if (!item) return;
+
+    // 更新 data-validation-status 属性
+    item.dataset.validationStatus = status;
+
+    const playButton = item.querySelector('.action-btn.play');
+    const selectBox = item.querySelector('.search-result-select');
+
+    if (status === 'invalid') {
+        // 如果歌曲无效，禁用播放按钮和选择框
+        if (playButton) {
+            playButton.disabled = true;
+            playButton.classList.remove('is-loading');
+            playButton.innerHTML = '<i class="fas fa-times"></i>'; // 改为 "x" 图标
+            playButton.title = "歌曲已失效";
+        }
+        if (selectBox) {
+            selectBox.disabled = true;
+        }
+    } else if (status === 'valid') {
+        // 如果歌曲有效，启用播放按钮和选择框
+        if (playButton) {
+            playButton.disabled = false;
+            playButton.classList.remove('is-loading');
+            playButton.innerHTML = '<i class="fas fa-play"></i>'; // 确保是播放图标
+            playButton.title = "播放";
+        }
+        if (selectBox) {
+            selectBox.disabled = false;
+        }
+    }
+}
+
+// --- 新增功能：批量更新搜索结果UI ---
+async function checkAndupdateSearchResultsUI(songKeys) {
+    if (!Array.isArray(songKeys) || songKeys.length === 0) return;
+
+    // 调用API检查歌曲状态
+    const statuses = await API.checkSongsStatus(songKeys);
+
+    // 遍历返回的状态并更新UI
+    for (const key in statuses) {
+        updateSearchResultItemUI(key, statuses[key]);
+    }
+}
+
+
 function createSearchResultItem(song, index) {
     const item = document.createElement("div");
     item.className = "search-result-item";
     item.dataset.index = String(index);
+    // --- 修改点: 为每个条目添加唯一的 song-key 和初始的 validation-status ---
+    const songKey = getSongKey(song);
+    if(songKey) {
+        item.dataset.songKey = songKey;
+    }
+    item.dataset.validationStatus = "pending"; // 初始状态为 "待验证"
 
     const selectionToggle = document.createElement("button");
     selectionToggle.className = "search-result-select";
     selectionToggle.type = "button";
     selectionToggle.innerHTML = '<i class="fas fa-check"></i>';
+    // --- 修改点: 初始时禁用选择框 ---
+    selectionToggle.disabled = true;
     selectionToggle.addEventListener("click", (event) => {
         event.preventDefault();
         event.stopPropagation();
@@ -3243,7 +3315,11 @@ function createSearchResultItem(song, index) {
     playButton.className = "action-btn play";
     playButton.type = "button";
     playButton.title = "播放";
-    playButton.innerHTML = '<i class="fas fa-play"></i>';
+    // --- 修改点: 初始时显示加载中状态 ---
+    playButton.innerHTML = ''; // 清空图标，为CSS伪元素加载器做准备
+    playButton.disabled = true;
+    playButton.classList.add("is-loading");
+
     playButton.addEventListener("click", (event) => {
         event.stopPropagation();
         playSearchResult(index);
@@ -3359,6 +3435,12 @@ function toggleSearchResultSelection(index) {
     if (!Number.isInteger(numericIndex) || numericIndex < 0) {
         return;
     }
+    // --- 新增功能: 增加前置检查，禁止选择无效歌曲 ---
+    const item = dom.searchResultsList.querySelector(`.search-result-item[data-index="${numericIndex}"]`);
+    if (item && item.dataset.validationStatus === 'invalid') {
+        return; // 如果歌曲无效，直接返回，不执行任何操作
+    }
+
     ensureSelectedSearchResultsSet();
     if (state.selectedSearchResults.has(numericIndex)) {
         state.selectedSearchResults.delete(numericIndex);
@@ -3563,15 +3645,26 @@ function displaySearchResults(newItems, options = {}) {
         return;
     }
 
+    // --- 修改点: 增加异步验证流程 ---
+    const keysToCheck = [];
     if (itemsToAppend.length > 0) {
         const fragment = document.createDocumentFragment();
         const startIndex = state.renderedSearchCount;
         itemsToAppend.forEach((song, offset) => {
             fragment.appendChild(createSearchResultItem(song, startIndex + offset));
+            const key = getSongKey(song);
+            if (key) {
+                keysToCheck.push(key);
+            }
         });
         container.appendChild(fragment);
         state.renderedSearchCount += itemsToAppend.length;
     }
+    // 在渲染后，延迟一小段时间再开始检查状态，给UI渲染留出时间
+    if (keysToCheck.length > 0) {
+        setTimeout(() => checkAndupdateSearchResultsUI(keysToCheck), 150);
+    }
+    // --- 修改结束 ---
 
     if (state.hasMoreResults) {
         container.appendChild(createLoadMoreButton());
@@ -3663,8 +3756,16 @@ async function downloadWithQuality(event, index, type, quality) {
     }
 }
 
-// 修复：播放搜索结果 - 添加到播放列表而不是清空
+// 播放搜索结果
 async function playSearchResult(index) {
+    // --- 新增功能: 增加播放前验证 ---
+    const item = dom.searchResultsList.querySelector(`.search-result-item[data-index="${index}"]`);
+    // 如果找到了对应的DOM元素，并且它的验证状态不是 'valid'，则提示用户并终止播放
+    if (item && item.dataset.validationStatus !== 'valid') {
+        showNotification("该歌曲已失效，无法播放", "warning");
+        return;
+    }
+
     const song = state.searchResults[index];
     if (!song) return;
 
