@@ -1013,6 +1013,7 @@ saveFavoriteState();
     });
 
     audio.addEventListener('play', () => {
+        bindActionHandlersOnce();
         navigator.mediaSession.playbackState = 'playing';
         updatePositionState();
         lastPositionUpdateTime = Date.now();

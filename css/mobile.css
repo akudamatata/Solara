@@ -15,9 +15,10 @@ body.mobile-view {
     margin: 0;
     min-height: var(--mobile-vh, 100dvh);
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    justify-content: flex-start;
     align-items: stretch;
-    padding: calc(env(safe-area-inset-top) + 12px) clamp(12px, 5vw, 24px) calc(env(safe-area-inset-bottom) + 20px);
+    padding: calc(env(safe-area-inset-top, 0px) + 12px) clamp(12px, 5vw, 24px) calc(env(safe-area-inset-bottom, 0px) + 20px);
     font-family: var(--font-main);
     background-attachment: fixed;
     box-sizing: border-box;
@@ -27,6 +28,20 @@ body.mobile-view {
     --mobile-ring-inner-radius: clamp(280px, 70vw, 520px);
     --mobile-ring-feather: clamp(120px, 24vw, 280px);
     --mobile-ring-vertical-shift: calc((env(safe-area-inset-top, 0px) * 0.5) - 24px);
+    --mobile-turntable-size: min(78vw, 320px);
+    --mobile-album-size: calc(var(--mobile-turntable-size) * 0.58);
+    --mobile-panel-available: calc(
+        var(--mobile-vh, 100dvh)
+        - env(safe-area-inset-top, 0px)
+        - env(safe-area-inset-bottom, 0px)
+    );
+    --mobile-panel-height: max(
+        calc(
+            var(--mobile-panel-available)
+            - clamp(120px, 34vw, 200px)
+        ),
+        min(320px, var(--mobile-panel-available))
+    );
 }
 
 body.mobile-view .background-stage {
@@ -43,6 +58,8 @@ body.mobile-view .background-stage {
         --mobile-ring-inner-radius: clamp(260px, 64vw, 480px);
         --mobile-ring-feather: clamp(110px, 22vw, 260px);
         --mobile-ring-vertical-shift: calc((env(safe-area-inset-top, 0px) * 0.55) - 28px);
+        --mobile-turntable-size: clamp(260px, 64vw, 460px);
+        --mobile-album-size: calc(var(--mobile-turntable-size) * 0.58);
     }
 
     body.mobile-view .background-stage {
@@ -80,8 +97,8 @@ body.mobile-view .container {
     background: linear-gradient(180deg, rgba(27, 29, 36, 0.92), rgba(7, 9, 14, 0.95));
     border-radius: 32px;
     padding: clamp(16px, 5vw, 28px);
-    padding-top: calc(env(safe-area-inset-top) + clamp(18px, 6vw, 32px));
-    padding-bottom: calc(env(safe-area-inset-bottom) + clamp(22px, 7vw, 32px));
+    padding-top: calc(env(safe-area-inset-top, 0px) + clamp(18px, 6vw, 32px));
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + clamp(22px, 7vw, 32px));
     box-shadow: 0 32px 90px rgba(0, 0, 0, 0.65);
     display: flex;
     flex-direction: column;
@@ -89,7 +106,11 @@ body.mobile-view .container {
     position: relative;
     overflow: visible;
     flex: 1 1 auto;
-    min-height: calc(var(--mobile-vh, 100dvh) - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    min-height: calc(
+        var(--mobile-vh, 100dvh)
+        - env(safe-area-inset-top, 0px)
+        - env(safe-area-inset-bottom, 0px)
+    );
     box-sizing: border-box;
 }
 
@@ -180,7 +201,8 @@ body.mobile-view .mobile-turntable {
 }
 
 body.mobile-view .mobile-turntable__platter {
-    width: min(78vw, 320px);
+    width: var(--mobile-turntable-size);
+    height: var(--mobile-turntable-size);
     aspect-ratio: 1 / 1;
     border-radius: 50%;
     background: radial-gradient(circle at 48% 50%, #1a1d25 0%, #05070c 65%, #000 100%);
@@ -211,7 +233,8 @@ body.mobile-view .album-cover {
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 58%;
+    width: var(--mobile-album-size);
+    height: var(--mobile-album-size);
     aspect-ratio: 1 / 1;
     transform: translate(-50%, -50%);
     border-radius: 50%;
@@ -570,7 +593,10 @@ body.mobile-view .mobile-panel {
     background: rgba(13, 16, 24, 0.96);
     backdrop-filter: blur(28px);
     border-radius: 28px 28px 0 0;
-    padding: 18px clamp(18px, 6vw, 28px) calc(env(safe-area-inset-bottom) + clamp(22px, 7vw, 32px));
+    padding:
+        calc(env(safe-area-inset-top, 0px) + clamp(18px, 6vw, 28px))
+        clamp(18px, 6vw, 28px)
+        calc(env(safe-area-inset-bottom, 0px) + clamp(22px, 7vw, 32px));
     display: flex;
     flex-direction: column;
     gap: 18px;
@@ -578,8 +604,8 @@ body.mobile-view .mobile-panel {
     pointer-events: auto;
     box-shadow: 0 -28px 60px rgba(0, 0, 0, 0.6);
     transition: transform 0.45s cubic-bezier(0.33, 1, 0.68, 1);
-    height: calc(100dvh - clamp(120px, 34vw, 200px));
-    max-height: calc(100dvh - clamp(120px, 34vw, 200px));
+    height: var(--mobile-panel-height);
+    max-height: var(--mobile-panel-height);
     overflow: hidden;
     overscroll-behavior: contain;
     touch-action: pan-y;
