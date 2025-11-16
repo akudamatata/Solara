@@ -47,6 +47,7 @@
 
 ## 🔐 访问控制设置
 - **Cloudflare Pages：** 在项目的 **Settings → Functions → Environment variables** 中新增名为 `PASSWORD` 的环境变量，值为希望设置的访问口令。
+- **腾讯云 EdgeOne Pages：** 在控制台的 **站点 → 设置 → 环境变量** 中同样添加 `PASSWORD` 变量。Functions 与页面会自动读取 EdgeOne 的运行时变量（或构建时的 `process.env.PASSWORD`），不再需要额外改动。
 - 部署完成后，未登录的访问者会被自动重定向到 `/login` 页面并需输入该口令；若想关闭访问口令，删除该环境变量并重新部署即可。
 ## 🎵 使用流程
 1. 输入关键词并选择想要的曲库后发起搜索。

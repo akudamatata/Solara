@@ -1,3 +1,5 @@
+import { getPasswordFromEnv } from "./lib/get-password";
+
 const PUBLIC_PATH_PATTERNS = [/^\/login(?:\/|$)/, /^\/api\/login(?:\/|$)/];
 const PUBLIC_FILE_EXTENSIONS = new Set([
   ".css",
@@ -34,7 +36,7 @@ function isPublicPath(pathname: string): boolean {
 
 export async function onRequest(context: any) {
   const { request, env } = context;
-  const password = env.PASSWORD;
+  const password = getPasswordFromEnv(env);
 
   if (typeof password !== "string") {
     return context.next();

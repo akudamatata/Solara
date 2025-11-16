@@ -1,8 +1,10 @@
+import { getPasswordFromEnv } from "../lib/get-password";
+
 const MAX_AGE_SECONDS = 48 * 60 * 60;
 
 export async function onRequestPost(context: any) {
   const { request, env } = context;
-  const passwordEnv = env.PASSWORD;
+  const passwordEnv = getPasswordFromEnv(env);
   const url = new URL(request.url);
 
   const body = await request.json().catch(() => ({ password: "" }));
