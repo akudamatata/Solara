@@ -47,7 +47,7 @@
 
 ## 🔐 访问控制设置
 - **Cloudflare Pages：** 在项目的 **Settings → Functions → Environment variables** 中新增名为 `PASSWORD` 的环境变量，值为希望设置的访问口令。
-- **腾讯云 EdgeOne Pages：** 在控制台的 **站点 → 设置 → 环境变量** 中同样添加 `PASSWORD` 变量即可。仓库已额外提供 `edge-functions/` 目录来映射中间件与 `/api/login`（EdgeOne 仅识别该目录），无需再手动复制函数代码；
+- **腾讯云 EdgeOne Pages：** 在控制台的 **站点 → 设置 → 环境变量** 中同样添加 `PASSWORD` 变量即可。仓库已额外提供 `edge-functions/index.ts`、`edge-functions/[[path]].ts` 与 `/api/login` 入口（EdgeOne 仅识别该目录），用于在所有路径上执行同样的密码校验，无需再手动复制函数代码；
   ⚠️ EdgeOne Pages 节点虽然速度快，但平台目前对音乐/音视频聚合站点的容忍度不高，存在被封禁的潜在风险，部署前请先评估。
 - 部署完成后，未登录的访问者会被自动重定向到 `/login` 页面并需输入该口令；若想关闭访问口令，删除该环境变量并重新部署即可。
 ## 🎵 使用流程
@@ -82,7 +82,8 @@ Music-Player/
 │   ├── palette.ts     # 封面取色算法
 │   └── proxy.ts       # 音频直链代理
 ├── edge-functions/
-│   ├── _middleware.ts # EdgeOne Pages 识别的函数入口，复用 functions/ 中间件
+│   ├── index.ts       # EdgeOne Pages 主页入口，复用密码校验逻辑
+│   ├── [[path]].ts    # EdgeOne catch-all 入口，确保子路径也执行密码校验
 │   └── api/
 │       └── login.ts   # EdgeOne 的登录接口入口，复用 functions/api/login
 ├── js/
