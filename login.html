@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="login-page-root">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>登录 - Solara</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    (function () {
+      const ua = navigator.userAgent || "";
+      const isMobileUA = /android|iphone|ipad|ipod|mobile|blackberry|phone|opera mini|windows phone/i.test(ua);
+      const isSmallScreen = typeof window.matchMedia === "function" && window.matchMedia("(max-width: 820px)").matches;
+      const isMobile = isMobileUA || isSmallScreen;
+      window.__SOLARA_IS_MOBILE = isMobile;
+      if (!isMobile) {
+        document.documentElement.classList.add("desktop-view");
+        const desktopLink = document.createElement("link");
+        desktopLink.rel = "stylesheet";
+        desktopLink.href = "css/desktop.css";
+        desktopLink.id = "desktopStylesheet";
+        document.head.appendChild(desktopLink);
+        return;
+      }
+      document.documentElement.classList.add("mobile-view");
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = "css/mobile.css";
+      link.id = "mobileStylesheet";
+      document.head.appendChild(link);
+      const setViewportUnit = () => {
+        const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+        if (typeof viewportHeight === "number" && !Number.isNaN(viewportHeight)) {
+          document.documentElement.style.setProperty("--mobile-vh", `${viewportHeight}px`);
+        }
+      };
+      const updateLoginLayout = () => {
+        const body = document.body;
+        const viewport = window.visualViewport;
+        const rawWidth = viewport ? viewport.width : window.innerWidth;
+        const hasNumericWidth = typeof rawWidth === "number" && !Number.isNaN(rawWidth);
+        const fallbackWidth = window.innerWidth || document.documentElement.clientWidth || 0;
+        const width = hasNumericWidth ? rawWidth : fallbackWidth;
+        const orientationQuery = typeof window.matchMedia === "function" ? window.matchMedia("(orientation: portrait)") : null;
+        const isPortrait = orientationQuery ? orientationQuery.matches : window.innerHeight >= window.innerWidth;
+        const isNarrow = width <= 820;
+        if (body) {
+          body.classList.toggle("portrait-mobile", Boolean(isPortrait && isNarrow));
+        }
+        let scale = 1;
+        if (width) {
+          if (isPortrait && width < 430) {
+            scale = Math.min(1, Math.max(0.8, width / 430));
+          } else if (!isPortrait && width < 540) {
+            scale = Math.min(1, Math.max(0.85, width / 540));
+          }
+        }
+        document.documentElement.style.setProperty("--login-scale", scale.toFixed(4));
+      };
+      const handleLayoutChange = () => {
+        setViewportUnit();
+        updateLoginLayout();
+      };
+      const applyBodyClass = () => {
+        if (document.body) {
+          document.body.classList.add("mobile-view");
+        }
+        handleLayoutChange();
+      };
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", applyBodyClass, { once: true });
+      } else {
+        applyBodyClass();
+      }
+      window.addEventListener("resize", handleLayoutChange);
+      window.addEventListener("orientationchange", handleLayoutChange);
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener("resize", handleLayoutChange);
+        window.visualViewport.addEventListener("scroll", handleLayoutChange);
+      }
+      handleLayoutChange();
+    })();
+  </script>
+  <style>
+    :root {
+      --login-scale: 1;
+    }
+
+    html.login-page-root {
+      min-height: var(--mobile-vh, 100dvh);
+      height: auto;
+    }
+
+    html.login-page-root,
+    body.login-page {
+      overflow-x: hidden;
+    }
+
+    html.login-page-root.mobile-view {
+      height: auto;
+      overflow-y: auto;
+    }
+
+    body.login-page {
+      position: relative;
+      margin: 0;
+      padding: clamp(16px, 4vw, 40px);
+      font-family: 'Noto Sans SC', 'Segoe UI', Arial, sans-serif;
+      display: flex;
+      justify-content: center !important;
+      align-items: center !important;
+      min-height: var(--mobile-vh, 100dvh);
+      color: var(--text-color);
+      background: radial-gradient(circle at 20% 20%, rgba(26, 188, 156, 0.35), transparent 55%),
+                  radial-gradient(circle at 80% 0%, rgba(52, 152, 219, 0.28), transparent 50%),
+                  #07090f;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+
+    body.login-page.mobile-view {
+      position: static;
+      inset: auto;
+      width: auto;
+      height: auto;
+      min-height: var(--mobile-vh, 100dvh);
+      padding: calc(env(safe-area-inset-top, 0px) + clamp(18px, 6vw, 32px))
+               clamp(18px, 6vw, 32px)
+               calc(env(safe-area-inset-bottom, 0px) + clamp(24px, 7vw, 36px));
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      overflow-y: auto;
+    }
+
+    body.login-page.mobile-view.portrait-mobile {
+      padding: calc(env(safe-area-inset-top, 0px) + clamp(20px, 8vw, 32px))
+               clamp(18px, 7vw, 28px)
+               calc(env(safe-area-inset-bottom, 0px) + clamp(26px, 9vw, 38px));
+    }
+
+    body.login-page.mobile-view .background-stage {
+      display: block;
+    }
+
+    .background-stage {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      max-width: 100vw;
+      box-sizing: border-box;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: -2;
+    }
+
+    .background-stage__layer {
+      position: absolute;
+      inset: -40% -20%;
+      filter: blur(110px);
+      opacity: 0.8;
+      transform: rotate(5deg);
+      background: conic-gradient(from 180deg,
+        rgba(26, 188, 156, 0.55),
+        rgba(64, 224, 208, 0.35),
+        rgba(52, 152, 219, 0.4),
+        rgba(17, 17, 23, 0.8));
+      animation: auroraShift 18s ease-in-out infinite alternate;
+    }
+
+    .background-stage__layer::after {
+      content: "";
+      position: absolute;
+      inset: 20% 18% 15% 25%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.18), transparent 60%);
+      animation: pulse 12s ease-in-out infinite;
+    }
+
+    .background-stage__overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(5, 10, 18, 0.92) 0%, rgba(8, 17, 24, 0.65) 100%);
+      z-index: 1;
+    }
+
+    @keyframes auroraShift {
+      0% { transform: translateY(-5%) rotate(8deg) scale(1.1); }
+      50% { transform: translateY(3%) rotate(2deg) scale(1.05); }
+      100% { transform: translateY(-2%) rotate(-4deg) scale(1.12); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.45; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.1); }
+    }
+
+    .login-shell {
+      position: relative;
+      width: min(460px, 100%);
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-inline: auto;
+      min-height: calc(var(--mobile-vh, 100dvh) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+    }
+
+    html.desktop-view .login-shell {
+      min-height: auto;
+    }
+
+    body.login-page.mobile-view .login-shell {
+      width: 100%;
+      max-width: 440px;
+      padding: 0;
+      min-height: auto;
+      flex: 1 1 auto;
+    }
+
+    body.login-page.mobile-view.portrait-mobile .login-shell {
+      min-height: auto;
+    }
+
+    .login-container {
+      background: linear-gradient(160deg, rgba(17, 21, 32, 0.9) 0%, rgba(14, 24, 29, 0.78) 100%);
+      border-radius: 28px;
+      padding: clamp(28px, 5vw, 40px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow:
+        0 30px 60px rgba(0, 0, 0, 0.55),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+      display: flex;
+      flex-direction: column;
+      gap: clamp(20px, 4vw, 32px);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      color: #f2f6f9;
+      width: 100%;
+      box-sizing: border-box;
+      transform: scale(var(--login-scale));
+      transform-origin: center;
+      transition: transform 0.25s ease;
+      will-change: transform;
+      margin-inline: auto;
+    }
+
+    body.login-page.mobile-view.portrait-mobile .login-container {
+      justify-content: center;
+    }
+
+    .login-header {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .logo-circle {
+      width: 64px;
+      height: 64px;
+      border-radius: 20px;
+      background: linear-gradient(145deg, rgba(34, 48, 63, 0.85), rgba(22, 36, 48, 0.95));
+      border: 1px solid rgba(82, 233, 210, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow:
+        0 18px 32px rgba(51, 211, 175, 0.28),
+        inset 0 0 18px rgba(82, 233, 210, 0.22);
+      overflow: hidden;
+    }
+
+    .logo-circle img {
+      width: 70%;
+      height: 70%;
+      object-fit: contain;
+      filter: brightness(0) invert(1) drop-shadow(0 0 10px rgba(146, 255, 236, 0.6));
+    }
+
+    .title-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .login-title {
+      font-size: clamp(1.9rem, 3vw, 2.2rem);
+      font-weight: 700;
+      margin: 0;
+      letter-spacing: 1px;
+      color: #ffffff;
+    }
+
+    .login-desc {
+      margin: 0;
+      color: rgba(255, 255, 255, 0.75);
+      font-size: 0.95rem;
+    }
+
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .field-label {
+      font-size: 0.9rem;
+      letter-spacing: 0.5px;
+      color: rgba(255, 255, 255, 0.76);
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      background: rgba(12, 18, 24, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 16px;
+      padding: 12px 16px;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .input-wrapper:focus-within {
+      border-color: rgba(51, 211, 175, 0.8);
+      box-shadow: 0 0 0 3px rgba(51, 211, 175, 0.18);
+    }
+
+    .input-wrapper i {
+      color: rgba(255, 255, 255, 0.58);
+      font-size: 1.1rem;
+      margin-right: 12px;
+    }
+
+    .login-form input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #ffffff;
+      font-size: 1rem;
+      font-family: inherit;
+      letter-spacing: 1px;
+    }
+
+    .login-form input::placeholder {
+      color: rgba(255, 255, 255, 0.45);
+    }
+
+    .login-hint {
+      margin: 0;
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.55);
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    .login-form button {
+      padding: 14px 18px;
+      border: none;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #2fd2a8, #1abc9c);
+      color: #ffffff;
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.3s ease;
+      box-shadow: 0 18px 35px rgba(42, 201, 165, 0.35);
+    }
+
+    .login-form button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 22px 40px rgba(42, 201, 165, 0.45);
+    }
+
+    .login-form button:active {
+      transform: translateY(0);
+      box-shadow: 0 14px 28px rgba(42, 201, 165, 0.35);
+    }
+
+    .login-footer {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.4);
+      text-align: center;
+    }
+
+    .login-footer .status-dot {
+      display: inline-flex;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #33d3af;
+      box-shadow: 0 0 10px rgba(51, 211, 175, 0.5);
+    }
+
+    .login-footer .status-message {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    @media (max-width: 768px) {
+      body.login-page {
+        padding: clamp(16px, 4vw, 24px);
+      }
+
+      .login-container {
+        border-radius: 22px;
+        padding: clamp(24px, 6vw, 32px);
+        gap: 22px;
+      }
+
+      .login-header {
+        gap: 14px;
+      }
+
+      .logo-circle {
+        width: 56px;
+        height: 56px;
+      }
+
+      .login-footer {
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body.login-page {
+        padding: clamp(16px, 7vw, 24px);
+      }
+
+      body.login-page.mobile-view {
+        padding: calc(env(safe-area-inset-top, 0px) + clamp(16px, 7vw, 24px))
+                 clamp(16px, 7vw, 24px)
+                 calc(env(safe-area-inset-bottom, 0px) + clamp(22px, 8vw, 30px));
+      }
+
+      body.login-page .login-shell {
+        width: 100%;
+        max-width: 420px;
+      }
+
+      body.login-page .login-container {
+        padding: clamp(24px, 7vw, 32px);
+      }
+
+      .login-footer {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+    }
+  </style>
+</head>
+<body class="login-page">
+  <div class="background-stage">
+    <div class="background-stage__layer"></div>
+    <div class="background-stage__overlay"></div>
+  </div>
+  <main class="login-shell">
+    <section class="login-container">
+      <header class="login-header">
+        <div class="logo-circle" aria-hidden="true">
+          <img src="/favicon.svg" alt="">
+        </div>
+        <div class="title-group">
+          <h1 class="login-title">Solara</h1>
+          <p class="login-desc">访问受到保护</p>
+        </div>
+      </header>
+      <form class="login-form" id="login-form">
+        <div class="field">
+          <label for="password" class="field-label">访问口令</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-lock" aria-hidden="true"></i>
+            <input type="password" id="password" placeholder="请输入密码" autocomplete="current-password" required
+              oninput="this.value = this.value.replace(/[^\x00-\x7F]/g, '')">
+          </div>
+        </div>
+        <p class="login-hint">只有输入了正确口令的成员才能继续访问内容。</p>
+        <button type="submit">进入 Solara</button>
+      </form>
+      <footer class="login-footer" aria-live="polite">
+        <span class="status-message"><span class="status-dot" aria-hidden="true"></span>安全状态：受保护</span>
+      </footer>
+    </section>
+  </main>
+  <div id="notification" class="notification" role="status" aria-live="polite"></div>
+  <script>
+    (function () {
+      const storedExpiry = localStorage.getItem("authExpiry");
+      if (storedExpiry) {
+        localStorage.removeItem("authExpiry");
+      }
+    })();
+    const notification = document.getElementById("notification");
+    let notificationTimer;
+    const showNotification = (message, type = "success") => {
+      if (!notification) {
+        if (typeof window.alert === "function") {
+          window.alert(message);
+        }
+        return;
+      }
+      notification.textContent = message;
+      notification.className = `notification ${type}`;
+      notification.classList.add("show");
+      if (notificationTimer) {
+        clearTimeout(notificationTimer);
+      }
+      notificationTimer = window.setTimeout(() => {
+        notification.classList.remove("show");
+      }, 3000);
+    };
+    document.getElementById("login-form")?.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const pwdInput = document.getElementById("password");
+      const password = pwdInput instanceof HTMLInputElement ? pwdInput.value : "";
+      try {
+        const response = await fetch("/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ password }),
+        });
+        if (response.ok) {
+          window.location.href = "/";
+          return;
+        }
+        showNotification("密码错误，请重试", "error");
+      } catch (error) {
+        console.error(error);
+        showNotification("登录出错，请稍后再试", "error");
+      }
+    });
+  </script>
+</body>
+</html>
