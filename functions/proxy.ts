@@ -1,4 +1,4 @@
-const API_BASE_URL = "https://music-api.gdstudio.xyz/api.php";
+const API_BASE_URL = "https://music-api.gdstudio.org/api.php";
 const KUWO_HOST_PATTERN = /(^|\.)kuwo\.cn$/i;
 const SAFE_RESPONSE_HEADERS = ["content-type", "cache-control", "accept-ranges", "content-length", "content-range", "etag", "last-modified", "expires"];
 
