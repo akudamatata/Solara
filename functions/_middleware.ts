@@ -76,7 +76,7 @@ async function i18nMiddleware(context: any) {
   if (language === "ENG" && response.headers.get("content-type")?.includes("text/html")) {
     return new HTMLRewriter().on("head", {
       element(element: any) {
-        element.append(`<script>window.SITE_LANGUAGE = "ENG";</script>`, { html: true });
+        element.prepend(`<script>window.SITE_LANGUAGE = "ENG";</script>`, { html: true });
       }
     }).transform(response);
   }
