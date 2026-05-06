@@ -1039,12 +1039,16 @@ html.mobile-view .playlist-header .playlist-action-btn {
 }
 
 /* 播放列表空状态的提示文本 */
-.playlist.empty::before {
+.playlist.empty .playlist-scroll::before {
     content: "点击\"探索雷达\"加载在线音乐";
     color: var(--text-secondary-color);
     font-style: italic;
     opacity: 0.7;
     font-size: 0.9em;
+}
+
+html[lang="en"] .playlist.empty .playlist-scroll::before {
+    content: 'Click "Explore Radar" to load online music';
 }
 
 .playlist.favorites.empty::before {
@@ -1551,6 +1555,10 @@ html.mobile-view .favorites .favorite-item-action--remove {
     font-size: 0.9em;
 }
 
+html[lang="en"] .lyrics.empty[data-placeholder="default"] .lyrics-scroll::before {
+    content: "Lyrics will be displayed here";
+}
+
 .lyrics.empty[data-placeholder="message"] .lyrics-scroll::before {
     content: none;
 }
@@ -1566,7 +1574,7 @@ html.mobile-view .favorites .favorite-item-action--remove {
 .controls {
     grid-area: controls;
     display: grid;
-    grid-template-columns: 300px minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: 300px 1fr auto;
     grid-template-areas: "transport progress trailing";
     align-items: center;
     column-gap: 20px;
