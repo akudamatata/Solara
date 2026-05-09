@@ -69,6 +69,11 @@
 ## 🔐 访问控制设置
 - **Cloudflare Pages：** 在项目的 **Settings → Functions → Environment variables** 中新增名为 `PASSWORD` 的环境变量，值为希望设置的访问口令。
 - 部署完成后，未登录的访问者会被自动重定向到 `/login` 页面并需输入该口令；若想关闭访问口令，删除该环境变量并重新部署即可。
+
+## 🌐 多语言设置 (English Version)
+- **Cloudflare Pages：** 在项目的 **Settings → Functions → Environment variables** 中新增名为 `LANGUAGE` 的环境变量，值为 `ENG`。
+- 部署完成后，站点将会自动切换为全英文界面。若想恢复中文界面，删除该环境变量或修改为其他值后重新部署即可。
+
 ## 🎵 使用流程
 1. 输入关键词并选择想要的曲库后发起搜索。
 2. 在结果列表中可试听、播放、下载或加入播放队列。
