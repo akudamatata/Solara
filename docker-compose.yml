@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  solara:
+    image: ghcr.io/akudamatata/solara:latest
+    container_name: solara
+    restart: always
+    ports:
+      - "8787:8787"
+    environment:
+      # 在这里配置你的 Solara 登录密码，Wrangler 会自动将其读取到代码中
+      - PASSWORD=your_secure_password_here
+    volumes:
+      # 持久化存储 D1 数据库（收藏夹和播放数据）
+      - ./data:/app/data

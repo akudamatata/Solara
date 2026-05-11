@@ -30,12 +30,40 @@
 - 🛠️ 调试控制台：按下 Ctrl + D 呼出实时日志面板，便于排查接口或交互异常。
 
 ## 🚀 快速上手
-根据使用的托管平台，推荐使用 Cloudflare Pages 进行部署：
+支持多种部署方式，推荐使用 Cloudflare Pages 或 Docker 进行部署：
 
-### ✅ Cloudflare Pages
+### ✅ Cloudflare Pages (推荐)
 1. Fork 或克隆本仓库。
 2. 按照 Cloudflare Pages 文档创建站点，并将本仓库作为构建来源或直接上传静态资源。
 3. 部署完成后，通过 Cloudflare Pages 分配的域名访问站点即可体验播放器。
+
+### 🐳 Docker 一键部署 (适合私有服务器)
+无需下载源码，只需在一个空白目录下新建 `docker-compose.yml` 文件，并填入以下内容：
+
+```yaml
+version: '3.8'
+
+services:
+  solara:
+    image: ghcr.io/akudamatata/solara:latest
+    container_name: solara
+    restart: always
+    ports:
+      - "8787:8787"
+    environment:
+      # 在这里配置你的 Solara 登录口令
+      - PASSWORD=your_secure_password_here
+    volumes:
+      # 持久化存储 D1 数据库（收藏夹和播放数据）
+      - ./data:/app/data
+```
+
+保存后，在该目录下执行以下命令即可启动：
+```bash
+docker compose pull
+docker compose up -d
+```
+启动后通过 `http://服务器IP:8787` 即可访问你的专属音乐播放器。
 
 ## ⚙️ 配置提示
 - API 基地址定义在 functions/proxy.ts 中的第1行，可替换为自建接口域名。

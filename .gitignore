@@ -1,0 +1,6 @@
+# Docker persistence
+data/
+.dev.vars
+
+# Cloudflare Wrangler local state (fallback)
+.wrangler/
