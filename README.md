@@ -30,15 +30,15 @@
 - 🛠️ 调试控制台：按下 Ctrl + D 呼出实时日志面板，便于排查接口或交互异常。
 
 ## 🚀 快速上手
-支持多种部署方式，推荐使用 Cloudflare Pages 或 Docker 进行部署：
+支持多种部署方式，您可以根据自己的服务器环境选择最合适的一种：
 
-### ✅ Cloudflare Pages (推荐)
-1. Fork 或克隆本仓库。
-2. 按照 Cloudflare Pages 文档创建站点，并将本仓库作为构建来源或直接上传静态资源。
-3. 部署完成后，通过 Cloudflare Pages 分配的域名访问站点即可体验播放器。
+- [🐳 Docker 一键部署 (适合私有服务器)](#-docker-一键部署-适合私有服务器)
+- [✅ Cloudflare Pages 部署 (适合免服务器托管)](#-cloudflare-pages-部署-适合免服务器托管)
+
+---
 
 ### 🐳 Docker 一键部署 (适合私有服务器)
-无需下载源码，只需在一个空白目录下新建 `docker-compose.yml` 文件，并填入以下内容：
+无需下载和编译源码，只需在您的服务器上新建一个空白目录，创建 `docker-compose.yml` 文件，并复制填入以下内容：
 
 ```yaml
 version: '3.8'
@@ -58,12 +58,20 @@ services:
       - ./data:/app/data
 ```
 
-保存后，在该目录下执行以下命令即可启动：
+保存文件后，在同一目录下打开终端，依次执行以下两条命令：
 ```bash
 docker compose pull
 docker compose up -d
 ```
-启动后通过 `http://服务器IP:8787` 即可访问你的专属音乐播放器。
+启动成功后，通过 `http://服务器IP:8787` 即可立即访问你的专属音乐播放器。
+
+---
+
+### ✅ Cloudflare Pages 部署 (适合免服务器托管)
+如果您没有自己的服务器，可以直接使用 Cloudflare 免费部署：
+1. Fork 或克隆本仓库到您自己的 GitHub 账号下。
+2. 登录 Cloudflare 控制台，按照 Cloudflare Pages 文档创建站点，并将本仓库作为构建来源或直接上传静态资源。
+3. 部署完成后，通过 Cloudflare Pages 分配的域名访问站点即可。
 
 ## ⚙️ 配置提示
 - API 基地址定义在 functions/proxy.ts 中的第1行，可替换为自建接口域名。
