@@ -2154,7 +2154,7 @@ async function updateDynamicBackground(imageUrl) {
         }
 
         console.warn("获取远程动态背景失败，尝试客户端降级提取:", error);
-        debugLog("动态背景加载失败，尝试前端解析");
+        debugLog("动态背景加载失败 尝试前端解析");
 
         try {
             // 降级方案：使用客户端 Canvas 提取 (支持 PNG/WebP 且绕过服务器解码限制)
