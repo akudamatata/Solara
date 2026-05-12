@@ -1822,6 +1822,249 @@ function setAlbumCoverImage(url) {
     }
 }
 
+// --- 客户端调色板提取核心算法 (从 palette.ts 移植) ---
+const PALETTE_MAX_DIMENSION = 96;
+const PALETTE_TARGET_SAMPLE_COUNT = 2400;
+
+function paletteClamp(value, min, max) {
+    return Math.min(Math.max(value, min), max);
+}
+
+function paletteComponentToHex(value) {
+    const clamped = paletteClamp(Math.round(value), 0, 255);
+    return clamped.toString(16).padStart(2, "0");
+}
+
+function paletteRgbToHex({ r, g, b }) {
+    return `#${paletteComponentToHex(r)}${paletteComponentToHex(g)}${paletteComponentToHex(b)}`;
+}
+
+function paletteRgbToHsl(r, g, b) {
+    const rNorm = paletteClamp(r / 255, 0, 1);
+    const gNorm = paletteClamp(g / 255, 0, 1);
+    const bNorm = paletteClamp(b / 255, 0, 1);
+
+    const max = Math.max(rNorm, gNorm, bNorm);
+    const min = Math.min(rNorm, gNorm, bNorm);
+    const delta = max - min;
+
+    let h = 0;
+    if (delta !== 0) {
+        if (max === rNorm) {
+            h = ((gNorm - bNorm) / delta) % 6;
+        } else if (max === gNorm) {
+            h = (bNorm - rNorm) / delta + 2;
+        } else {
+            h = (rNorm - gNorm) / delta + 4;
+        }
+        h *= 60;
+        if (h < 0) {
+            h += 360;
+        }
+    }
+
+    const l = (max + min) / 2;
+    const s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+
+    return { h, s, l };
+}
+
+function paletteHueToRgb(p, q, t) {
+    if (t < 0) t += 1;
+    if (t > 1) t -= 1;
+    if (t < 1 / 6) return p + (q - p) * 6 * t;
+    if (t < 1 / 2) return q;
+    if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+    return p;
+}
+
+function paletteHslToRgb(h, s, l) {
+    const saturation = paletteClamp(s, 0, 1);
+    const lightness = paletteClamp(l, 0, 1);
+
+    const normalizedHue = ((h % 360) + 360) % 360 / 360;
+
+    if (saturation === 0) {
+        const value = lightness * 255;
+        return { r: value, g: value, b: value };
+    }
+
+    const q = lightness < 0.5
+        ? lightness * (1 + saturation)
+        : lightness + saturation - lightness * saturation;
+    const p = 2 * lightness - q;
+
+    const r = paletteHueToRgb(p, q, normalizedHue + 1 / 3) * 255;
+    const g = paletteHueToRgb(p, q, normalizedHue) * 255;
+    const b = paletteHueToRgb(p, q, normalizedHue - 1 / 3) * 255;
+
+    return { r, g, b };
+}
+
+function paletteHslToHex(color) {
+    const rgb = paletteHslToRgb(color.h, color.s, color.l);
+    return paletteRgbToHex(rgb);
+}
+
+function paletteRelativeLuminance(r, g, b) {
+    const normalize = (value) => {
+        const channel = paletteClamp(value / 255, 0, 1);
+        return channel <= 0.03928
+            ? channel / 12.92
+            : Math.pow((channel + 0.055) / 1.055, 2.4);
+    };
+
+    const rLin = normalize(r);
+    const gLin = normalize(g);
+    const bLin = normalize(b);
+
+    return 0.2126 * rLin + 0.7152 * gLin + 0.0722 * bLin;
+}
+
+function palettePickContrastColor(color) {
+    const luminance = paletteRelativeLuminance(color.r, color.g, color.b);
+    return luminance > 0.45 ? "#1f2937" : "#f8fafc";
+}
+
+function paletteAdjustSaturation(base, factor, offset = 0) {
+    return paletteClamp(base * factor + offset, 0, 1);
+}
+
+function paletteAdjustLightness(base, offset, factor = 1) {
+    return paletteClamp(base * factor + offset, 0, 1);
+}
+
+function analyzeImageDataColors(imageData) {
+    const { data } = imageData;
+    const totalPixels = data.length / 4;
+    const step = Math.max(1, Math.floor(totalPixels / PALETTE_TARGET_SAMPLE_COUNT));
+
+    let totalR = 0;
+    let totalG = 0;
+    let totalB = 0;
+    let count = 0;
+
+    let accent = null;
+
+    for (let index = 0; index < data.length; index += step * 4) {
+        const alpha = data[index + 3];
+        if (alpha < 48) {
+            continue;
+        }
+
+        const r = data[index];
+        const g = data[index + 1];
+        const b = data[index + 2];
+
+        totalR += r;
+        totalG += g;
+        totalB += b;
+        count++;
+
+        const hsl = paletteRgbToHsl(r, g, b);
+        const vibrance = hsl.s;
+        const balance = 1 - Math.abs(hsl.l - 0.5);
+        const score = vibrance * 0.65 + balance * 0.35;
+
+        if (!accent || score > accent.score) {
+            accent = { color: hsl, score };
+        }
+    }
+
+    if (count === 0) {
+        throw new Error("No opaque pixels available for analysis");
+    }
+
+    const averageR = totalR / count;
+    const averageG = totalG / count;
+    const averageB = totalB / count;
+    const average = paletteRgbToHsl(averageR, averageG, averageB);
+
+    const accentColor = accent ? accent.color : average;
+
+    return {
+        average,
+        accent: accentColor,
+    };
+}
+
+function buildPaletteFromAccent(accent, average) {
+    const lightColors = [
+        paletteHslToHex({ h: accent.h, s: paletteAdjustSaturation(accent.s, 0.4, 0.08), l: paletteAdjustLightness(accent.l, 0.42, 0.52) }),
+        paletteHslToHex({ h: accent.h, s: paletteAdjustSaturation(accent.s, 0.52, 0.05), l: paletteAdjustLightness(accent.l, 0.26, 0.62) }),
+        paletteHslToHex({ h: accent.h, s: paletteAdjustSaturation(accent.s, 0.65), l: paletteAdjustLightness(accent.l, 0.12, 0.72) }),
+    ];
+
+    const darkColors = [
+        paletteHslToHex({ h: accent.h, s: paletteAdjustSaturation(accent.s, 0.55, 0.04), l: paletteAdjustLightness(accent.l, 0.14, 0.38) }),
+        paletteHslToHex({ h: accent.h, s: paletteAdjustSaturation(accent.s, 0.62, 0.02), l: paletteAdjustLightness(accent.l, 0.04, 0.3) }),
+        paletteHslToHex({ h: accent.h, s: paletteAdjustSaturation(accent.s, 0.72), l: paletteAdjustLightness(accent.l, -0.04, 0.22) }),
+    ];
+
+    const accentRgb = paletteHslToRgb(accent.h, accent.s, accent.l);
+
+    return {
+        source: "client",
+        baseColor: paletteHslToHex(accent),
+        averageColor: paletteHslToHex(average),
+        accentColor: paletteHslToHex(accent),
+        contrastColor: palettePickContrastColor(accentRgb),
+        gradients: {
+            light: {
+                colors: lightColors,
+                gradient: `linear-gradient(140deg, ${lightColors[0]} 0%, ${lightColors[1]} 45%, ${lightColors[2]} 100%)`,
+            },
+            dark: {
+                colors: darkColors,
+                gradient: `linear-gradient(135deg, ${darkColors[0]} 0%, ${darkColors[1]} 55%, ${darkColors[2]} 100%)`,
+            },
+        },
+        tokens: {
+            light: {
+                primaryColor: paletteHslToHex({ h: accent.h, s: paletteAdjustSaturation(accent.s, 0.6, 0.06), l: paletteAdjustLightness(accent.l, 0.22, 0.6) }),
+                primaryColorDark: paletteHslToHex({ h: accent.h, s: paletteAdjustSaturation(accent.s, 0.72, 0.02), l: paletteAdjustLightness(accent.l, 0.06, 0.52) }),
+            },
+            dark: {
+                primaryColor: paletteHslToHex({ h: accent.h, s: paletteAdjustSaturation(accent.s, 0.58, 0.04), l: paletteAdjustLightness(accent.l, 0.16, 0.42) }),
+                primaryColorDark: paletteHslToHex({ h: accent.h, s: paletteAdjustSaturation(accent.s, 0.68), l: paletteAdjustLightness(accent.l, 0.02, 0.32) }),
+            },
+        },
+    };
+}
+
+async function extractPaletteFromCanvas(imageUrl) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => {
+            try {
+                const canvas = document.createElement("canvas");
+                const ctx = canvas.getContext("2d");
+                
+                const maxSide = Math.max(img.width, img.height);
+                const scale = PALETTE_MAX_DIMENSION / maxSide;
+                const w = Math.max(1, Math.round(img.width * scale));
+                const h = Math.max(1, Math.round(img.height * scale));
+                
+                canvas.width = w;
+                canvas.height = h;
+                ctx.drawImage(img, 0, 0, w, h);
+                
+                const imageData = ctx.getImageData(0, 0, w, h);
+                const analyzed = analyzeImageDataColors(imageData);
+                const palette = buildPaletteFromAccent(analyzed.accent, analyzed.average);
+                palette.source = imageUrl;
+                
+                resolve(palette);
+            } catch (err) {
+                reject(err);
+            }
+        };
+        img.onerror = () => reject(new Error("Failed to load image for canvas analysis"));
+        img.src = imageUrl;
+    });
+}
+
 loadStoredPalettes();
 
 async function fetchPaletteData(imageUrl, signal) {
@@ -1906,10 +2149,29 @@ async function updateDynamicBackground(imageUrl) {
         if (error?.name === "AbortError") {
             return;
         }
-        console.warn("获取动态背景失败:", error);
-        debugLog(`动态背景加载失败: ${error}`);
-        if (requestId === paletteRequestId) {
-            resetDynamicBackground();
+
+        console.warn("获取远程动态背景失败，尝试客户端降级提取:", error);
+        debugLog(`远程背景提取失败，尝试客户端降级...`);
+
+        try {
+            // 降级方案：使用客户端 Canvas 提取 (支持 PNG/WebP 且绕过服务器解码限制)
+            const clientPalette = await extractPaletteFromCanvas(imageUrl);
+            if (requestId !== paletteRequestId) {
+                return;
+            }
+
+            // 提取成功后存入缓存，下次可直接使用
+            paletteCache.set(imageUrl, clientPalette);
+            persistPaletteCache();
+
+            queuePaletteApplication(clientPalette, imageUrl);
+            debugLog("客户端配色提取成功");
+        } catch (fallbackError) {
+            console.warn("客户端降级提取也失败了:", fallbackError);
+            debugLog(`动态背景加载失败: ${fallbackError}`);
+            if (requestId === paletteRequestId) {
+                resetDynamicBackground();
+            }
         }
     } finally {
         if (controller && paletteAbortController === controller) {
