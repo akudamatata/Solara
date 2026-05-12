@@ -49,7 +49,7 @@ services:
     container_name: solara
     restart: always
     ports:
-      - "8787:8787"
+      - "80:8787"
     environment:
       # 在这里配置你的 Solara 登录口令
       - PASSWORD=your_secure_password_here
