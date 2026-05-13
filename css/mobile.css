@@ -928,10 +928,19 @@ body.mobile-view .search-results {
     align-self: center;
     margin-top: 0;
     position: relative;
-    /* Use mask to hide items scrolling behind the toolbar area */
-    mask-image: linear-gradient(to bottom, transparent, transparent 45px, black 80px, black calc(100% - 20px), transparent);
-    -webkit-mask-image: linear-gradient(to bottom, transparent, transparent 45px, black 80px, black calc(100% - 20px), transparent);
     scrollbar-width: none;
+}
+
+body.mobile-view .search-results-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 65px 0 20px 0; /* Extra padding to avoid being covered by sticky toolbar */
+    width: 100%;
+    box-sizing: border-box;
+    /* Apply mask here so it doesn't affect the sticky toolbar */
+    mask-image: linear-gradient(to bottom, transparent, transparent 20px, black 60px, black calc(100% - 20px), transparent);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, transparent 20px, black 60px, black calc(100% - 20px), transparent);
 }
 
 body.mobile-view .search-results::-webkit-scrollbar {
@@ -992,15 +1001,6 @@ body.mobile-view .source-option {
 body.mobile-view .import-dropdown-item:active,
 body.mobile-view .source-option:active {
     background: rgba(255, 255, 255, 0.1);
-}
-
-body.mobile-view .search-results-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    padding: 20px 0;
-    width: 100%;
-    box-sizing: border-box;
 }
 
 body.mobile-view .search-result-item {
