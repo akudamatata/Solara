@@ -832,14 +832,10 @@ body.mobile-view .search-controls-wrapper {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    padding-bottom: 20px;
+    padding-bottom: 5px; /* Reduced gap to integrate with toolbar */
     margin-bottom: 0;
-    position: sticky;
-    top: -20px; /* Adjust to cover title gap if needed */
+    position: relative;
     z-index: 30;
-    background: rgba(8, 10, 16, 0.85);
-    backdrop-filter: blur(40px) saturate(180%);
-    -webkit-backdrop-filter: blur(40px) saturate(180%);
 }
 
 body.mobile-view .search-header {
@@ -924,22 +920,6 @@ body.mobile-view .source-select-btn {
     white-space: nowrap;
 }
 
-body.mobile-view .search-results-toolbar {
-    width: 100%;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    background: transparent;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-}
-
-/* Add a bit of space for the first item to not be cut off by sticky header */
-body.mobile-view .search-results-list {
-    padding-top: 10px;
-}
-
 body.mobile-view .search-results {
     flex: 1;
     overflow-y: auto;
@@ -948,8 +928,9 @@ body.mobile-view .search-results {
     align-self: center;
     margin-top: 0;
     position: relative;
-    mask-image: linear-gradient(to bottom, transparent, black 15px, black calc(100% - 15px), transparent);
-    -webkit-mask-image: linear-gradient(to bottom, transparent, black 15px, black calc(100% - 15px), transparent);
+    /* Use mask to hide items scrolling behind the toolbar area */
+    mask-image: linear-gradient(to bottom, transparent, transparent 45px, black 80px, black calc(100% - 20px), transparent);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, transparent 45px, black 80px, black calc(100% - 20px), transparent);
     scrollbar-width: none;
 }
 
@@ -964,6 +945,10 @@ body.mobile-view .search-results-toolbar {
     padding: 10px 0;
     display: flex;
     justify-content: center;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: transparent;
 }
 
 body.mobile-view .import-dropdown {
