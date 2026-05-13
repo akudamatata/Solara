@@ -154,13 +154,25 @@ body.background-transitioning .background-stage__layer--transition {
     font-size: 2.2em; 
     font-weight: 700; 
     color: var(--primary-color); 
-    letter-spacing: 1px; 
+    letter-spacing: 1px;
+    user-select: none;
+    cursor: default;
 }
 .header .warning { 
     color: var(--text-secondary-color); 
     font-size: 0.9em; 
     margin-top: 10px; 
     font-style: italic; 
+}
+
+/* 设置齿轮按钮旋转动效 */
+#openSettingsBtn:hover i {
+    animation: gear-spin 0.6s linear;
+}
+
+@keyframes gear-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(180deg); }
 }
 
 /* 搜索区域样式 - 增强动效 */
@@ -2232,7 +2244,8 @@ input[type="range"]:active::-moz-range-thumb {
     margin: 0;
     font-size: 1.5rem;
     font-weight: 700;
-    color: var(--primary-color);
+    color: #1abc9c;
+    user-select: none;
 }
 
 .close-modal-btn {
@@ -2309,7 +2322,7 @@ input[type="range"]:active::-moz-range-thumb {
     background: var(--primary-color);
     border-color: var(--primary-color);
     color: white;
-    box-shadow: 0 8px 16px rgba(26, 188, 156, 0.25);
+    box-shadow: 0 8px 16px rgba(26, 188, 156, 0.3);
     transform: translateY(-2px);
 }
 

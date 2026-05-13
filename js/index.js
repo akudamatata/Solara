@@ -80,6 +80,7 @@ const dom = {
     settingsModal: document.getElementById("settingsModal"),
     closeSettingsBtn: document.getElementById("closeSettingsBtn"),
     saveSettingsBtn: document.getElementById("saveSettingsBtn"),
+    openSettingsBtn: document.getElementById("openSettingsBtn"),
     radarGenreList: document.getElementById("radarGenreList"),
     logo: document.querySelector(".header h1"),
 };
@@ -6292,6 +6293,11 @@ function initSettings() {
     }
     if (dom.saveSettingsBtn) {
         dom.saveSettingsBtn.addEventListener("click", saveSettings);
+    }
+    // 绑定齿轮图标按钮
+    const openBtn = dom.openSettingsBtn || document.getElementById("openSettingsBtn");
+    if (openBtn) {
+        openBtn.addEventListener("click", openSettingsModal);
     }
     if (dom.settingsModal) {
         dom.settingsModal.addEventListener("click", (e) => {
