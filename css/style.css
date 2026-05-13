@@ -1193,6 +1193,19 @@ html[lang="en"] .playlist.empty .playlist-scroll::before {
     background-color: var(--item-current-bg);
 }
 
+/* 暗色模式下强化对比度：使用更深背景 + 纯白文字 */
+body.dark-mode .playlist-items .playlist-item:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+body.dark-mode .playlist-items .playlist-item.current {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    font-weight: 600;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
 
 .playlist-item-favorite,
 .playlist-item-download,
