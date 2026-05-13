@@ -921,9 +921,14 @@ body.mobile-view .search-results {
     max-width: 400px;
     align-self: center;
     margin-top: 10px;
-    padding-right: 4px;
-    mask-image: linear-gradient(to bottom, transparent, black 20px, black calc(100% - 20px), transparent);
-    -webkit-mask-image: linear-gradient(to bottom, transparent, black 20px, black calc(100% - 20px), transparent);
+    position: relative;
+    mask-image: linear-gradient(to bottom, transparent, black 15px, black calc(100% - 15px), transparent);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black 15px, black calc(100% - 15px), transparent);
+    scrollbar-width: none; /* Hide scrollbar for cleaner look if possible, or use custom styling */
+}
+
+body.mobile-view .search-results::-webkit-scrollbar {
+    display: none;
 }
 
 body.mobile-view .search-results-toolbar {
@@ -960,11 +965,15 @@ body.mobile-view .search-results-list {
     flex-direction: column;
     gap: 12px;
     padding: 20px 0;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 body.mobile-view .search-result-item {
     display: flex;
     align-items: center;
+    width: 100%;
+    box-sizing: border-box;
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 18px;
