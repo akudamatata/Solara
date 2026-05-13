@@ -831,16 +831,14 @@ body.mobile-view .search-controls-wrapper {
     align-self: center;
     display: flex;
     flex-direction: column;
-    padding: 10px;
-    background: transparent; /* Removed white tint for "内外一色" look */
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 12px;
+    background: transparent; /* Seamless with background */
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
     position: sticky;
     top: 0;
     z-index: 30;
-    backdrop-filter: blur(40px) saturate(180%);
-    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    /* Removed redundant backdrop-filter and box-shadow to achieve "内外一色" */
 }
 
 body.mobile-view .search-header {
@@ -850,7 +848,8 @@ body.mobile-view .search-header {
     width: 100%;
     max-width: 400px;
     align-self: center;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
+    padding: 0 4px;
 }
 
 body.mobile-view .search-title {
@@ -865,11 +864,11 @@ body.mobile-view .search-bar-unified {
     display: flex;
     align-items: center;
     width: 100%;
-    background: rgba(255, 255, 255, 0.1); 
-    border: 1.5px solid rgba(29, 185, 84, 0.4); /* Restored original green border */
-    border-radius: 14px; /* Restored rounding degree */
+    background: rgba(255, 255, 255, 0.08); 
+    border: 1.5px solid rgba(29, 185, 84, 0.4); 
+    border-radius: 14px;
     padding: 2px;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
     transition: border-color 0.3s ease;
 }
 
@@ -925,18 +924,17 @@ body.mobile-view .source-select-btn {
 body.mobile-view .search-results-toolbar {
     width: 100%;
     margin: 0;
-    padding: 2px 0 8px 0;
+    padding: 0;
     display: flex;
-    justify-content: center;
-    background: transparent;
+    /* Removed justify-content: center to allow full-width button */
 }
 
 body.mobile-view .import-dropdown {
-    width: 100%; /* Ensure dropdown container is full width */
+    width: 100%;
 }
 
 body.mobile-view .import-selected-btn {
-    width: 100%; /* Make button span left to right */
+    width: 100%;
     border-radius: 16px;
     background: linear-gradient(135deg, #f36d6d 0%, #f3a25b 100%);
     box-shadow: 0 8px 24px rgba(243, 109, 109, 0.3);
