@@ -208,7 +208,11 @@ body.background-transitioning .background-stage__layer--transition {
     border: 2px solid var(--primary-color);
 }
 
-.search-container {
+.search-header {
+    display: none;
+}
+
+.search-controls-wrapper {
     display: flex;
     gap: 10px;
     align-items: center;
@@ -216,22 +220,44 @@ body.background-transitioning .background-stage__layer--transition {
     flex-shrink: 0;
 }
 
-.search-input {
+.search-bar-unified {
     flex: 1;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.search-input-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: center;
     padding: 12px 16px;
     border: 2px solid var(--border-color);
     border-radius: 12px;
     background: var(--component-bg);
+    transition: all 0.3s ease;
+}
+
+.search-input-wrapper:focus-within {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(26, 188, 156, 0.12);
+}
+
+.search-icon {
+    color: var(--text-secondary-color);
+    margin-right: 10px;
+    font-size: 14px;
+}
+
+.search-input {
+    flex: 1;
+    border: none;
+    background: transparent;
     color: var(--text-color);
     font-size: 16px;
     font-family: inherit;
     outline: none;
-    transition: all 0.3s ease;
-}
-
-.search-input:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(26, 188, 156, 0.12);
+    padding: 0;
 }
 
 .source-select-wrapper {

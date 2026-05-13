@@ -825,6 +825,13 @@ body.mobile-view.mobile-search-open .search-area {
     pointer-events: auto;
 }
 
+body.mobile-view .search-controls-wrapper {
+    width: 100%;
+    max-width: 400px;
+    align-self: center;
+    display: block;
+}
+
 body.mobile-view .search-header {
     display: flex;
     justify-content: space-between;
@@ -860,6 +867,10 @@ body.mobile-view .search-bar-unified:focus-within {
     border-color: rgba(243, 162, 91, 0.5);
     box-shadow: 0 12px 40px rgba(243, 162, 91, 0.15);
     transform: scale(1.01);
+}
+
+body.mobile-view #searchBtn {
+    display: none;
 }
 
 body.mobile-view .search-input-wrapper {

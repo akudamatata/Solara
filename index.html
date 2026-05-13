@@ -140,20 +140,25 @@
                     <i class="fas fa-times" aria-hidden="true"></i>
                 </button>
             </div>
-            <div class="search-bar-unified">
-                <div class="search-input-wrapper">
-                    <i class="fas fa-search search-icon"></i>
-                    <input type="text" id="searchInput" class="search-input" placeholder="搜索歌曲、歌手或专辑...">
+            <div class="search-controls-wrapper">
+                <div class="search-bar-unified">
+                    <div class="search-input-wrapper">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="searchInput" class="search-input" placeholder="搜索歌曲、歌手或专辑...">
+                    </div>
+                    <div class="source-select-wrapper" id="sourceSelectWrapper">
+                        <button id="sourceSelectButton" class="source-select-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
+                            <span id="sourceSelectLabel">网易云</span>
+                            <i class="fas fa-chevron-down caret-icon" aria-hidden="true"></i>
+                        </button>
+                        <div id="sourceMenu" class="source-menu" role="listbox" aria-labelledby="sourceSelectButton"></div>
+                    </div>
                 </div>
-                <div class="source-select-wrapper" id="sourceSelectWrapper">
-                    <button id="sourceSelectButton" class="source-select-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
-                        <span id="sourceSelectLabel">网易云</span>
-                        <i class="fas fa-chevron-down caret-icon" aria-hidden="true"></i>
-                    </button>
-                    <div id="sourceMenu" class="source-menu" role="listbox" aria-labelledby="sourceSelectButton"></div>
-                </div>
+                <button id="searchBtn" class="search-btn">
+                    <i class="fas fa-search"></i>
+                    <span>搜索</span>
+                </button>
             </div>
-            <button id="searchBtn" class="search-btn" style="display: none;"></button>
             <div id="searchResults" class="search-results">
                 <div class="search-results-toolbar">
                     <div class="import-dropdown">
