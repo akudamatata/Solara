@@ -1207,24 +1207,27 @@ body.dark-mode .playlist-items .playlist-item.current {
 }
 
 
+/* ===== 播放列表操作按钮：极简幽灵风格 ===== */
 .playlist-item-favorite,
 .playlist-item-download,
 .playlist-item-remove {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    width: 20px;
-    height: 20px;
-    border-radius: 4px;
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     border: 1px solid transparent;
     padding: 0;
-    font-size: 14px;
+    font-size: 13px;
     cursor: pointer;
     opacity: 0;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease, opacity 0.2s ease;
+    background: transparent;
+    color: var(--text-secondary-color);
+    transition: opacity 0.18s ease, color 0.18s ease, background 0.18s ease, transform 0.18s ease;
     z-index: 5;
 }
 
@@ -1237,65 +1240,65 @@ body.dark-mode .playlist-items .playlist-item.current {
     opacity: 1;
 }
 
-
 .playlist-item-favorite {
     right: 74px;
-    background: #ff4d67;
-    color: #ffffff;
-    border-color: rgba(255, 77, 103, 0.6);
-    box-shadow: 0 4px 12px rgba(255, 77, 103, 0.25);
+    box-shadow: none;
 }
-
 .playlist-item-favorite .fas,
 .playlist-item-favorite .far {
     margin: 0;
-    transition: color 0.2s ease;
+    transition: color 0.18s ease;
 }
-
 .playlist-item-favorite.is-active {
-    filter: brightness(1.02);
+    color: #ff4d67;
 }
-
 .playlist-item-favorite.is-active .fas,
 .playlist-item-favorite.is-active .far {
-    color: #ffffff;
+    color: #ff4d67;
 }
 
 .playlist-item-download {
     right: 42px;
-    background: var(--success-color);
-    color: #ffffff;
-    border-color: rgba(46, 204, 113, 0.5);
-    box-shadow: 0 4px 10px rgba(46, 204, 113, 0.2);
+    box-shadow: none;
 }
 
 .playlist-item-remove {
     right: 10px;
-    background: rgba(255, 59, 48, 0.9);
-    color: #ffffff;
-    border-color: rgba(231, 76, 60, 0.5);
-    box-shadow: 0 4px 10px rgba(231, 76, 60, 0.22);
+    box-shadow: none;
 }
 
-.playlist-item-favorite:hover,
-.playlist-items .playlist-item:focus-within .playlist-item-favorite {
-    transform: translateY(-50%) scale(1.05);
-    box-shadow: 0 8px 20px rgba(255, 77, 103, 0.35);
-    filter: brightness(1.05);
+/* hover 时显示对应功能色 */
+.playlist-item-favorite:hover {
+    color: #ff4d67;
+    background: rgba(255, 77, 103, 0.1);
+    transform: translateY(-50%) scale(1.1);
+    border-color: rgba(255, 77, 103, 0.2);
+}
+.playlist-item-download:hover {
+    color: #2ecc71;
+    background: rgba(46, 204, 113, 0.1);
+    transform: translateY(-50%) scale(1.1);
+    border-color: rgba(46, 204, 113, 0.2);
+}
+.playlist-item-remove:hover {
+    color: #e74c3c;
+    background: rgba(231, 76, 60, 0.1);
+    transform: translateY(-50%) scale(1.1);
+    border-color: rgba(231, 76, 60, 0.2);
 }
 
-.playlist-item-download:hover,
-.playlist-items .playlist-item:focus-within .playlist-item-download {
-    transform: translateY(-50%) scale(1.05);
-    box-shadow: 0 8px 18px rgba(46, 204, 113, 0.25);
-    filter: brightness(1.05);
+/* 暗色模式下加强边框和背景可见度 */
+body.dark-mode .playlist-item-favorite:hover {
+    background: rgba(255, 77, 103, 0.18);
+    border-color: rgba(255, 77, 103, 0.3);
 }
-
-.playlist-item-remove:hover,
-.playlist-items .playlist-item:focus-within .playlist-item-remove {
-    transform: translateY(-50%) scale(1.05);
-    box-shadow: 0 8px 18px rgba(231, 76, 60, 0.28);
-    filter: brightness(1.05);
+body.dark-mode .playlist-item-download:hover {
+    background: rgba(46, 204, 113, 0.18);
+    border-color: rgba(46, 204, 113, 0.3);
+}
+body.dark-mode .playlist-item-remove:hover {
+    background: rgba(231, 76, 60, 0.18);
+    border-color: rgba(231, 76, 60, 0.3);
 }
 
 .favorite-toggle {
@@ -1347,76 +1350,72 @@ body.dark-mode .playlist-items .playlist-item.current {
     padding-right: 150px;
 }
 
+/* ===== 收藏列表操作按钮：极简幽灵风格 ===== */
 .favorite-item-action {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    width: 20px;
-    height: 20px;
-    border-radius: 4px;
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     border: 1px solid transparent;
     cursor: pointer;
     opacity: 0;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease, opacity 0.2s ease;
-    color: #ffffff;
+    font-size: 13px;
+    background: transparent;
+    color: var(--text-secondary-color);
+    transition: opacity 0.18s ease, color 0.18s ease, background 0.18s ease, transform 0.18s ease;
 }
 
 .favorite-item-action--add {
     right: 74px;
-    background: var(--primary-color);
 }
-
 .favorite-item-action--download {
     right: 42px;
-    background: var(--success-color);
 }
-
 .favorite-item-action--remove {
     right: 10px;
-    background: rgba(255, 59, 48, 0.8);
 }
 
-.favorites .playlist-item:hover .favorite-item-action {
+.favorites .playlist-item:hover .favorite-item-action,
+.favorites .playlist-items .playlist-item:focus-within .favorite-item-action {
     opacity: 1;
 }
 
-.favorite-item-action:hover,
-.favorites .playlist-items .playlist-item:focus-within .favorite-item-action {
-    transform: translateY(-50%) scale(1.05);
-    filter: brightness(1.05);
+.favorite-item-action--add:hover {
+    color: var(--primary-color);
+    background: rgba(26, 188, 156, 0.1);
+    border-color: rgba(26, 188, 156, 0.2);
+    transform: translateY(-50%) scale(1.1);
+}
+.favorite-item-action--download:hover {
+    color: #2ecc71;
+    background: rgba(46, 204, 113, 0.1);
+    border-color: rgba(46, 204, 113, 0.2);
+    transform: translateY(-50%) scale(1.1);
+}
+.favorite-item-action--remove:hover {
+    color: #e74c3c;
+    background: rgba(231, 76, 60, 0.1);
+    border-color: rgba(231, 76, 60, 0.2);
+    transform: translateY(-50%) scale(1.1);
 }
 
-.favorite-item-action--add {
-    box-shadow: 0 4px 12px rgba(76, 110, 245, 0.22);
+/* 暗色模式加强 */
+body.dark-mode .favorite-item-action--add:hover {
+    background: rgba(26, 188, 156, 0.18);
+    border-color: rgba(26, 188, 156, 0.3);
 }
-
-.favorite-item-action--download {
-    box-shadow: 0 4px 10px rgba(46, 204, 113, 0.2);
+body.dark-mode .favorite-item-action--download:hover {
+    background: rgba(46, 204, 113, 0.18);
+    border-color: rgba(46, 204, 113, 0.3);
 }
-
-.favorite-item-action--remove {
-    box-shadow: 0 4px 10px rgba(231, 76, 60, 0.22);
-}
-
-.favorite-item-action--add:hover,
-.favorites .playlist-items .playlist-item:focus-within .favorite-item-action--add {
-    background: var(--primary-color-dark);
-    box-shadow: 0 8px 20px rgba(76, 110, 245, 0.28);
-}
-
-.favorite-item-action--download:hover,
-.favorites .playlist-items .playlist-item:focus-within .favorite-item-action--download {
-    background: var(--success-color-hover);
-    box-shadow: 0 8px 18px rgba(46, 204, 113, 0.25);
-}
-
-.favorite-item-action--remove:hover,
-.favorites .playlist-items .playlist-item:focus-within .favorite-item-action--remove {
-    background: rgba(255, 59, 48, 1);
-    box-shadow: 0 8px 18px rgba(231, 76, 60, 0.28);
+body.dark-mode .favorite-item-action--remove:hover {
+    background: rgba(231, 76, 60, 0.18);
+    border-color: rgba(231, 76, 60, 0.3);
 }
 
 html.mobile-view .mobile-panel-header .playlist-tabs {
