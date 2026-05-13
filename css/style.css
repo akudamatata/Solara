@@ -611,48 +611,72 @@ body.background-transitioning .background-stage__layer--transition {
 
 .search-result-actions {
     display: flex;
-    gap: 8px;
-    margin-left: 15px;
+    gap: 4px;
+    margin-left: 12px;
+    flex-shrink: 0;
 }
 
 .search-result-actions .action-btn {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     padding: 0;
     border-radius: 8px;
     justify-content: center;
-    font-size: 14px;
+    font-size: 13px;
     gap: 0;
-    border: 1px solid rgba(255, 255, 255, 0.6);
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-secondary-color);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    z-index: auto;
+    font-weight: normal;
+    box-shadow: none;
+    transition: color 0.18s ease, transform 0.18s ease;
 }
 
 .search-result-actions .action-btn i {
     margin: 0;
 }
 
-.search-result-actions .action-btn.favorite {
-    background: #ff4d67;
-    color: #ffffff;
-    border-color: rgba(255, 77, 103, 0.65);
-    box-shadow: 0 6px 16px rgba(255, 77, 103, 0.3);
+/* 搜索按钮 hover 重置基础类的彩色背景 */
+.search-result-actions .action-btn:hover {
+    background: transparent;
+    transform: scale(1.1);
+    box-shadow: none;
 }
 
-.search-result-actions .action-btn.favorite.is-active {
-    filter: brightness(1.05);
-}
-
+/* 收藏按钮 - 悬停变红心 */
 .search-result-actions .action-btn.favorite:hover {
-    color: #ffffff;
-    filter: brightness(1.05);
+    color: #ff4d67;
+    transform: scale(1.1);
 }
 
-.search-result-actions .action-btn.play {
-    border-color: rgba(26, 188, 156, 0.45);
+/* 收藏激活（已收藏）状态 - 红心 */
+.search-result-actions .action-btn.favorite.is-active {
+    color: #ff4d67;
 }
 
+.search-result-actions .action-btn.favorite.is-active:hover {
+    color: #ff4d67;
+    transform: scale(1.1);
+}
+
+/* 播放按钮 - 悬停变主题色 */
+.search-result-actions .action-btn.play:hover {
+    color: var(--primary-color);
+    transform: scale(1.1);
+}
+
+/* 下载按钮 - 悬停变绿色 */
 .search-result-actions .action-btn.download {
-    border-color: rgba(46, 204, 113, 0.55);
-    box-shadow: 0 6px 16px rgba(46, 204, 113, 0.28);
+    position: relative;
+}
+
+.search-result-actions .action-btn.download:hover {
+    color: #2ecc71;
+    transform: scale(1.1);
 }
 
 
