@@ -1740,7 +1740,6 @@ input[type="range"]::-webkit-slider-thumb {
     height: 16px;
     border-radius: 50%;
     background: var(--primary-color);
-    border: 2px solid rgba(255, 255, 255, 0.6);
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
     transition: transform 0.2s ease;
 }
@@ -1750,7 +1749,6 @@ input[type="range"]::-moz-range-thumb {
     height: 16px;
     border-radius: 50%;
     background: var(--primary-color);
-    border: 2px solid rgba(255, 255, 255, 0.6);
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
     transition: transform 0.2s ease;
 }

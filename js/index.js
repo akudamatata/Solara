@@ -1564,6 +1564,15 @@ function captureThemeDefaults() {
 
     const initialIsDark = document.body.classList.contains("dark-mode");
     document.body.classList.remove("dark-mode");
+
+    const oldBg = document.documentElement.style.getPropertyValue("--bg-gradient");
+    const oldPrimary = document.documentElement.style.getPropertyValue("--primary-color");
+    const oldPrimaryDark = document.documentElement.style.getPropertyValue("--primary-color-dark");
+    
+    document.documentElement.style.removeProperty("--bg-gradient");
+    document.documentElement.style.removeProperty("--primary-color");
+    document.documentElement.style.removeProperty("--primary-color-dark");
+
     const lightStyles = getComputedStyle(document.body);
     themeDefaults.light.gradient = lightStyles.getPropertyValue("--bg-gradient").trim();
     themeDefaults.light.primaryColor = lightStyles.getPropertyValue("--primary-color").trim();
@@ -1578,6 +1587,10 @@ function captureThemeDefaults() {
     if (!initialIsDark) {
         document.body.classList.remove("dark-mode");
     }
+
+    if (oldBg) document.documentElement.style.setProperty("--bg-gradient", oldBg);
+    if (oldPrimary) document.documentElement.style.setProperty("--primary-color", oldPrimary);
+    if (oldPrimaryDark) document.documentElement.style.setProperty("--primary-color-dark", oldPrimaryDark);
 
     state.themeDefaultsCaptured = true;
 }
@@ -2182,6 +2195,9 @@ async function updateDynamicBackground(imageUrl) {
             }
 
             // 提取成功后存入缓存，下次可直接使用
+            if (paletteCache.has(imageUrl)) {
+                paletteCache.delete(imageUrl);
+            }
             paletteCache.set(imageUrl, clientPalette);
             persistPaletteCache();
 
