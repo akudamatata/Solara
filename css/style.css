@@ -2073,6 +2073,14 @@ input[type="range"]:active::-moz-range-thumb {
     justify-content: flex-end;
 }
 
+.header-left-controls {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    display: flex;
+    justify-content: flex-start;
+}
+
 .theme-toggle-button {
     width: 44px;
     height: 44px;
