@@ -3753,9 +3753,9 @@ function setupInteractions() {
         if (restoredSong) {
             state.currentSong = restoredSong;
             updatePlaylistHighlight();
-            updateCurrentSongInfo(restoredSong).catch(error => {
-                console.error("恢复歌曲信息失败:", error);
-            });
+            // 注意：不在这里调用 updateCurrentSongInfo，
+            // restoreCurrentSongState() 会通过 playSong → scheduleDeferredSongAssets
+            // 正确完成封面加载和动态背景应用，避免竞态条件重置 audioReadyForPalette
         }
 
         savePlayerState();
