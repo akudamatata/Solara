@@ -2052,7 +2052,7 @@ input[type="range"]:active::-moz-range-thumb {
 .theme-toggle-button {
     width: 44px;
     height: 44px;
-    border-radius: 50%;
+    border-radius: 16px;
     border: none;
     background: var(--primary-color);
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
