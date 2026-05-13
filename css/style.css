@@ -672,11 +672,16 @@ body.background-transitioning .background-stage__layer--transition {
 /* 下载按钮 - 悬停变绿色 */
 .search-result-actions .action-btn.download {
     position: relative;
+    background: transparent;
+    padding: 0;
+    font-size: 13px;
 }
 
 .search-result-actions .action-btn.download:hover {
     color: #2ecc71;
+    background: transparent;
     transform: scale(1.1);
+    box-shadow: none;
 }
 
 
@@ -755,10 +760,7 @@ body.background-transitioning .background-stage__layer--transition {
     box-shadow: 0 4px 12px rgba(46, 204, 113, 0.3);
 }
 
-.search-result-actions .action-btn.download {
-    padding: 0;
-    font-size: 14px;
-}
+
 
 /* 主要内容区域 - 播放模式显示，搜索模式隐藏 */
 .main-content {
