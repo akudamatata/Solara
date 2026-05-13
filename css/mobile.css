@@ -960,6 +960,29 @@ body.mobile-view .import-selected-btn:disabled {
     color: rgba(255, 255, 255, 0.3);
 }
 
+body.mobile-view .import-dropdown-menu,
+body.mobile-view .source-menu {
+    background: rgba(28, 30, 38, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 16px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    overflow: hidden;
+}
+
+body.mobile-view .import-dropdown-item,
+body.mobile-view .source-option {
+    color: #ffffff !important;
+    padding: 12px 18px;
+    font-size: 0.95rem;
+}
+
+body.mobile-view .import-dropdown-item:active,
+body.mobile-view .source-option:active {
+    background: rgba(255, 255, 255, 0.1);
+}
+
 body.mobile-view .search-results-list {
     display: flex;
     flex-direction: column;
@@ -1024,13 +1047,18 @@ body.mobile-view .search-result-item.selected .search-result-select i {
     transform: scale(1);
 }
 
+body.mobile-view .search-result-item.selected .search-result-title {
+    color: #f3a25b;
+    text-shadow: 0 0 12px rgba(243, 162, 91, 0.3);
+}
+
 body.mobile-view .search-result-info {
     flex: 1;
     min-width: 0;
 }
 
 body.mobile-view .search-result-title {
-    font-size: 1rem;
+    font-size: 1.05rem;
     font-weight: 600;
     color: #ffffff;
     white-space: nowrap;
@@ -1040,8 +1068,8 @@ body.mobile-view .search-result-title {
 }
 
 body.mobile-view .search-result-artist {
-    font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.7);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
