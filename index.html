@@ -504,6 +504,39 @@
 
     <audio id="audioPlayer" preload="metadata" playsinline></audio>
 
+<!-- 设置模态框 -->
+<div id="settingsModal" class="modal-overlay" aria-hidden="true">
+    <div class="modal-content settings-content">
+        <div class="modal-header">
+            <h2>设置</h2>
+            <button id="closeSettingsBtn" class="close-modal-btn" aria-label="关闭设置">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <section class="settings-section">
+                <h3>探索雷达风格</h3>
+                <p class="settings-hint">选择您喜欢的音乐风格，探索雷达将从中为您推荐歌曲。</p>
+                <div id="radarGenreList" class="genre-grid">
+                    <!-- 风格复选框将通过 JS 动态生成 -->
+                </div>
+            </section>
+            <section class="settings-section">
+                <h3>数据同步</h3>
+                <p class="settings-hint">手动触发云端数据同步，确保所有设备数据一致。</p>
+                <div class="sync-controls">
+                    <button id="manualSyncBtn" class="sync-btn">
+                        <i class="fas fa-sync-alt"></i> 立即同步云端数据
+                    </button>
+                </div>
+            </section>
+        </div>
+        <div class="modal-footer">
+            <button id="saveSettingsBtn" class="save-settings-btn">保存设置</button>
+        </div>
+    </div>
+</div>
+
 <!-- 通知容器 -->
 <div id="notification" class="notification"></div>
 

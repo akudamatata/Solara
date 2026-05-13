@@ -77,6 +77,12 @@ const dom = {
     importFavoritesInput: document.getElementById("importFavoritesInput"),
     clearFavoritesBtn: document.getElementById("clearFavoritesBtn"),
     currentFavoriteToggle: document.getElementById("currentFavoriteToggle"),
+    settingsModal: document.getElementById("settingsModal"),
+    closeSettingsBtn: document.getElementById("closeSettingsBtn"),
+    saveSettingsBtn: document.getElementById("saveSettingsBtn"),
+    manualSyncBtn: document.getElementById("manualSyncBtn"),
+    radarGenreList: document.getElementById("radarGenreList"),
+    logo: document.querySelector(".header h1"),
 };
 
 window.SolaraDom = dom;
@@ -367,6 +373,7 @@ const STORAGE_KEYS_TO_SYNC = new Set([
     "favoritePlaybackTime",
     "searchSource",
     "lastSearchState.v1",
+    "radarSettings",
 ]);
 
 function createPersistentStorageClient() {
@@ -988,6 +995,17 @@ function applyPersistentSnapshotFromRemote(data) {
             state.playlistSongs = playlist;
             safeSetLocalStorage("playlistSongs", data.playlistSongs, { skipRemote: true });
             playlistUpdated = true;
+        }
+    }
+
+    if (typeof data.radarSettings === "string") {
+        const radarSettings = parseJSON(data.radarSettings, null);
+        if (radarSettings) {
+            state.radarSettings = radarSettings;
+            safeSetLocalStorage("radarSettings", data.radarSettings, { skipRemote: true });
+            if (typeof applySettingsToUI === "function") {
+                applySettingsToUI();
+            }
         }
     }
 
@@ -2647,6 +2665,20 @@ function seekAudio(value) {
     } else {
         state.lastSavedPlaybackTime = state.currentPlaybackTime;
         safeSetLocalStorage("currentPlaybackTime", state.currentPlaybackTime.toFixed(1));
+    }
+}
+
+async function performManualSync() {
+    const btn = document.getElementById("manualSyncBtn");
+    if (btn) btn.disabled = true;
+    showNotification("正在同步云端数据...");
+    try {
+        await syncDataToCloud();
+        showNotification("同步成功", "success");
+    } catch (e) {
+        showNotification("同步失败", "error");
+    } finally {
+        if (btn) btn.disabled = false;
     }
 }
 
@@ -5844,11 +5876,12 @@ const EXPLORE_RADAR_GENRES = [
 ];
 
 function pickRandomExploreGenre() {
-    if (!Array.isArray(EXPLORE_RADAR_GENRES) || EXPLORE_RADAR_GENRES.length === 0) {
-        return "流行";
-    }
-    const index = Math.floor(Math.random() * EXPLORE_RADAR_GENRES.length);
-    return EXPLORE_RADAR_GENRES[index];
+    const genres = (state.radarSettings && state.radarSettings.genres && state.radarSettings.genres.length > 0)
+        ? state.radarSettings.genres
+        : EXPLORE_RADAR_GENRES;
+    
+    const index = Math.floor(Math.random() * genres.length);
+    return genres[index];
 }
 
 const EXPLORE_RADAR_SOURCES = ["netease", "kuwo"];
@@ -6239,3 +6272,164 @@ function showNotification(message, type = "success") {
         notification.classList.remove("show");
     }, 3000);
 }
+
+// --- 设置与探索雷达自定义 ---
+
+function initSettings() {
+    // 渲染风格列表
+    renderGenreList();
+
+    // 绑定 Logo 双击事件
+    if (dom.logo) {
+        dom.logo.addEventListener("dblclick", openSettingsModal);
+    }
+    if (dom.mobileToolbarTitle) {
+        dom.mobileToolbarTitle.addEventListener("dblclick", openSettingsModal);
+    }
+
+    // 绑定按钮事件
+    if (dom.closeSettingsBtn) {
+        dom.closeSettingsBtn.addEventListener("click", closeSettingsModal);
+    }
+    if (dom.saveSettingsBtn) {
+        dom.saveSettingsBtn.addEventListener("click", saveSettings);
+    }
+    if (dom.manualSyncBtn) {
+        dom.manualSyncBtn.addEventListener("click", manualSync);
+    }
+    if (dom.settingsModal) {
+        dom.settingsModal.addEventListener("click", (e) => {
+            if (e.target === dom.settingsModal) closeSettingsModal();
+        });
+    }
+
+    // 加载设置
+    loadSettings();
+}
+
+function renderGenreList() {
+    if (!dom.radarGenreList) return;
+    
+    dom.radarGenreList.innerHTML = EXPLORE_RADAR_GENRES.map(genre => `
+        <div class="genre-item">
+            <input type="checkbox" id="genre-${genre}" value="${genre}" checked>
+            <label for="genre-${genre}" class="genre-label">${genre}</label>
+        </div>
+    `).join("");
+}
+
+function openSettingsModal() {
+    if (dom.settingsModal) {
+        dom.settingsModal.classList.add("show");
+        dom.settingsModal.setAttribute("aria-hidden", "false");
+    }
+}
+
+function closeSettingsModal() {
+    if (dom.settingsModal) {
+        dom.settingsModal.classList.remove("show");
+        dom.settingsModal.setAttribute("aria-hidden", "true");
+    }
+}
+
+async function saveSettings() {
+    const selectedGenres = Array.from(dom.radarGenreList.querySelectorAll("input:checked")).map(cb => cb.value);
+    
+    if (selectedGenres.length === 0) {
+        showNotification("请至少选择一个风格", "warning");
+        return;
+    }
+
+    state.radarSettings = {
+        genres: selectedGenres
+    };
+
+    // 本地保存
+    safeSetLocalStorage("radarSettings", JSON.stringify(state.radarSettings));
+
+    // 云同步会自动被 STORAGE_KEYS_TO_SYNC 机制处理，但我们这里手动触发一次以确保即时性
+    if (typeof persistStorageItems === "function") {
+        persistStorageItems({
+            radarSettings: JSON.stringify(state.radarSettings)
+        });
+    }
+
+    showNotification("设置已保存", "success");
+    closeSettingsModal();
+}
+
+async function loadSettings() {
+    // 1. 从本地加载 (作为兜底)
+    let localSettings = safeGetLocalStorage("radarSettings");
+    if (localSettings) {
+        try {
+            state.radarSettings = JSON.parse(localSettings);
+            applySettingsToUI();
+        } catch (e) {
+            console.error("解析本地设置失败:", e);
+        }
+    }
+    // 注意：云端加载已在 bootstrapPersistentStorage 中统一处理
+}
+
+function applySettingsToUI() {
+    if (!state.radarSettings || !state.radarSettings.genres || !dom.radarGenreList) return;
+    
+    const checkboxes = dom.radarGenreList.querySelectorAll("input[type='checkbox']");
+    checkboxes.forEach(cb => {
+        cb.checked = state.radarSettings.genres.includes(cb.value);
+    });
+}
+
+async function manualSync() {
+    if (dom.manualSyncBtn) {
+        dom.manualSyncBtn.classList.add("loading");
+        dom.manualSyncBtn.disabled = true;
+    }
+    
+    showNotification("正在同步云端数据...", "info");
+    
+    try {
+        // 先尝试将本地最新数据推送到云端
+        const itemsToPush = {};
+        STORAGE_KEYS_TO_SYNC.forEach(key => {
+            const val = safeGetLocalStorage(key);
+            if (val !== null) {
+                itemsToPush[key] = val;
+            }
+        });
+        
+        if (Object.keys(itemsToPush).length > 0) {
+            await persistentStorage.setItems(itemsToPush);
+        }
+
+        // 再从云端拉取最新数据
+        await bootstrapPersistentStorage();
+        
+        showNotification("同步完成", "success");
+    } catch (error) {
+        console.error("同步失败:", error);
+        showNotification("同步失败，请检查网络或登录状态", "error");
+    } finally {
+        if (dom.manualSyncBtn) {
+            dom.manualSyncBtn.classList.remove("loading");
+            dom.manualSyncBtn.disabled = false;
+        }
+    }
+}
+
+// 在 bootstrapPersistentStorage 之后或期间初始化设置
+(function() {
+    const originalBootstrap = bootstrapPersistentStorage;
+    bootstrapPersistentStorage = async function() {
+        await originalBootstrap();
+        initSettings();
+    };
+})();
+
+// 如果页面没有启用云同步，也要初始化设置
+document.addEventListener("DOMContentLoaded", () => {
+    if (!remoteSyncEnabled) {
+        initSettings();
+    }
+});
