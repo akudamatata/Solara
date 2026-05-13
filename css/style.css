@@ -1270,36 +1270,17 @@ body.dark-mode .playlist-items .playlist-item.current {
 /* hover 时显示对应功能色 */
 .playlist-item-favorite:hover {
     color: #ff4d67;
-    background: rgba(255, 77, 103, 0.1);
     transform: translateY(-50%) scale(1.1);
-    border-color: rgba(255, 77, 103, 0.2);
 }
 .playlist-item-download:hover {
     color: #2ecc71;
-    background: rgba(46, 204, 113, 0.1);
     transform: translateY(-50%) scale(1.1);
-    border-color: rgba(46, 204, 113, 0.2);
 }
 .playlist-item-remove:hover {
     color: #e74c3c;
-    background: rgba(231, 76, 60, 0.1);
     transform: translateY(-50%) scale(1.1);
-    border-color: rgba(231, 76, 60, 0.2);
 }
 
-/* 暗色模式下加强边框和背景可见度 */
-body.dark-mode .playlist-item-favorite:hover {
-    background: rgba(255, 77, 103, 0.18);
-    border-color: rgba(255, 77, 103, 0.3);
-}
-body.dark-mode .playlist-item-download:hover {
-    background: rgba(46, 204, 113, 0.18);
-    border-color: rgba(46, 204, 113, 0.3);
-}
-body.dark-mode .playlist-item-remove:hover {
-    background: rgba(231, 76, 60, 0.18);
-    border-color: rgba(231, 76, 60, 0.3);
-}
 
 .favorite-toggle {
     border: none;
@@ -1321,26 +1302,7 @@ body.dark-mode .playlist-item-remove:hover {
     color: #ff4d67;
 }
 
-.playlist-item-favorite.favorite-toggle {
-    padding: 0;
-    background: #ff4d67;
-    color: #ffffff;
-    border: 1px solid rgba(255, 77, 103, 0.6);
-    box-shadow: 0 4px 12px rgba(255, 77, 103, 0.25);
-    transition: opacity 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease,
-        filter 0.2s ease, color 0.2s ease;
-}
 
-.playlist-item-favorite.favorite-toggle:hover {
-    color: #ffffff;
-    background: #e6435b;
-    box-shadow: 0 8px 20px rgba(255, 77, 103, 0.35);
-}
-
-.playlist-item-favorite.favorite-toggle.is-active {
-    color: #ffffff;
-    filter: brightness(1.03);
-}
 
 .current-favorite-btn {
     font-size: 18px;
@@ -1387,35 +1349,15 @@ body.dark-mode .playlist-item-remove:hover {
 
 .favorite-item-action--add:hover {
     color: var(--primary-color);
-    background: rgba(26, 188, 156, 0.1);
-    border-color: rgba(26, 188, 156, 0.2);
     transform: translateY(-50%) scale(1.1);
 }
 .favorite-item-action--download:hover {
     color: #2ecc71;
-    background: rgba(46, 204, 113, 0.1);
-    border-color: rgba(46, 204, 113, 0.2);
     transform: translateY(-50%) scale(1.1);
 }
 .favorite-item-action--remove:hover {
     color: #e74c3c;
-    background: rgba(231, 76, 60, 0.1);
-    border-color: rgba(231, 76, 60, 0.2);
     transform: translateY(-50%) scale(1.1);
-}
-
-/* 暗色模式加强 */
-body.dark-mode .favorite-item-action--add:hover {
-    background: rgba(26, 188, 156, 0.18);
-    border-color: rgba(26, 188, 156, 0.3);
-}
-body.dark-mode .favorite-item-action--download:hover {
-    background: rgba(46, 204, 113, 0.18);
-    border-color: rgba(46, 204, 113, 0.3);
-}
-body.dark-mode .favorite-item-action--remove:hover {
-    background: rgba(231, 76, 60, 0.18);
-    border-color: rgba(231, 76, 60, 0.3);
 }
 
 html.mobile-view .mobile-panel-header .playlist-tabs {
