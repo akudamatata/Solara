@@ -5398,30 +5398,33 @@ function handleImportFavoritesChange(event) {
 function clearPlaylist() {
     if (state.playlistSongs.length === 0) return;
 
-    if (state.currentPlaylist === "playlist") {
-        dom.audioPlayer.pause();
-        dom.audioPlayer.src = "";
-        state.currentTrackIndex = -1;
-        state.currentSong = null;
-        state.currentAudioUrl = null;
-        state.currentPlaybackTime = 0;
-        state.lastSavedPlaybackTime = 0;
-        dom.progressBar.value = 0;
-        dom.progressBar.max = 0;
-        dom.currentTimeDisplay.textContent = "00:00";
-        dom.durationDisplay.textContent = "00:00";
-        updateProgressBarBackground(0, 1);
-        dom.currentSongTitle.textContent = "选择一首歌曲开始播放";
-        updateMobileToolbarTitle();
-        dom.currentSongArtist.textContent = "未知艺术家";
-        showAlbumCoverPlaceholder();
-        clearLyricsContent();
-        if (dom.lyrics) {
-            dom.lyrics.dataset.placeholder = "default";
-        }
-        dom.lyrics.classList.add("empty");
-        updatePlayPauseButton();
+    // 无论当前是从哪个列表播放，只要播放列表清空，
+    // 都需要重置播放器 UI 到空态
+    const wasPlayingFromPlaylist = state.currentPlaylist === "playlist";
+
+    dom.audioPlayer.pause();
+    dom.audioPlayer.src = "";
+    state.currentTrackIndex = -1;
+    state.currentSong = null;
+    state.currentAudioUrl = null;
+    state.currentPlaybackTime = 0;
+    state.lastSavedPlaybackTime = 0;
+    dom.progressBar.value = 0;
+    dom.progressBar.max = 0;
+    dom.currentTimeDisplay.textContent = "00:00";
+    dom.durationDisplay.textContent = "00:00";
+    updateProgressBarBackground(0, 1);
+    dom.currentSongTitle.textContent = "选择一首歌曲开始播放";
+    updateMobileToolbarTitle();
+    dom.currentSongArtist.textContent = "未知艺术家";
+    showAlbumCoverPlaceholder();
+    clearLyricsContent();
+    if (dom.lyrics) {
+        dom.lyrics.dataset.placeholder = "default";
     }
+    dom.lyrics.classList.add("empty");
+    updatePlayPauseButton();
+    updateFavoriteIcons();
 
     state.playlistSongs = [];
     dom.playlist.classList.add("empty");
