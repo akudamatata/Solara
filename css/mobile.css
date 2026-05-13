@@ -914,17 +914,29 @@ body.mobile-view .source-select-btn {
     white-space: nowrap;
 }
 
+body.mobile-view .search-results-toolbar {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 8px 0 16px 0;
+    display: flex;
+    justify-content: center;
+    position: relative;
+    z-index: 10;
+    background: rgba(8, 10, 16, 0.95);
+}
+
 body.mobile-view .search-results {
     flex: 1;
     overflow-y: auto;
     width: 100%;
     max-width: 400px;
     align-self: center;
-    margin-top: 10px;
+    margin-top: 0;
     position: relative;
     mask-image: linear-gradient(to bottom, transparent, black 15px, black calc(100% - 15px), transparent);
     -webkit-mask-image: linear-gradient(to bottom, transparent, black 15px, black calc(100% - 15px), transparent);
-    scrollbar-width: none; /* Hide scrollbar for cleaner look if possible, or use custom styling */
+    scrollbar-width: none;
 }
 
 body.mobile-view .search-results::-webkit-scrollbar {
