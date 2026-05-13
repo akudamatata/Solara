@@ -918,12 +918,20 @@ body.mobile-view .search-results-toolbar {
     width: 100%;
     max-width: 400px;
     margin: 0 auto;
-    padding: 8px 0 16px 0;
+    padding: 0 0 12px 0;
     display: flex;
     justify-content: center;
-    position: relative;
-    z-index: 10;
-    background: rgba(8, 10, 16, 0.95);
+    position: sticky;
+    top: -1px;
+    z-index: 20;
+    background: rgba(8, 10, 16, 0.85);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+}
+
+/* Add a bit of space for the first item to not be cut off by sticky header */
+body.mobile-view .search-results-list {
+    padding-top: 10px;
 }
 
 body.mobile-view .search-results {
