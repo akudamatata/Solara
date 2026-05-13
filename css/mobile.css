@@ -831,11 +831,16 @@ body.mobile-view .search-controls-wrapper {
     align-self: center;
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    padding-bottom: 5px; /* Reduced gap to integrate with toolbar */
-    margin-bottom: 0;
-    position: relative;
+    padding: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 24px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    position: sticky;
+    top: 0;
     z-index: 30;
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
 }
 
 body.mobile-view .search-header {
@@ -845,6 +850,7 @@ body.mobile-view .search-header {
     width: 100%;
     max-width: 400px;
     align-self: center;
+    margin-bottom: 8px;
 }
 
 body.mobile-view .search-title {
@@ -858,21 +864,11 @@ body.mobile-view .search-title {
 body.mobile-view .search-bar-unified {
     display: flex;
     align-items: center;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 20px;
-    padding: 6px;
     width: 100%;
-    max-width: 400px;
-    align-self: center;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-body.mobile-view .search-bar-unified:focus-within {
-    border-color: rgba(243, 162, 91, 0.5);
-    box-shadow: 0 12px 40px rgba(243, 162, 91, 0.15);
-    transform: scale(1.01);
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
 }
 
 body.mobile-view #searchBtn {
@@ -935,12 +931,12 @@ body.mobile-view .search-results-list {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    padding: 65px 0 20px 0; /* Extra padding to avoid being covered by sticky toolbar */
+    padding: 12px 0 20px 0; /* Tightened top padding */
     width: 100%;
     box-sizing: border-box;
     /* Apply mask here so it doesn't affect the sticky toolbar */
-    mask-image: linear-gradient(to bottom, transparent, transparent 20px, black 60px, black calc(100% - 20px), transparent);
-    -webkit-mask-image: linear-gradient(to bottom, transparent, transparent 20px, black 60px, black calc(100% - 20px), transparent);
+    mask-image: linear-gradient(to bottom, transparent, transparent 10px, black 40px, black calc(100% - 20px), transparent);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, transparent 10px, black 40px, black calc(100% - 20px), transparent);
 }
 
 body.mobile-view .search-results::-webkit-scrollbar {
@@ -949,14 +945,10 @@ body.mobile-view .search-results::-webkit-scrollbar {
 
 body.mobile-view .search-results-toolbar {
     width: 100%;
-    max-width: 400px;
-    margin: 0 auto;
-    padding: 10px 0;
+    margin: 0;
+    padding: 2px 0 8px 0; /* Tightened to integrate with bar above */
     display: flex;
     justify-content: center;
-    position: sticky;
-    top: 0;
-    z-index: 20;
     background: transparent;
 }
 
