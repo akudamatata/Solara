@@ -3991,6 +3991,7 @@ function createSearchResultItem(song, index) {
     item.className = "search-result-item";
     item.dataset.index = String(index);
 
+    // 选择圆圈 (替代封面位置)
     const selectionToggle = document.createElement("button");
     selectionToggle.className = "search-result-select";
     selectionToggle.type = "button";
@@ -4053,28 +4054,6 @@ function createSearchResultItem(song, index) {
         showQualityMenu(event, index, "search");
     });
 
-    const qualityMenu = document.createElement("div");
-    qualityMenu.className = "quality-menu";
-
-    const qualityOptions = [
-        { label: "标准音质", suffix: " (128k)", quality: "128" },
-        { label: "高音质", suffix: " (192k)", quality: "192" },
-        { label: "超高音质", suffix: " (320k)", quality: "320" },
-        { label: "无损音质", suffix: "", quality: "999" },
-    ];
-
-    qualityOptions.forEach(option => {
-        const qualityItem = document.createElement("div");
-        qualityItem.className = "quality-option";
-        qualityItem.textContent = `${option.label}${option.suffix}`;
-        qualityItem.addEventListener("click", (event) => {
-            downloadWithQuality(event, index, "search", option.quality);
-        });
-        qualityMenu.appendChild(qualityItem);
-    });
-
-    downloadButton.appendChild(qualityMenu);
-
     actions.appendChild(favoriteButton);
     actions.appendChild(playButton);
     actions.appendChild(downloadButton);
@@ -4086,10 +4065,7 @@ function createSearchResultItem(song, index) {
     applySelectionStateToElement(item, state.selectedSearchResults.has(index));
 
     item.addEventListener("click", (event) => {
-        if (event.target.closest(".search-result-actions")) {
-            return;
-        }
-        if (event.target.closest(".search-result-select")) {
+        if (event.target.closest(".search-result-actions") || event.target.closest(".search-result-select")) {
             return;
         }
         toggleSearchResultSelection(index);
