@@ -2053,49 +2053,52 @@ input[type="range"]:active::-moz-range-thumb {
     width: 44px;
     height: 44px;
     border-radius: 16px;
-    border: none;
-    background: var(--primary-color);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    border: 1px solid var(--border-color);
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.4));
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, background 0.3s ease;
     position: relative;
     overflow: hidden;
-    color: white;
+    color: var(--primary-color);
 }
 
 .theme-toggle-button:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 0 4px rgba(26, 188, 156, 0.25);
 }
 
 .theme-toggle-button:hover {
-    background: var(--primary-color-dark);
     transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+    box-shadow: 0 12px 26px rgba(0, 0, 0, 0.16);
 }
 
-.theme-toggle-button:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+.theme-toggle-button.is-dark {
+    background: linear-gradient(160deg, rgba(36, 42, 54, 0.9), rgba(24, 30, 42, 0.7));
+    border-color: rgba(26, 188, 156, 0.45);
 }
 
 .theme-toggle-button .theme-icon {
     position: absolute;
-    font-size: 19px;
+    font-size: 18px;
     transition: opacity 0.35s ease, transform 0.45s ease;
     opacity: 0;
     transform: scale(0.6) rotate(-20deg);
 }
 
 .theme-toggle-button .theme-icon--sun {
-    text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+    color: #f5a623;
+    text-shadow: 0 0 10px rgba(245, 166, 35, 0.4);
 }
 
 .theme-toggle-button .theme-icon--moon {
-    text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+    color: #a29bfe;
+    text-shadow: 0 0 10px rgba(162, 155, 254, 0.4);
     transform: scale(0.6) rotate(20deg);
 }
 
