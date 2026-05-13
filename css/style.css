@@ -14,7 +14,7 @@
     --success-color-hover: #27ae60;
     --item-hover-bg: rgba(26, 188, 156, 0.1);
     --item-current-bg: rgba(26, 188, 156, 0.2);
-    --item-current-text: var(--primary-color);
+    --item-current-text: var(--text-color);
     --border-color: rgba(0, 0, 0, 0.1);
     --lyrics-highlight-bg: rgba(46, 204, 113, 0.12);
     --lyrics-highlight-text: #1e9f78;
