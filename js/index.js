@@ -80,7 +80,6 @@ const dom = {
     settingsModal: document.getElementById("settingsModal"),
     closeSettingsBtn: document.getElementById("closeSettingsBtn"),
     saveSettingsBtn: document.getElementById("saveSettingsBtn"),
-    manualSyncBtn: document.getElementById("manualSyncBtn"),
     radarGenreList: document.getElementById("radarGenreList"),
     logo: document.querySelector(".header h1"),
 };
@@ -6294,9 +6293,6 @@ function initSettings() {
     if (dom.saveSettingsBtn) {
         dom.saveSettingsBtn.addEventListener("click", saveSettings);
     }
-    if (dom.manualSyncBtn) {
-        dom.manualSyncBtn.addEventListener("click", manualSync);
-    }
     if (dom.settingsModal) {
         dom.settingsModal.addEventListener("click", (e) => {
             if (e.target === dom.settingsModal) closeSettingsModal();
@@ -6381,41 +6377,6 @@ function applySettingsToUI() {
     });
 }
 
-async function manualSync() {
-    if (dom.manualSyncBtn) {
-        dom.manualSyncBtn.classList.add("loading");
-        dom.manualSyncBtn.disabled = true;
-    }
-    
-    showNotification("正在同步云端数据...", "info");
-    
-    try {
-        // 先尝试将本地最新数据推送到云端
-        const itemsToPush = {};
-        STORAGE_KEYS_TO_SYNC.forEach(key => {
-            const val = safeGetLocalStorage(key);
-            if (val !== null) {
-                itemsToPush[key] = val;
-            }
-        });
-        
-        if (Object.keys(itemsToPush).length > 0) {
-            await persistentStorage.setItems(itemsToPush);
-        }
-
-        // 再从云端拉取最新数据
-        await bootstrapPersistentStorage();
-        
-        showNotification("同步完成", "success");
-    } catch (error) {
-        console.error("同步失败:", error);
-        showNotification("同步失败，请检查网络或登录状态", "error");
-    } finally {
-        if (dom.manualSyncBtn) {
-            dom.manualSyncBtn.classList.remove("loading");
-            dom.manualSyncBtn.disabled = false;
-        }
-    }
 }
 
 // 在 bootstrapPersistentStorage 之后或期间初始化设置

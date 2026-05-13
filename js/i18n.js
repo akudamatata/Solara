@@ -81,16 +81,8 @@
         "设置": "Settings",
         "探索雷达风格": "Radar Styles",
         "保存设置": "Save Settings",
-        "数据同步": "Data Sync",
-        "立即同步云端数据": "Sync Cloud Data Now",
-        "手动触发云端数据同步，确保所有设备数据一致。": "Manually trigger cloud sync to keep all devices consistent.",
-        "选择您喜欢的音乐风格，探索雷达将从中为您推荐歌曲。": "Select genres you like, and the radar will recommend songs from them.",
-        "正在同步云端数据...": "Syncing cloud data...",
-        "同步完成": "Sync complete",
-        "同步失败，请检查网络或登录状态": "Sync failed, please check network or login status",
         "已保存设置": "Settings saved",
         "请至少选择一个风格": "Please select at least one genre",
-        "正在准备同步...": "Preparing to sync...",
         "云端加载设置失败": "Failed to load settings from cloud"
     };
 
