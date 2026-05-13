@@ -814,7 +814,7 @@ body.mobile-view .search-area {
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 0; /* Merge card parts */
     opacity: 0;
     pointer-events: none;
 }
@@ -831,14 +831,17 @@ body.mobile-view .search-controls-wrapper {
     align-self: center;
     display: flex;
     flex-direction: column;
-    padding: 12px;
-    background: transparent; /* Seamless with background */
+    padding: 12px 12px 0 12px; /* No bottom padding */
+    background: transparent; 
     border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 20px;
+    border-bottom: none; /* Merge with results below */
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
     position: sticky;
     top: 0;
     z-index: 30;
-    /* Removed redundant backdrop-filter and box-shadow to achieve "内外一色" */
 }
 
 body.mobile-view .search-header {
@@ -953,6 +956,12 @@ body.mobile-view .search-results {
     margin-top: 0;
     position: relative;
     scrollbar-width: none;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-top: none; /* Merge with wrapper above */
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
 }
 
 body.mobile-view .search-results-list {
