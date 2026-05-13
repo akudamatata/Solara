@@ -2191,12 +2191,14 @@ input[type="range"]:active::-moz-range-thumb {
     z-index: 100000;
     opacity: 0;
     visibility: hidden;
+    pointer-events: none;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .modal-overlay.show {
     opacity: 1;
     visibility: visible;
+    pointer-events: auto;
 }
 
 .modal-content.settings-content {
