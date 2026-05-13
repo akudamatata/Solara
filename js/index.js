@@ -6377,8 +6377,6 @@ function applySettingsToUI() {
     });
 }
 
-}
-
 // 在 bootstrapPersistentStorage 之后或期间初始化设置
 (function() {
     const originalBootstrap = bootstrapPersistentStorage;
