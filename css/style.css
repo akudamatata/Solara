@@ -218,6 +218,7 @@ body.background-transitioning .background-stage__layer--transition {
     align-items: center;
     margin-bottom: 15px;
     flex-shrink: 0;
+    position: relative;
 }
 
 .search-bar-unified {

@@ -943,6 +943,7 @@ body.mobile-view .import-selected-btn {
     padding: 12px;
     font-weight: 600;
     transition: transform 0.2s ease, opacity 0.3s ease;
+    justify-content: center;
 }
 
 body.mobile-view .search-results {

@@ -64,22 +64,25 @@ html.desktop-view .search-results {
     gap: 0;
 }
 
-/* Toolbar is inside search-controls-wrapper on desktop; float it over the results */
+/* Toolbar is inside search-controls-wrapper; take it out of the flex flow with absolute positioning */
 html.desktop-view .search-results-toolbar {
-    display: block;
+    position: absolute;
+    width: 0;
     height: 0;
     overflow: visible;
     pointer-events: none;
-    position: relative;
     z-index: 5;
     padding: 0;
+    top: 0;
+    right: 0;
 }
 
 html.desktop-view .search-results-toolbar .import-selected-btn {
     position: absolute;
-    top: 16px;
-    right: 0;
+    top: 60px;
+    right: 20px;
     pointer-events: auto;
+    width: auto;
 }
 
 html.desktop-view .search-results-list {
