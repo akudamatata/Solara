@@ -85,8 +85,12 @@ async function proxyKuwoAudio(targetUrl: string, request: Request): Promise<Resp
 
 async function proxyApiRequest(url: URL, request: Request, waitUntil?: (promise: Promise<any>) => void): Promise<Response> {
   const cache = caches.default;
-  // 构建缓存 Key（完整 URL 和原始方法）
-  const cacheKey = new Request(url.toString(), {
+  
+  // 构建缓存 Key（完整 URL 和原始方法，但过滤掉每次随机的防缓存签名 s）
+  const cacheUrl = new URL(url.toString());
+  cacheUrl.searchParams.delete("s");
+  
+  const cacheKey = new Request(cacheUrl.toString(), {
     method: request.method,
     headers: request.headers
   });
@@ -111,7 +115,7 @@ async function proxyApiRequest(url: URL, request: Request, waitUntil?: (promise:
 
   const apiUrl = new URL(API_BASE_URL);
   url.searchParams.forEach((value, key) => {
-    if (key === "target" || key === "callback") {
+    if (key === "target" || key === "callback" || key === "s") {
       return;
     }
     apiUrl.searchParams.set(key, value);
