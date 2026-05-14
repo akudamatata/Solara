@@ -6330,8 +6330,23 @@ function initSettings() {
     if (dom.logo) {
         dom.logo.addEventListener("dblclick", openSettingsModal);
     }
+    
+    // 移动端双击标题或图标打开设置 (优化移动端双击兼容性)
+    let lastToolbarClick = 0;
+    const handleDoubleTap = (e) => {
+        const now = Date.now();
+        if (now - lastToolbarClick < 300) {
+            e.preventDefault();
+            openSettingsModal();
+        }
+        lastToolbarClick = now;
+    };
+
     if (dom.mobileToolbarTitle) {
-        dom.mobileToolbarTitle.addEventListener("dblclick", openSettingsModal);
+        dom.mobileToolbarTitle.addEventListener("click", handleDoubleTap);
+    }
+    if (dom.mobileExploreButton) {
+        dom.mobileExploreButton.addEventListener("click", handleDoubleTap);
     }
 
     // 绑定按钮事件
