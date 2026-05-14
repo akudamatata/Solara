@@ -132,6 +132,7 @@ async function proxyApiRequest(url: URL, request: Request, waitUntil?: (promise:
     },
   });
 
+  const responseText = await upstream.text();
   const headers = createCorsHeaders(upstream.headers);
   if (!headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json; charset=utf-8");
@@ -140,21 +141,32 @@ async function proxyApiRequest(url: URL, request: Request, waitUntil?: (promise:
   headers.set("X-Cache-Status", "MISS");
   headers.set("Access-Control-Expose-Headers", "X-Cache-Status");
 
-  // 成功响应且为 GET 请求时，设置 5 分钟缓存
-  if (upstream.status === 200 && request.method === "GET") {
-    headers.set("Cache-Control", "public, s-maxage=300, max-age=300");
-  } else if (!headers.has("Cache-Control") || headers.get("Cache-Control") === "no-store") {
-    // 保持不缓存
+  // 判断是否应该缓存：必须是 200 状态，且内容不能是空数组或包含错误标识
+  const isSearch = url.searchParams.get("types") === "search";
+  const isEmptyResult = responseText.trim() === "[]";
+  const isError = responseText.includes('"error"') || responseText.includes('"status":0');
+  
+  let shouldCache = upstream.status === 200 && request.method === "GET" && !isError;
+  
+  // 如果是搜索请求且结果为空，通常是 API 繁忙或异常，不建议长缓存
+  if (isSearch && isEmptyResult) {
+    shouldCache = false;
   }
 
-  const response = new Response(upstream.body, {
+  if (shouldCache) {
+    headers.set("Cache-Control", "public, s-maxage=300, max-age=300");
+  } else {
+    headers.set("Cache-Control", "no-store, no-cache, must-revalidate");
+  }
+
+  const response = new Response(responseText, {
     status: upstream.status,
     statusText: upstream.statusText,
     headers,
   });
 
   // 写入缓存（不阻塞主流程）
-  if (upstream.status === 200 && request.method === "GET" && waitUntil) {
+  if (shouldCache && waitUntil) {
     waitUntil(cache.put(cacheKey, response.clone()));
     console.log(`[Cache PUT] Saved to cache: ${url.toString()}`);
   }
