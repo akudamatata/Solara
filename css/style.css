@@ -430,7 +430,7 @@ body.background-transitioning .background-stage__layer--transition {
 }
 
 .search-results-toolbar {
-    display: flex !important;
+    display: flex;
     justify-content: flex-end;
     align-items: center;
     gap: 8px;
