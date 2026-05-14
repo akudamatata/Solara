@@ -59,32 +59,42 @@ html.desktop-view .playlist-action-btn:disabled {
     cursor: not-allowed;
 }
 
-/* Keep the desktop search import button visible without an opaque bar */
-html.desktop-view .search-results {
-    gap: 0;
+/* ===== 桌面端：导入已选按钮 - 独立定位，不影响搜索栏布局 ===== */
+
+/* search-controls-wrapper 已有 position:relative，toolbar absolute 定位以它为锚 */
+html.desktop-view .search-results-toolbar {
+    position: absolute;      /* 脱离 flex 流，不占任何宽度 */
+    top: 100%;               /* 紧贴 wrapper 底部 */
+    right: 0;
+    padding-top: 8px;
+    z-index: 10;
+    pointer-events: auto;
+    /* 重置移动端样式 */
+    width: auto;
+    max-width: none;
+    align-self: auto;
+    flex-shrink: unset;
+    margin: 0;
+    display: block;
 }
 
-/* Toolbar is inside search-controls-wrapper; take it out of the flex flow with absolute positioning */
-html.desktop-view .search-results-toolbar {
-    position: absolute;
-    width: 0;
-    height: 0;
-    overflow: visible;
-    pointer-events: none;
-    z-index: 5;
-    padding: 0;
-    top: 0;
-    right: 0;
+html.desktop-view .search-results-toolbar .import-dropdown {
+    width: auto;             /* 重置移动端 width:100% */
 }
 
 html.desktop-view .search-results-toolbar .import-selected-btn {
-    position: absolute;
-    top: 60px;
-    right: 20px;
-    pointer-events: auto;
-    width: auto;
+    width: auto;             /* 重置移动端 width:100% */
+    justify-content: unset;  /* 重置移动端居中 */
+    border-radius: 999px;    /* 桌面端圆角胶囊 */
+    padding: 8px 16px;
+    font-size: 14px;
 }
 
+/* 搜索结果列表留出顶部空间，避免第一条结果被按钮遮挡 */
 html.desktop-view .search-results-list {
-    padding-top: 60px;
+    padding-top: 52px;
+}
+
+html.desktop-view .search-results {
+    gap: 0;
 }
