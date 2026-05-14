@@ -5234,6 +5234,29 @@ function clearFavorites() {
     if (state.currentList === "favorite") {
         state.currentList = "playlist";
         state.currentPlaylist = "playlist";
+        // 如果清空时正在播放收藏列表的歌，停止播放
+        dom.audioPlayer.pause();
+        dom.audioPlayer.src = "";
+        state.currentTrackIndex = -1;
+        state.currentSong = null;
+        state.currentAudioUrl = null;
+        state.currentPlaybackTime = 0;
+        state.lastSavedPlaybackTime = 0;
+        dom.progressBar.value = 0;
+        dom.progressBar.max = 0;
+        dom.currentTimeDisplay.textContent = "00:00";
+        dom.durationDisplay.textContent = "00:00";
+        updateProgressBarBackground(0, 1);
+        dom.currentSongTitle.textContent = "选择一首歌曲开始播放";
+        updateMobileToolbarTitle();
+        dom.currentSongArtist.textContent = "未知艺术家";
+        showAlbumCoverPlaceholder();
+        clearLyricsContent();
+        if (dom.lyrics) {
+            dom.lyrics.dataset.placeholder = "default";
+        }
+        dom.lyrics.classList.add("empty");
+        updatePlayPauseButton();
     }
     saveFavoriteState();
     savePlayerState();
@@ -5827,14 +5850,29 @@ async function playOnlineSong(index) {
     const song = state.onlineSongs[index];
     if (!song) return;
 
-    state.currentTrackIndex = index;
-    state.currentPlaylist = "online";
-    state.currentList = "playlist";
+    // 检查歌曲是否已在播放列表中
+    const existingIndex = state.playlistSongs.findIndex(s => getSongKey(s) === getSongKey(song));
+
+    if (existingIndex !== -1) {
+        state.currentTrackIndex = existingIndex;
+        state.currentPlaylist = "playlist";
+        state.currentList = "playlist";
+    } else {
+        state.playlistSongs.push(song);
+        state.currentTrackIndex = state.playlistSongs.length - 1;
+        state.currentPlaylist = "playlist";
+        state.currentList = "playlist";
+    }
 
     try {
         await playSong(song);
-        updateOnlineHighlight();
+        updatePlaylistHighlight();
         updatePlayModeUI();
+        renderPlaylist();
+        updatePlaylistActionStates();
+        
+        // 可选：如果希望继续高亮“探索雷达”中的项，保留对 updateOnlineHighlight 的调用
+        // updateOnlineHighlight();
     } catch (error) {
         console.error("播放失败:", error);
         showNotification("播放失败，请稍后重试", "error");
