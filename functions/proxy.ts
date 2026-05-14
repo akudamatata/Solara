@@ -97,7 +97,10 @@ async function proxyApiRequest(url: URL, request: Request, waitUntil?: (promise:
       const cachedResponse = await cache.match(cacheKey);
       if (cachedResponse) {
         console.log(`[Cache HIT] ${url.toString()}`);
-        return cachedResponse;
+        const response = new Response(cachedResponse.body, cachedResponse);
+        response.headers.set("X-Cache-Status", "HIT");
+        response.headers.set("Access-Control-Expose-Headers", "X-Cache-Status");
+        return response;
       }
     } catch (err) {
       console.warn(`[Cache ERROR] ${url.toString()}`, err);
@@ -129,6 +132,9 @@ async function proxyApiRequest(url: URL, request: Request, waitUntil?: (promise:
   if (!headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json; charset=utf-8");
   }
+
+  headers.set("X-Cache-Status", "MISS");
+  headers.set("Access-Control-Expose-Headers", "X-Cache-Status");
 
   // 成功响应且为 GET 请求时，设置 5 分钟缓存
   if (upstream.status === 200 && request.method === "GET") {
