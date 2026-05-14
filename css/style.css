@@ -433,10 +433,9 @@ body.background-transitioning .background-stage__layer--transition {
     justify-content: flex-end;
     align-items: center;
     gap: 8px;
-    padding-top: 12px;
-    padding-bottom: 12px;
-    position: sticky;
-    top: 0;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    position: relative;
     z-index: 2;
     background: none;
 }

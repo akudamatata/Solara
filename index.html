@@ -159,21 +159,21 @@
                     <span>搜索</span>
                 </button>
             </div>
-            <div id="searchResults" class="search-results">
-                <div class="search-results-toolbar">
-                    <div class="import-dropdown">
-                        <button class="import-selected-btn" id="importSelectedBtn" disabled>
-                            <i class="fas fa-file-import"></i>
-                            <span>导入已选</span>
-                            <span id="importSelectedCount" class="import-selected-count"></span>
-                            <i class="fas fa-chevron-down import-dropdown-caret"></i>
-                        </button>
-                        <div class="import-dropdown-menu" id="importSelectedMenu" hidden>
-                            <button class="import-dropdown-item" id="importToPlaylist" data-action="playlist">导入到播放列表</button>
-                            <button class="import-dropdown-item" id="importToFavorites" data-action="favorites">导入到收藏列表</button>
-                        </div>
+            <div class="search-results-toolbar">
+                <div class="import-dropdown">
+                    <button class="import-selected-btn" id="importSelectedBtn" disabled>
+                        <i class="fas fa-file-import"></i>
+                        <span>导入已选</span>
+                        <span id="importSelectedCount" class="import-selected-count"></span>
+                        <i class="fas fa-chevron-down import-dropdown-caret"></i>
+                    </button>
+                    <div class="import-dropdown-menu" id="importSelectedMenu" hidden>
+                        <button class="import-dropdown-item" id="importToPlaylist" data-action="playlist">导入到播放列表</button>
+                        <button class="import-dropdown-item" id="importToFavorites" data-action="favorites">导入到收藏列表</button>
                     </div>
                 </div>
+            </div>
+            <div id="searchResults" class="search-results">
                 <div id="searchResultsList" class="search-results-list"></div>
             </div>
         </div>

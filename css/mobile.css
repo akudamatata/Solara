@@ -831,14 +831,10 @@ body.mobile-view .search-controls-wrapper {
     align-self: center;
     display: flex;
     flex-direction: column;
-    padding: 12px 12px 0 12px; /* No bottom padding */
-    background: transparent; 
+    padding: 12px;
+    background: transparent;
     border: 1px solid rgba(255, 255, 255, 0.12);
-    border-bottom: none; /* Merge with results below */
-    border-top-left-radius: 20px;
-    border-top-right-radius: 20px;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
+    border-radius: 20px;
     position: sticky;
     top: 0;
     z-index: 30;
@@ -924,12 +920,17 @@ body.mobile-view .source-select-btn {
     white-space: nowrap;
 }
 
+/* 导入已选工具栏：脱离 search-results 滚动容器，独立显示在输入区和结果列表之间 */
 body.mobile-view .search-results-toolbar {
     width: 100%;
+    max-width: 400px;
+    align-self: center;
     margin: 0;
-    padding: 0;
+    padding: 8px 0 0 0;
     display: flex;
-    /* Removed justify-content: center to allow full-width button */
+    flex-shrink: 0;
+    position: relative;
+    z-index: 5;
 }
 
 body.mobile-view .import-dropdown {
@@ -957,21 +958,16 @@ body.mobile-view .search-results {
     position: relative;
     scrollbar-width: none;
     border: 1px solid rgba(255, 255, 255, 0.12);
-    border-top: none; /* Merge with wrapper above */
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-    border-bottom-left-radius: 20px;
-    border-bottom-right-radius: 20px;
+    border-radius: 20px;
 }
 
 body.mobile-view .search-results-list {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    padding: 12px 0 20px 0; /* Tightened top padding */
+    padding: 12px 0 20px 0;
     width: 100%;
     box-sizing: border-box;
-    /* Apply mask here so it doesn't affect the sticky toolbar */
     mask-image: linear-gradient(to bottom, transparent, transparent 10px, black 40px, black calc(100% - 20px), transparent);
     -webkit-mask-image: linear-gradient(to bottom, transparent, transparent 10px, black 40px, black calc(100% - 20px), transparent);
 }
@@ -980,10 +976,12 @@ body.mobile-view .search-results::-webkit-scrollbar {
     display: none;
 }
 
+/* 禁用状态：不透明背景，防止下方歌名文字透显 */
 body.mobile-view .import-selected-btn:disabled {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(42, 44, 54, 0.95);
     box-shadow: none;
-    color: rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 body.mobile-view .import-dropdown-menu,
