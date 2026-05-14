@@ -71,7 +71,7 @@ html.desktop-view .container.search-mode .search-results-toolbar {
     display: block;
     position: absolute;      /* 脱离 flex 流，不占任何宽度 */
     top: 100%;               /* 紧贴 wrapper 底部 */
-    margin-top: 20px;        /* 下移到原本的相对位置 */
+    margin-top: 46px;        /* 下移到原本的相对位置 (15px + 15px + 16px) */
     right: 0;
     z-index: 10;
     pointer-events: auto;
