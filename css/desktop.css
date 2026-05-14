@@ -61,12 +61,18 @@ html.desktop-view .playlist-action-btn:disabled {
 
 /* ===== 桌面端：导入已选按钮 - 独立定位，不影响搜索栏布局 ===== */
 
-/* search-controls-wrapper 已有 position:relative，toolbar absolute 定位以它为锚 */
+/* 默认隐藏，仅在搜索模式下显示 */
 html.desktop-view .search-results-toolbar {
+    display: none;
+}
+
+/* search-controls-wrapper 已有 position:relative，toolbar absolute 定位以它为锚 */
+html.desktop-view .container.search-mode .search-results-toolbar {
+    display: block;
     position: absolute;      /* 脱离 flex 流，不占任何宽度 */
     top: 100%;               /* 紧贴 wrapper 底部 */
+    margin-top: 20px;        /* 下移到原本的相对位置 */
     right: 0;
-    padding-top: 8px;
     z-index: 10;
     pointer-events: auto;
     /* 重置移动端样式 */
@@ -74,8 +80,7 @@ html.desktop-view .search-results-toolbar {
     max-width: none;
     align-self: auto;
     flex-shrink: unset;
-    margin: 0;
-    display: block;
+    padding: 0;
 }
 
 html.desktop-view .search-results-toolbar .import-dropdown {
