@@ -96,12 +96,15 @@ async function proxyApiRequest(url: URL, request: Request, waitUntil?: (promise:
     try {
       const cachedResponse = await cache.match(cacheKey);
       if (cachedResponse) {
+        console.log(`[Cache HIT] ${url.toString()}`);
         return cachedResponse;
       }
     } catch (err) {
-      // 忽略缓存读取错误
+      console.warn(`[Cache ERROR] ${url.toString()}`, err);
     }
   }
+
+  console.log(`[Cache MISS] Fetching from upstream: ${url.toString()}`);
 
   const apiUrl = new URL(API_BASE_URL);
   url.searchParams.forEach((value, key) => {
@@ -143,6 +146,7 @@ async function proxyApiRequest(url: URL, request: Request, waitUntil?: (promise:
   // 写入缓存（不阻塞主流程）
   if (upstream.status === 200 && request.method === "GET" && waitUntil) {
     waitUntil(cache.put(cacheKey, response.clone()));
+    console.log(`[Cache PUT] Saved to cache: ${url.toString()}`);
   }
 
   return response;
