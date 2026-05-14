@@ -962,20 +962,61 @@ const state = {
 
 let importSelectedMenuOutsideHandler = null;
 
-if (state.currentList === "favorite" && (!Array.isArray(state.favoriteSongs) || state.favoriteSongs.length === 0)) {
+/**
+ * 状态自洽性检查：
+ * 如果当前指向的播放列表为空，则清除当前歌曲状态，防止“幽灵播放”
+ */
+function validateStateConsistency() {
+    const isPlaylistEmpty = () => {
+        if (state.currentPlaylist === 'playlist') return state.playlistSongs.length === 0;
+        if (state.currentPlaylist === 'favorites') return state.favoriteSongs.length === 0;
+        if (state.currentPlaylist === 'search') return state.searchResults.length === 0;
+        if (state.currentPlaylist === 'online') return state.onlineSongs.length === 0;
+        return false;
+    };
+
+    if (isPlaylistEmpty() && state.currentSong !== null) {
+        debugLog("检测到列表为空，清除幽灵播放歌曲");
+        state.currentSong = null;
+        state.currentTrackIndex = -1;
+        state.currentAudioUrl = null;
+        state.currentPlaybackTime = 0;
+        
+        // 更新本地持久化
+        safeRemoveLocalStorage("currentSong", { skipRemote: true });
+        safeSetLocalStorage("currentTrackIndex", "-1", { skipRemote: true });
+        
+        // 更新 UI (如果 DOM 已加载)
+        if (dom.currentSongTitle) dom.currentSongTitle.textContent = "选择一首歌曲开始播放";
+        if (dom.currentSongArtist) dom.currentSongArtist.textContent = "未知艺术家";
+        if (typeof showAlbumCoverPlaceholder === "function") showAlbumCoverPlaceholder();
+        if (typeof updateMobileToolbarTitle === "function") updateMobileToolbarTitle();
+        if (typeof updatePlayPauseButton === "function") updatePlayPauseButton();
+    }
+}
+
+// 规范化收藏夹数据
+state.favoriteSongs = (typeof ensureFavoriteSongsArray === "function" ? ensureFavoriteSongsArray() : (state.favoriteSongs || []))
+    .map((song) => (typeof sanitizeImportedSong === "function" ? sanitizeImportedSong(song) : song) || song)
+    .filter((song) => song && typeof song === "object");
+
+// 确保 currentList 状态正确
+if (state.currentList === "favorite" && state.favoriteSongs.length === 0) {
     state.currentList = "playlist";
 }
 if (state.currentList === "favorite") {
     state.currentPlaylist = "favorites";
 }
-state.favoriteSongs = ensureFavoriteSongsArray()
-    .map((song) => sanitizeImportedSong(song) || song)
-    .filter((song) => song && typeof song === "object");
-if (!Array.isArray(state.favoriteSongs) || state.favoriteSongs.length === 0) {
+
+// 修正收藏夹索引
+if (state.favoriteSongs.length === 0) {
     state.currentFavoriteIndex = 0;
 } else if (state.currentFavoriteIndex >= state.favoriteSongs.length) {
     state.currentFavoriteIndex = state.favoriteSongs.length - 1;
 }
+
+// 启动时执行一次自洽性检查
+validateStateConsistency();
 saveFavoriteState();
 
 async function bootstrapPersistentStorage() {
@@ -986,6 +1027,8 @@ async function bootstrapPersistentStorage() {
             return;
         }
         applyPersistentSnapshotFromRemote(snapshot.data);
+        // 远程同步后再次检查自洽性
+        validateStateConsistency();
     } catch (error) {
         console.warn("加载远程存储失败", error);
     } finally {
