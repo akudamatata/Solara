@@ -83,7 +83,26 @@ async function proxyKuwoAudio(targetUrl: string, request: Request): Promise<Resp
   });
 }
 
-async function proxyApiRequest(url: URL, request: Request): Promise<Response> {
+async function proxyApiRequest(url: URL, request: Request, waitUntil?: (promise: Promise<any>) => void): Promise<Response> {
+  const cache = caches.default;
+  // 构建缓存 Key（完整 URL 和原始方法）
+  const cacheKey = new Request(url.toString(), {
+    method: request.method,
+    headers: request.headers
+  });
+
+  // 如果是 GET 请求，尝试命中缓存
+  if (request.method === "GET") {
+    try {
+      const cachedResponse = await cache.match(cacheKey);
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+    } catch (err) {
+      // 忽略缓存读取错误
+    }
+  }
+
   const apiUrl = new URL(API_BASE_URL);
   url.searchParams.forEach((value, key) => {
     if (key === "target" || key === "callback") {
@@ -108,14 +127,28 @@ async function proxyApiRequest(url: URL, request: Request): Promise<Response> {
     headers.set("Content-Type", "application/json; charset=utf-8");
   }
 
-  return new Response(upstream.body, {
+  // 成功响应且为 GET 请求时，设置 5 分钟缓存
+  if (upstream.status === 200 && request.method === "GET") {
+    headers.set("Cache-Control", "public, s-maxage=300, max-age=300");
+  } else if (!headers.has("Cache-Control") || headers.get("Cache-Control") === "no-store") {
+    // 保持不缓存
+  }
+
+  const response = new Response(upstream.body, {
     status: upstream.status,
     statusText: upstream.statusText,
     headers,
   });
+
+  // 写入缓存（不阻塞主流程）
+  if (upstream.status === 200 && request.method === "GET" && waitUntil) {
+    waitUntil(cache.put(cacheKey, response.clone()));
+  }
+
+  return response;
 }
 
-export async function onRequest({ request }: { request: Request }): Promise<Response> {
+export async function onRequest({ request, waitUntil }: { request: Request, waitUntil: (promise: Promise<any>) => void }): Promise<Response> {
   if (request.method === "OPTIONS") {
     return handleOptions();
   }
@@ -131,5 +164,5 @@ export async function onRequest({ request }: { request: Request }): Promise<Resp
     return proxyKuwoAudio(target, request);
   }
 
-  return proxyApiRequest(url, request);
+  return proxyApiRequest(url, request, waitUntil);
 }
