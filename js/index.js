@@ -6345,9 +6345,6 @@ function initSettings() {
     if (dom.mobileToolbarTitle) {
         dom.mobileToolbarTitle.addEventListener("click", handleDoubleTap);
     }
-    if (dom.mobileExploreButton) {
-        dom.mobileExploreButton.addEventListener("click", handleDoubleTap);
-    }
 
     // 绑定按钮事件
     if (dom.closeSettingsBtn) {
