@@ -2155,6 +2155,7 @@ async function updateDynamicBackground(imageUrl) {
         paletteCache.set(imageUrl, cached);
         queuePaletteApplication(cached, imageUrl);
         debugLog("动态背景加载成功");
+        console.log(`[Palette CACHE] Loaded colors from local cache: ${imageUrl}`);
         return;
     }
 
@@ -2179,16 +2180,18 @@ async function updateDynamicBackground(imageUrl) {
         }
         queuePaletteApplication(palette, imageUrl);
         debugLog("动态背景加载成功");
+        console.log(`[Palette BACKEND] Successfully extracted colors using Backend API: ${imageUrl}`);
     } catch (error) {
         if (error?.name === "AbortError") {
             return;
         }
 
-        console.warn("获取远程动态背景失败，尝试客户端降级提取:", error);
+        console.warn(`[Palette ERROR] Backend extraction failed:`, error);
         debugLog("动态背景加载失败 尝试前端解析");
 
         try {
             // 降级方案：使用客户端 Canvas 提取 (支持 PNG/WebP 且绕过服务器解码限制)
+            console.log(`[Palette FALLBACK] Attempting extraction using Frontend Canvas API...`);
             const clientPalette = await extractPaletteFromCanvas(imageUrl);
             if (requestId !== paletteRequestId) {
                 return;
@@ -2203,6 +2206,7 @@ async function updateDynamicBackground(imageUrl) {
 
             queuePaletteApplication(clientPalette, imageUrl);
             debugLog("前端解析成功");
+            console.log(`[Palette FRONTEND] Successfully extracted colors using Frontend Canvas API: ${imageUrl}`);
             debugLog("动态背景加载成功");
         } catch (fallbackError) {
             console.warn("客户端降级提取也失败了:", fallbackError);
