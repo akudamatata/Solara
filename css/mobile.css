@@ -838,6 +838,7 @@ body.mobile-view .search-controls-wrapper {
     position: sticky;
     top: 0;
     z-index: 30;
+    gap: 8px;
 }
 
 body.mobile-view .search-header {
@@ -920,17 +921,13 @@ body.mobile-view .source-select-btn {
     white-space: nowrap;
 }
 
-/* 导入已选工具栏：脱离 search-results 滚动容器，独立显示在输入区和结果列表之间 */
+/* 导入已选工具栏：在 search-controls-wrapper 内部，输入框下方 */
 body.mobile-view .search-results-toolbar {
     width: 100%;
-    max-width: 400px;
-    align-self: center;
     margin: 0;
-    padding: 8px 0 0 0;
+    padding: 0;
     display: flex;
     flex-shrink: 0;
-    position: relative;
-    z-index: 5;
 }
 
 body.mobile-view .import-dropdown {
@@ -976,9 +973,11 @@ body.mobile-view .search-results::-webkit-scrollbar {
     display: none;
 }
 
-/* 禁用状态：不透明背景，防止下方歌名文字透显 */
+/* 禁用状态：毛玻璃效果，防止下方歌名文字穿透 */
 body.mobile-view .import-selected-btn:disabled {
-    background: rgba(42, 44, 54, 0.95);
+    background: rgba(255, 255, 255, 0.07);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     box-shadow: none;
     color: rgba(255, 255, 255, 0.35);
     border: 1px solid rgba(255, 255, 255, 0.1);
