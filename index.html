@@ -2,550 +2,743 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Solara</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <title>Solara · 流光音律</title>
     <meta name="apple-mobile-web-app-title" content="Solara">
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
-    <link rel="shortcut icon" href="/favicon.png">
-    <link rel="mask-icon" href="/favicon.svg" color="#5bbad5">
-    <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png">
-    <link rel="apple-touch-icon-precomposed" sizes="180x180" href="/favicon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23806e5e'%3E%3Cpath d='M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z'/%3E%3C/svg%3E">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css">
-    <script src="js/i18n.js"></script>
-    <script>
-        (function () {
-            const ua = navigator.userAgent || "";
-            const isMobileUA = /android|iphone|ipad|ipod|mobile|blackberry|phone|opera mini|windows phone/i.test(ua);
-            const isSmallScreen = typeof window.matchMedia === "function" && window.matchMedia("(max-width: 820px)").matches;
-            const isMobile = isMobileUA || isSmallScreen;
-            window.__SOLARA_IS_MOBILE = isMobile;
-            if (!isMobile) {
-                document.documentElement.classList.add("desktop-view");
-                const desktopLink = document.createElement("link");
-                desktopLink.rel = "stylesheet";
-                desktopLink.href = "css/desktop.css";
-                desktopLink.id = "desktopStylesheet";
-                document.head.appendChild(desktopLink);
-                return;
-            }
-            document.documentElement.classList.add("mobile-view");
-            const link = document.createElement("link");
-            link.rel = "stylesheet";
-            link.href = "css/mobile.css";
-            link.id = "mobileStylesheet";
-            document.head.appendChild(link);
-            const setViewportUnit = () => {
-                const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-                document.documentElement.style.setProperty("--mobile-vh", `${viewportHeight}px`);
-            };
-
-            const applyBodyClass = () => {
-                if (document.body) {
-                    document.body.classList.add("mobile-view");
-                    setViewportUnit();
-                }
-            };
-            if (document.readyState === "loading") {
-                document.addEventListener("DOMContentLoaded", applyBodyClass, { once: true });
-            } else {
-                applyBodyClass();
-            }
-
-            window.addEventListener("resize", setViewportUnit);
-            window.addEventListener("orientationchange", setViewportUnit);
-            if (window.visualViewport) {
-                window.visualViewport.addEventListener("resize", setViewportUnit);
-                window.visualViewport.addEventListener("scroll", setViewportUnit);
-            }
-
-            setViewportUnit();
-        })();
-    </script>
-    <style id="safari-ios-26-fix">
-        /* --- Safari iOS 26 Fix --- */
-        html, body {
+    <style>
+        * {
             margin: 0;
             padding: 0;
-            width: 100%;
-            overflow-x: hidden;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
-        .login-shell {
-            position: relative;
-            left: 50%;
-            transform: translateX(-50%);
-            margin-inline: auto;
+
+        :root {
+            --bg-primary: #faf7f2;
+            --bg-surface: #ffffff;
+            --text-primary: #2c2418;
+            --text-secondary: #6b5a4a;
+            --accent: #c47a44;
+            --accent-soft: #e9d9cd;
+            --border-light: #ede5db;
+            --shadow-sm: 0 8px 20px rgba(0,0,0,0.03), 0 2px 6px rgba(0,0,0,0.05);
+            --cover-size: 68px;
+            --transition: all 0.2s ease;
         }
+
+        body.dark {
+            --bg-primary: #121212;
+            --bg-surface: #1e1e1e;
+            --text-primary: #efebe9;
+            --text-secondary: #bcaea0;
+            --accent: #e29b6e;
+            --accent-soft: #2e2a24;
+            --border-light: #2c2a28;
+        }
+
         body {
-            padding-left: max(env(safe-area-inset-left), 16px);
-            padding-right: max(env(safe-area-inset-right), 16px);
+            font-family: 'Inter', 'Noto Sans SC', system-ui, -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background 0.25s, color 0.2s;
+            overflow-x: hidden;
+            padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
         }
-        @supports (height: 100dvh) {
-            :root {
-                --mobile-vh: 100dvh;
+
+        /* 主容器响应式 */
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 20px 24px 32px;
+        }
+
+        /* 头部区域 */
+        .header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .header h1 {
+            font-size: 1.9rem;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, var(--accent), #b95f2c);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        .warning {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            background: var(--accent-soft);
+            padding: 5px 12px;
+            border-radius: 40px;
+            opacity: 0.8;
+        }
+        .header-left-controls, .theme-switch-wrapper {
+            display: flex;
+            gap: 12px;
+        }
+        .theme-toggle-button {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-light);
+            border-radius: 40px;
+            padding: 8px 12px;
+            cursor: pointer;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        /* 搜索区 */
+        .search-area {
+            background: var(--bg-surface);
+            border-radius: 32px;
+            padding: 20px;
+            margin-bottom: 28px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+        }
+        .search-bar-unified {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .search-input-wrapper {
+            flex: 3;
+            position: relative;
+        }
+        .search-input {
+            width: 100%;
+            padding: 14px 20px 14px 44px;
+            border-radius: 60px;
+            border: 1px solid var(--border-light);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+        .source-select-wrapper {
+            position: relative;
+        }
+        .source-select-btn {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            padding: 12px 20px;
+            border-radius: 60px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            cursor: pointer;
+        }
+        .source-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: var(--bg-surface);
+            border-radius: 20px;
+            margin-top: 6px;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.1);
+            z-index: 30;
+            min-width: 130px;
+            display: none;
+        }
+        .source-menu.show { display: block; }
+        .source-menu button {
+            display: block;
+            width: 100%;
+            padding: 12px 18px;
+            text-align: left;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+        .search-btn {
+            background: var(--accent);
+            border: none;
+            border-radius: 60px;
+            padding: 0 24px;
+            color: white;
+            font-weight: 600;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            cursor: pointer;
+        }
+        .search-results-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 380px;
+            overflow-y: auto;
+            margin-top: 16px;
+        }
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: var(--bg-primary);
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        /* 播放控制条 */
+        .controls {
+            background: var(--bg-surface);
+            border-radius: 48px;
+            padding: 18px 24px;
+            margin-top: 24px;
+            box-shadow: var(--shadow-sm);
+        }
+        .transport-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 24px;
+            margin-bottom: 16px;
+        }
+        .transport-button {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .transport-button--play {
+            background: var(--accent);
+            color: white;
+            width: 52px;
+            height: 52px;
+            border-radius: 60px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .progress-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.8rem;
+        }
+        #progressBar {
+            flex: 1;
+            height: 4px;
+            border-radius: 10px;
+        }
+        .current-song-info {
+            text-align: center;
+            margin-top: 12px;
+        }
+        .current-song-title-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+        }
+        .favorite-toggle {
+            background: transparent;
+            border: none;
+            font-size: 1.3rem;
+            color: #e06c6c;
+        }
+        /* 播放列表区域 */
+        .playlist-tabs {
+            display: flex;
+            gap: 20px;
+            border-bottom: 1px solid var(--border-light);
+            margin-bottom: 16px;
+        }
+        .playlist-tab {
+            background: none;
+            border: none;
+            padding: 10px 0;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+        .playlist-tab.active {
+            color: var(--accent);
+            border-bottom: 2px solid var(--accent);
+        }
+        .playlist-items {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 280px;
+            overflow-y: auto;
+        }
+        .playlist-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: var(--bg-primary);
+            border-radius: 16px;
+        }
+        .import-dropdown {
+            position: relative;
+        }
+        .import-dropdown-menu {
+            position: absolute;
+            bottom: 100%;
+            right: 0;
+            background: var(--bg-surface);
+            border-radius: 20px;
+            display: none;
+        }
+        /* 移动端优化 */
+        @media (max-width: 680px) {
+            .container { padding: 16px; }
+            .search-bar-unified { flex-direction: column; }
+            .controls { padding: 16px; }
+            .transport-controls { gap: 16px; }
+        }
+        /* 桌面优化 */
+        @media (min-width: 1024px) {
+            .main-content {
+                display: grid;
+                grid-template-columns: 1fr 1.4fr;
+                gap: 28px;
+                align-items: start;
+            }
+            .cover-area {
+                position: sticky;
+                top: 20px;
+            }
+            .mobile-panel {
+                background: var(--bg-surface);
+                border-radius: 32px;
+                padding: 16px;
             }
         }
+        .modal-overlay {
+            position: fixed;
+            top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            visibility: hidden;
+            opacity: 0;
+            transition: 0.2s;
+        }
+        .modal-overlay.active {
+            visibility: visible;
+            opacity: 1;
+        }
+        .modal-content {
+            background: var(--bg-surface);
+            max-width: 460px;
+            width: 90%;
+            border-radius: 40px;
+            padding: 24px;
+        }
+        .genre-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 16px 0;
+        }
+        .genre-chip {
+            background: var(--bg-primary);
+            padding: 8px 16px;
+            border-radius: 40px;
+            border: 1px solid var(--border-light);
+            cursor: pointer;
+        }
+        .notification {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2e2a24;
+            color: #fff2e5;
+            padding: 10px 20px;
+            border-radius: 60px;
+            z-index: 1100;
+            opacity: 0;
+            transition: 0.2s;
+            pointer-events: none;
+        }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .album-cover {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 16px;
+            background: var(--accent-soft);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        @media (max-width: 680px) {
+            .album-cover { width: 140px; height: 140px; }
+        }
+        .mobile-toolbar { display: none; }
     </style>
-    <script>
-        (function fixMobileVH(){
-            document.documentElement.style.setProperty("--mobile-vh", window.innerHeight + "px");
-            window.addEventListener("resize", fixMobileVH);
-            window.addEventListener("orientationchange", fixMobileVH);
-        })();
-    </script>
-
 </head>
 <body>
-    <div class="background-stage" id="backgroundStage" aria-hidden="true">
-        <div class="background-stage__layer background-stage__layer--base" id="backgroundBaseLayer"></div>
-        <div class="background-stage__layer background-stage__layer--transition" id="backgroundTransitionLayer"></div>
+<div class="container" id="mainContainer">
+    <div class="header">
+        <h1>Solara</h1>
+        <div class="warning">🎵 学习交流 · GD音乐台API · 支持正版</div>
+        <div style="display: flex; gap: 8px;">
+            <button id="themeToggle" class="theme-toggle-button" aria-label="主题"><i class="fas fa-moon"></i></button>
+            <button id="openSettingsModal" class="theme-toggle-button"><i class="fas fa-sliders-h"></i></button>
+        </div>
     </div>
-    <div class="container" id="mainContainer">
-        <div class="mobile-toolbar" id="mobileToolbar" role="toolbar">
-            <button class="mobile-toolbar__button" id="mobileExploreButton" type="button" aria-label="探索雷达">
-                <i class="fas fa-satellite-dish" aria-hidden="true"></i>
-            </button>
-            <div class="mobile-toolbar__title" id="mobileToolbarTitle">Solara</div>
-            <div class="mobile-toolbar__actions">
-                <button class="mobile-toolbar__button" id="mobileSearchToggle" type="button" aria-label="打开搜索">
-                    <i class="fas fa-search" aria-hidden="true"></i>
-                </button>
-            </div>
-        </div>
-        <div class="header">
-            <h1>Solara</h1>
-            <div class="warning">Made by Wet Dream Boy，免费API来自GD音乐台(music.gdstudio.xyz)，仅供学习交流使用，请支持正版音乐奥！</div>
-            <div class="header-left-controls">
-                <button id="themeToggleButton" class="theme-toggle-button" type="button" aria-label="切换深浅色模式">
-                    <i class="fas fa-sun theme-icon theme-icon--sun" aria-hidden="true"></i>
-                    <i class="fas fa-moon theme-icon theme-icon--moon" aria-hidden="true"></i>
-                </button>
-            </div>
-            <div class="theme-switch-wrapper">
-                <button id="openSettingsBtn" class="theme-toggle-button" type="button" aria-label="设置" title="设置（或双击Logo）">
-                    <i class="fas fa-cog" aria-hidden="true"></i>
-                </button>
-            </div>
-        </div>
 
-        <div class="search-area" id="searchArea">
-            <div class="search-header">
-                <h2 class="search-title">探索音乐</h2>
-                <button type="button" class="mobile-close-btn" id="mobileSearchClose" aria-label="关闭搜索">
-                    <i class="fas fa-times" aria-hidden="true"></i>
-                </button>
+    <!-- 搜索区 -->
+    <div class="search-area">
+        <div class="search-bar-unified">
+            <div class="search-input-wrapper">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="searchInput" class="search-input" placeholder="搜索歌曲、歌手...">
             </div>
-            <div class="search-controls-wrapper">
-                <div class="search-bar-unified">
-                    <div class="search-input-wrapper">
-                        <i class="fas fa-search search-icon"></i>
-                        <input type="text" id="searchInput" class="search-input" placeholder="搜索歌曲、歌手或专辑...">
-                    </div>
-                    <div class="source-select-wrapper" id="sourceSelectWrapper">
-                        <button id="sourceSelectButton" class="source-select-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
-                            <span id="sourceSelectLabel">网易云</span>
-                            <i class="fas fa-chevron-down caret-icon" aria-hidden="true"></i>
-                        </button>
-                        <div id="sourceMenu" class="source-menu" role="listbox" aria-labelledby="sourceSelectButton"></div>
-                    </div>
-                </div>
-                <button id="searchBtn" class="search-btn">
-                    <i class="fas fa-search"></i>
-                    <span>搜索</span>
-                </button>
-                <div class="search-results-toolbar">
-                    <div class="import-dropdown">
-                        <button class="import-selected-btn" id="importSelectedBtn" disabled>
-                            <i class="fas fa-file-import"></i>
-                            <span>导入已选</span>
-                            <span id="importSelectedCount" class="import-selected-count"></span>
-                            <i class="fas fa-chevron-down import-dropdown-caret"></i>
-                        </button>
-                        <div class="import-dropdown-menu" id="importSelectedMenu" hidden>
-                            <button class="import-dropdown-item" id="importToPlaylist" data-action="playlist">导入到播放列表</button>
-                            <button class="import-dropdown-item" id="importToFavorites" data-action="favorites">导入到收藏列表</button>
-                        </div>
-                    </div>
+            <div class="source-select-wrapper">
+                <button id="sourceBtn" class="source-select-btn"><span id="sourceName">网易云</span> <i class="fas fa-chevron-down"></i></button>
+                <div id="sourceMenu" class="source-menu">
+                    <button data-source="netease">网易云</button>
+                    <button data-source="tencent">QQ音乐</button>
                 </div>
             </div>
-            <div id="searchResults" class="search-results">
-                <div id="searchResultsList" class="search-results-list"></div>
+            <button id="searchBtn" class="search-btn"><i class="fas fa-search"></i> 搜索</button>
+        </div>
+        <div id="searchResultsList" class="search-results-list"></div>
+        <div class="import-dropdown" style="margin-top:12px; text-align:right">
+            <button id="importSelectedBtn" disabled class="theme-toggle-button" style="background:var(--accent); color:white"><i class="fas fa-download"></i> 导入选中 (<span id="selectedCount">0</span>)</button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="cover-area">
+            <div class="album-cover" id="albumCover"><i class="fas fa-headphones" style="font-size: 3rem; opacity:0.6;"></i></div>
+            <div class="current-song-info">
+                <div class="current-song-title-row">
+                    <span id="currentSongTitle" style="font-weight: 700; font-size:1.2rem;">未播放</span>
+                    <button id="favCurrentBtn" class="favorite-toggle"><i class="far fa-heart"></i></button>
+                </div>
+                <div id="currentSongArtist" style="color: var(--text-secondary); margin-top:4px;">——</div>
+                <button id="qualityMobileBtn" class="theme-toggle-button" style="margin-top:12px; font-size:0.75rem;">极高音质 <i class="fas fa-angle-down"></i></button>
+                <div id="qualityMobileMenu" style="display:none; position:absolute; background:var(--bg-surface); border-radius:20px;"></div>
             </div>
         </div>
 
-        <div class="main-content">
-            <div class="cover-area">
-                <div class="mobile-turntable" id="mobileTurntable">
-                    <div class="mobile-turntable__platter">
-                        <div class="album-cover" id="albumCover">
-                            <div class="placeholder">
-                                <i class="fas fa-music"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="mobile-inline-lyrics" id="mobileInlineLyrics" aria-hidden="true">
-                    <div class="mobile-inline-lyrics__hint">
-                        <i class="fas fa-arrow-left"></i>
-                        轻触返回封面
-                    </div>
-                    <div class="mobile-inline-lyrics__scroll" id="mobileInlineLyricsScroll">
-                        <div class="mobile-inline-lyrics__content" id="mobileInlineLyricsContent"></div>
-                    </div>
-                </div>
-                <div class="current-song-info">
-                    <div class="current-song-title-row">
-                        <span class="current-song-title" id="currentSongTitle">选择一首歌曲开始播放</span>
-                        <button
-                            class="favorite-toggle current-favorite-btn"
-                            id="currentFavoriteToggle"
-                            type="button"
-                            aria-label="收藏当前歌曲"
-                            title="收藏当前歌曲"
-                        >
-                            <i class="far fa-heart" aria-hidden="true"></i>
-                        </button>
-                    </div>
-                    <div class="current-song-artist" id="currentSongArtist">未知艺术家</div>
-                    <button class="mobile-quality-chip" id="mobileQualityToggle" type="button" aria-haspopup="menu" aria-expanded="false">
-                        <span id="mobileQualityLabel">极高音质</span>
-                        <i class="fas fa-chevron-down" aria-hidden="true"></i>
-                    </button>
-                </div>
+        <div class="mobile-panel">
+            <div class="playlist-tabs" id="panelTabs">
+                <button class="playlist-tab active" data-tab="playlist">📋 播放列表</button>
+                <button class="playlist-tab" data-tab="favorites">❤️ 收藏列表</button>
             </div>
-
-            <div class="mobile-panel" id="mobilePanel">
-                <div class="mobile-panel-header" id="mobilePanelHeader">
-                    <div class="mobile-panel-handle" aria-hidden="true"></div>
-                    <div class="playlist-tabs" role="tablist">
-                        <button
-                            id="mobilePlaylistTab"
-                            class="playlist-tab active"
-                            type="button"
-                            role="tab"
-                            aria-selected="true"
-                            data-target="playlist"
-                        >
-                            播放列表
-                        </button>
-                        <button
-                            id="mobileFavoritesTab"
-                            class="playlist-tab"
-                            type="button"
-                            role="tab"
-                            aria-selected="false"
-                            data-target="favorites"
-                        >
-                            收藏列表
-                        </button>
-                    </div>
-                    <div class="mobile-panel-actions">
-                        <div class="mobile-actions-group" id="mobilePlaylistActions" role="group" aria-label="播放列表操作" aria-hidden="false">
-                            <button
-                                id="mobileImportPlaylistBtn"
-                                class="mobile-panel-action-btn"
-                                type="button"
-                                aria-label="导入播放列表"
-                                title="导入播放列表"
-                            >
-                                <i class="fas fa-file-import" aria-hidden="true"></i>
-                            </button>
-                            <button
-                                id="mobileExportPlaylistBtn"
-                                class="mobile-panel-action-btn"
-                                type="button"
-                                aria-label="导出播放列表"
-                                title="导出播放列表"
-                                aria-disabled="true"
-                                disabled
-                            >
-                                <i class="fas fa-file-export" aria-hidden="true"></i>
-                            </button>
-                            <button
-                                id="mobileClearPlaylistBtn"
-                                class="mobile-panel-action-btn mobile-panel-clear-btn"
-                                type="button"
-                                aria-label="清空播放列表"
-                                title="清空播放列表"
-                                onclick="clearPlaylist()"
-                                hidden
-                                aria-hidden="true"
-                            >
-                                <i class="fas fa-trash" aria-hidden="true"></i>
-                            </button>
-                        </div>
-                        <div class="mobile-actions-group" id="mobileFavoritesActions" role="group" aria-label="收藏列表操作" hidden aria-hidden="true">
-                            <button
-                                id="mobileAddAllFavoritesBtn"
-                                class="mobile-panel-action-btn"
-                                type="button"
-                                aria-label="全部添加到播放列表"
-                                title="全部添加到播放列表"
-                            >
-                                <i class="fas fa-plus-circle" aria-hidden="true"></i>
-                            </button>
-                            <button
-                                id="mobileImportFavoritesBtn"
-                                class="mobile-panel-action-btn"
-                                type="button"
-                                aria-label="导入收藏列表"
-                                title="导入收藏列表"
-                            >
-                                <i class="fas fa-file-import" aria-hidden="true"></i>
-                            </button>
-                            <button
-                                id="mobileExportFavoritesBtn"
-                                class="mobile-panel-action-btn"
-                                type="button"
-                                aria-label="导出收藏列表"
-                                title="导出收藏列表"
-                                aria-disabled="true"
-                                disabled
-                            >
-                                <i class="fas fa-file-export" aria-hidden="true"></i>
-                            </button>
-                            <button
-                                id="mobileClearFavoritesBtn"
-                                class="mobile-panel-action-btn mobile-panel-clear-btn"
-                                type="button"
-                                aria-label="清空收藏列表"
-                                title="清空收藏列表"
-                            >
-                                <i class="fas fa-trash" aria-hidden="true"></i>
-                            </button>
-                        </div>
-                        <button id="mobilePanelClose" class="mobile-close-btn mobile-panel-action-btn" type="button" aria-label="收起播放面板">
-                            <i class="fas fa-chevron-down" aria-hidden="true"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="playlist active empty" id="playlist" role="tabpanel" aria-labelledby="playlistTab">
-                    <div class="playlist-header">
-                        <div class="playlist-tabs" role="tablist">
-                            <button
-                                id="playlistTab"
-                                class="playlist-tab active"
-                                type="button"
-                                role="tab"
-                                aria-selected="true"
-                                data-target="playlist"
-                            >播放列表</button>
-                            <button
-                                id="favoritesTab"
-                                class="playlist-tab"
-                                type="button"
-                                role="tab"
-                                aria-selected="false"
-                                data-target="favorites"
-                            >收藏列表</button>
-                        </div>
-                        <div class="playlist-actions-tray" role="group" aria-label="播放列表操作">
-                            <input
-                                id="importPlaylistInput"
-                                class="playlist-import-input"
-                                type="file"
-                                accept="application/json"
-                                hidden
-                            />
-                            <button
-                                class="playlist-action-btn playlist-action-btn--import"
-                                id="importPlaylistBtn"
-                                type="button"
-                                title="导入播放列表"
-                                aria-label="导入播放列表"
-                            >
-                                <i class="fas fa-file-import" aria-hidden="true"></i>
-                            </button>
-                            <button
-                                class="playlist-action-btn playlist-action-btn--export"
-                                id="exportPlaylistBtn"
-                                type="button"
-                                title="导出播放列表"
-                                aria-label="导出播放列表"
-                            >
-                                <i class="fas fa-file-export" aria-hidden="true"></i>
-                            </button>
-                            <button
-                                class="playlist-action-btn playlist-action-btn--clear clear-playlist-btn"
-                                id="clearPlaylistBtn"
-                                type="button"
-                                onclick="clearPlaylist()"
-                                title="清空播放列表"
-                                aria-label="清空播放列表"
-                            >
-                                <i class="fas fa-trash" aria-hidden="true"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="playlist-scroll">
-                        <div class="playlist-items" id="playlistItems"></div>
-                    </div>
-                </div>
-                <div class="playlist favorites empty" id="favorites" role="tabpanel" aria-labelledby="favoritesTab" hidden>
-                    <div class="playlist-header">
-                        <div class="playlist-tabs" role="tablist">
-                            <button
-                                id="playlistTabSecondary"
-                                class="playlist-tab active"
-                                type="button"
-                                role="tab"
-                                aria-selected="true"
-                                data-target="playlist"
-                            >播放列表</button>
-                            <button
-                                id="favoritesTabSecondary"
-                                class="playlist-tab"
-                                type="button"
-                                role="tab"
-                                aria-selected="false"
-                                data-target="favorites"
-                            >收藏列表</button>
-                        </div>
-                        <div class="playlist-actions-tray" role="group" aria-label="收藏列表操作">
-                            <button
-                                class="playlist-action-btn"
-                                id="addAllFavoritesBtn"
-                                type="button"
-                                title="全部添加到播放列表"
-                                aria-label="全部添加到播放列表"
-                            >
-                                <i class="fas fa-plus-circle" aria-hidden="true"></i>
-                            </button>
-                            <input
-                                id="importFavoritesInput"
-                                class="playlist-import-input"
-                                type="file"
-                                accept="application/json"
-                                hidden
-                            />
-                            <button
-                                class="playlist-action-btn"
-                                id="importFavoritesBtn"
-                                type="button"
-                                title="导入收藏列表"
-                                aria-label="导入收藏列表"
-                            >
-                                <i class="fas fa-file-import" aria-hidden="true"></i>
-                            </button>
-                            <button
-                                class="playlist-action-btn"
-                                id="exportFavoritesBtn"
-                                type="button"
-                                title="导出收藏列表"
-                                aria-label="导出收藏列表"
-                            >
-                                <i class="fas fa-file-export" aria-hidden="true"></i>
-                            </button>
-                            <button
-                                class="playlist-action-btn playlist-action-btn--clear"
-                                id="clearFavoritesBtn"
-                                type="button"
-                                title="清空收藏列表"
-                                aria-label="清空收藏列表"
-                            >
-                                <i class="fas fa-trash" aria-hidden="true"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="playlist-scroll">
-                        <div class="playlist-items" id="favoriteItems"></div>
-                    </div>
-                </div>
-                <div class="lyrics empty" id="lyrics" data-placeholder="default">
-                    <div class="lyrics-scroll" id="lyricsScroll">
-                        <div class="lyrics-content" id="lyricsContent"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="controls">
-            <div class="transport-controls">
-                <button class="play-mode-btn transport-button transport-button--mode" id="playModeBtn" type="button" title="播放模式">
-                    <i class="fas fa-repeat"></i>
-                </button>
-                <button class="transport-button transport-button--prev" onclick="playPrevious()" type="button" title="上一曲"><i class="fas fa-backward-step"></i></button>
-                <button class="transport-button transport-button--play" id="playPauseBtn" type="button" title="播放 / 暂停"><i class="fas fa-play"></i></button>
-                <button class="transport-button transport-button--next" onclick="playNext()" type="button" title="下一曲"><i class="fas fa-forward-step"></i></button>
-                <button class="transport-button transport-button--queue" id="mobileQueueToggle" type="button" title="打开播放列表" aria-label="打开播放列表"><i class="fas fa-bars"></i></button>
-                <button class="transport-button transport-button--shuffle" id="shuffleToggleBtn" type="button" title="随机播放" aria-label="切换随机播放"><i class="fas fa-shuffle shuffle-icon shuffle-icon--off"></i></button>
-            </div>
-            <div class="progress-container">
-                <span id="currentTimeDisplay">00:00</span>
-                <input type="range" id="progressBar" min="0" max="0" step="0.1" value="0">
-                <span id="durationDisplay">00:00</span>
-            </div>
-            <div class="control-trailing">
-                <div class="audio-tools">
-                    <div class="player-quality">
-                        <button id="qualityToggle" class="player-quality-btn" type="button">
-                            <span id="qualityLabel">极高音质</span>
-                        </button>
-                        <div id="playerQualityMenu" class="player-quality-menu"></div>
-                    </div>
-                    <div class="volume-container">
-                        <i id="volumeIcon" class="fas fa-volume-up"></i>
-                        <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.8">
-                    </div>
-                </div>
-                <button id="loadOnlineBtn" title="聚合所有雷达，探索新音乐">
-                    <span class="btn-text"><i class="fas fa-satellite-dish"></i> 探索雷达</span>
-                    <span class="loader" style="display: none;"></span>
-                </button>
+            <div id="playlistContainer" class="playlist-items"></div>
+            <div id="favoritesContainer" class="playlist-items" style="display:none;"></div>
+            <div style="display:flex; gap:12px; margin-top:16px; justify-content:flex-end;">
+                <button id="exportPlaylistBtn" class="theme-toggle-button"><i class="fas fa-upload"></i> 导出歌单</button>
+                <button id="clearPlaylistBtn" class="theme-toggle-button"><i class="fas fa-trash"></i> 清空</button>
             </div>
         </div>
     </div>
 
-    <div class="mobile-overlay-scrim" id="mobileOverlayScrim"></div>
-
-    <audio id="audioPlayer" preload="metadata" playsinline></audio>
-
-<!-- 设置模态框 -->
-<div id="settingsModal" class="modal-overlay" aria-hidden="true">
-    <div class="modal-content settings-content">
-        <div class="modal-header">
-            <h2>设置</h2>
-            <button id="closeSettingsBtn" class="close-modal-btn" aria-label="关闭设置">
-                <i class="fas fa-times"></i>
-            </button>
+    <div class="controls">
+        <div class="transport-controls">
+            <button id="modeBtn" class="transport-button" title="播放模式"><i class="fas fa-repeat"></i></button>
+            <button id="prevBtn" class="transport-button"><i class="fas fa-backward-step"></i></button>
+            <button id="playPauseBtn" class="transport-button transport-button--play"><i class="fas fa-play"></i></button>
+            <button id="nextBtn" class="transport-button"><i class="fas fa-forward-step"></i></button>
+            <button id="shuffleBtn" class="transport-button"><i class="fas fa-shuffle"></i></button>
         </div>
-        <div class="modal-body">
-            <section class="settings-section">
-                <h3>探索雷达风格</h3>
-                <p class="settings-hint">选择您喜欢的音乐风格，探索雷达将从中为您推荐歌曲。</p>
-                <div id="radarGenreList" class="genre-grid">
-                    <!-- 风格复选框将通过 JS 动态生成 -->
-                </div>
-            </section>
+        <div class="progress-container">
+            <span id="currentTime">00:00</span>
+            <input type="range" id="progressBar" value="0" step="0.1">
+            <span id="totalDuration">00:00</span>
         </div>
-        <div class="modal-footer">
-            <button id="saveSettingsBtn" class="save-settings-btn">保存设置</button>
+        <div style="display: flex; justify-content: space-between; margin-top: 12px;">
+            <div class="volume-container"><i id="volumeIcon" class="fas fa-volume-up"></i> <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.8"></div>
+            <div class="player-quality"><button id="qualityDesktopBtn" class="theme-toggle-button" style="font-size:0.75rem;">极高音质</button></div>
         </div>
     </div>
 </div>
-
-<!-- 通知容器 -->
 <div id="notification" class="notification"></div>
+<div id="settingsModal" class="modal-overlay">
+    <div class="modal-content">
+        <h3>✨ 探索雷达风格</h3>
+        <div id="genreList" class="genre-grid"></div>
+        <button id="saveSettings" class="search-btn" style="margin-top: 16px; width:100%">保存</button>
+        <button id="closeModalBtn" style="margin-top:12px; background:none; border:none;">取消</button>
+    </div>
+</div>
+<audio id="audio" preload="metadata"></audio>
 
-<!-- 调试信息容器 -->
-<div id="debugInfo" class="debug-info"></div>
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="js/index.js"></script>
 <script>
-    if (window.__SOLARA_IS_MOBILE) {
-        const mobileScript = document.createElement('script');
-        mobileScript.src = 'js/mobile.js';
-        mobileScript.async = false;
-        mobileScript.defer = false;
-        document.body.appendChild(mobileScript);
+    // ---------- 全局变量 ----------
+    let playlist = [];         // [{id,title,artist,url,cover,source}]
+    let favorites = [];
+    let currentIndex = -1;
+    let isPlaying = false;
+    let playMode = 'list';     // list, repeat, random
+    let shuffleOn = false;
+    let currentSource = 'netease';
+    let searchResults = [];
+    let selectedSearchIndices = new Set();
+    let currentQuality = 'lossless'; // 模拟音质
+    let audio = document.getElementById('audio');
+    let themeDark = localStorage.getItem('theme') === 'dark';
+    
+    // 风格预设
+    const genres = ['流行', '摇滚', '电子', '民谣', '爵士', 'R&B', '古典'];
+    let selectedGenres = JSON.parse(localStorage.getItem('radarGenres') || '["流行","电子"]');
+    
+    function showMsg(msg, isError=false) {
+        let notif = document.getElementById('notification');
+        notif.textContent = msg;
+        notif.style.opacity = '1';
+        setTimeout(() => notif.style.opacity = '0', 2000);
     }
+
+    // 主题
+    function applyTheme() {
+        if(themeDark) document.body.classList.add('dark');
+        else document.body.classList.remove('dark');
+    }
+    document.getElementById('themeToggle').onclick = () => { themeDark = !themeDark; localStorage.setItem('theme', themeDark?'dark':'light'); applyTheme(); };
+    applyTheme();
+    
+    // 模拟API (基于GD音乐台风格)
+    async function searchMusic(keyword, source) {
+        if(!keyword.trim()) return [];
+        // 模拟真实响应，因为纯前端无法直接跨域调用真实API，但展示功能
+        return new Promise(resolve => {
+            setTimeout(() => {
+                let mock = [];
+                for(let i=0;i<8;i++) {
+                    mock.push({
+                        id: `${source}_${Date.now()}_${i}`,
+                        title: `${keyword} · 模拟曲目${i+1}`,
+                        artist: `${source==='netease'?'网易云艺人':'QQ音乐歌手'}`,
+                        url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+                        cover: '',
+                        source: source
+                    });
+                }
+                resolve(mock);
+            }, 400);
+        });
+    }
+    
+    // 渲染搜索结果
+    function renderSearchResults() {
+        let container = document.getElementById('searchResultsList');
+        if(!searchResults.length) { container.innerHTML = '<div style="padding:20px; text-align:center;">✨ 搜索你喜欢的音乐</div>'; return; }
+        container.innerHTML = searchResults.map((song, idx) => `
+            <div class="result-item" data-idx="${idx}">
+                <div><strong>${escapeHtml(song.title)}</strong><br><small>${song.artist}</small></div>
+                <div><input type="checkbox" class="result-checkbox" data-idx="${idx}" ${selectedSearchIndices.has(idx) ? 'checked' : ''}></div>
+            </div>
+        `).join('');
+        document.querySelectorAll('.result-item').forEach(el => {
+            el.addEventListener('click', (e) => { if(e.target.type !== 'checkbox') playSearchResult(parseInt(el.dataset.idx)); });
+        });
+        document.querySelectorAll('.result-checkbox').forEach(cb => {
+            cb.addEventListener('change', (e) => {
+                let idx = parseInt(cb.dataset.idx);
+                if(cb.checked) selectedSearchIndices.add(idx);
+                else selectedSearchIndices.delete(idx);
+                document.getElementById('selectedCount').innerText = selectedSearchIndices.size;
+                document.getElementById('importSelectedBtn').disabled = selectedSearchIndices.size === 0;
+            });
+        });
+        document.getElementById('selectedCount').innerText = selectedSearchIndices.size;
+        document.getElementById('importSelectedBtn').disabled = selectedSearchIndices.size === 0;
+    }
+    
+    function playSearchResult(idx) {
+        let song = searchResults[idx];
+        addToPlaylistAndPlay(song);
+    }
+    
+    function addToPlaylistAndPlay(song) {
+        let exists = playlist.find(s => s.id === song.id);
+        if(!exists) playlist.push(song);
+        let newIndex = playlist.findIndex(s => s.id === song.id);
+        if(newIndex !== -1) currentIndex = newIndex;
+        else currentIndex = playlist.length-1;
+        renderPlaylist();
+        playCurrent();
+        showMsg(`✅ 已添加: ${song.title}`);
+        savePlaylistToLocal();
+    }
+    
+    function importSelectedToPlaylist() {
+        let songsToAdd = [...selectedSearchIndices].map(i => searchResults[i]);
+        for(let s of songsToAdd) {
+            if(!playlist.find(p => p.id === s.id)) playlist.push(s);
+        }
+        renderPlaylist();
+        savePlaylistToLocal();
+        showMsg(`导入了 ${songsToAdd.length} 首歌曲`);
+        selectedSearchIndices.clear();
+        renderSearchResults();
+    }
+    
+    function renderPlaylist() {
+        let container = document.getElementById('playlistContainer');
+        if(playlist.length === 0) { container.innerHTML = '<div style="padding:20px; text-align:center;">🎵 暂无歌曲，去搜索添加吧</div>'; return; }
+        container.innerHTML = playlist.map((song, idx) => `
+            <div class="playlist-item ${currentIndex===idx ? 'active-item' : ''}" data-playidx="${idx}">
+                <div style="flex:1"><strong>${escapeHtml(song.title)}</strong> - ${song.artist}</div>
+                <div><button class="play-this-btn" data-idx="${idx}"><i class="fas fa-play"></i></button> <button class="remove-playlist" data-idx="${idx}"><i class="fas fa-times"></i></button></div>
+            </div>
+        `).join('');
+        document.querySelectorAll('.play-this-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => { e.stopPropagation(); let i = parseInt(btn.dataset.idx); if(!isNaN(i)) { currentIndex=i; playCurrent(); renderPlaylist(); } });
+        });
+        document.querySelectorAll('.remove-playlist').forEach(btn => {
+            btn.addEventListener('click', (e) => { e.stopPropagation(); let i = parseInt(btn.dataset.idx); playlist.splice(i,1); if(currentIndex >= playlist.length) currentIndex = playlist.length-1; if(playlist.length===0) pauseAudio(); renderPlaylist(); savePlaylistToLocal(); });
+        });
+    }
+    
+    function renderFavorites() {
+        let container = document.getElementById('favoritesContainer');
+        if(favorites.length === 0) { container.innerHTML = '<div style="padding:20px; text-align:center;">❤️ 暂无收藏歌曲</div>'; return; }
+        container.innerHTML = favorites.map((song, idx) => `
+            <div class="playlist-item">
+                <div><strong>${escapeHtml(song.title)}</strong> - ${song.artist}</div>
+                <div><button class="fav-play-btn" data-favidx="${idx}"><i class="fas fa-play"></i></button> <button class="fav-remove-btn" data-favidx="${idx}"><i class="fas fa-trash"></i></button></div>
+            </div>
+        `).join('');
+        document.querySelectorAll('.fav-play-btn').forEach(btn => {
+            btn.addEventListener('click', () => { let idx = parseInt(btn.dataset.favidx); let song = favorites[idx]; addToPlaylistAndPlay(song); });
+        });
+        document.querySelectorAll('.fav-remove-btn').forEach(btn => {
+            btn.addEventListener('click', () => { let idx = parseInt(btn.dataset.favidx); favorites.splice(idx,1); renderFavorites(); saveFavorites(); showMsg('已移除收藏'); });
+        });
+    }
+    
+    function playCurrent() {
+        if(currentIndex < 0 || playlist.length === 0) return;
+        let song = playlist[currentIndex];
+        document.getElementById('currentSongTitle').innerText = song.title;
+        document.getElementById('currentSongArtist').innerText = song.artist;
+        audio.src = song.url || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+        audio.load();
+        audio.play().then(()=>{ isPlaying=true; updatePlayPauseIcon(); }).catch(e=>showMsg('播放失败，模拟地址受限',true));
+        updateFavoriteStar(song);
+    }
+    
+    function updateFavoriteStar(song) {
+        let isFav = favorites.some(f => f.id === song.id);
+        document.getElementById('favCurrentBtn').innerHTML = isFav ? '<i class="fas fa-heart" style="color:#e06c6c;"></i>' : '<i class="far fa-heart"></i>';
+    }
+    document.getElementById('favCurrentBtn').onclick = () => {
+        if(currentIndex<0) return;
+        let song = playlist[currentIndex];
+        let exists = favorites.find(f => f.id === song.id);
+        if(exists) { favorites = favorites.filter(f => f.id !== song.id); showMsg('取消收藏'); }
+        else { favorites.push({...song}); showMsg('已添加收藏'); }
+        renderFavorites(); saveFavorites(); updateFavoriteStar(song);
+    };
+    
+    function pauseAudio() { audio.pause(); isPlaying=false; updatePlayPauseIcon(); }
+    function playAudio() { audio.play(); isPlaying=true; updatePlayPauseIcon(); }
+    function updatePlayPauseIcon() { let btn = document.getElementById('playPauseBtn'); btn.innerHTML = isPlaying ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>'; }
+    document.getElementById('playPauseBtn').onclick = () => { if(isPlaying) pauseAudio(); else playAudio(); };
+    document.getElementById('nextBtn').onclick = () => { if(playlist.length) { currentIndex = (currentIndex+1) % playlist.length; playCurrent(); } };
+    document.getElementById('prevBtn').onclick = () => { if(playlist.length) { currentIndex = (currentIndex-1+playlist.length)%playlist.length; playCurrent(); } };
+    
+    audio.addEventListener('timeupdate', () => { if(audio.duration) { let percent = (audio.currentTime/audio.duration)*100; document.getElementById('progressBar').value = percent; document.getElementById('currentTime').innerText = formatTime(audio.currentTime); } });
+    audio.addEventListener('loadedmetadata', () => { document.getElementById('totalDuration').innerText = formatTime(audio.duration); document.getElementById('progressBar').max = 100; });
+    document.getElementById('progressBar').addEventListener('input', (e) => { if(audio.duration) audio.currentTime = (e.target.value/100)*audio.duration; });
+    document.getElementById('volumeSlider').addEventListener('input', (e) => { audio.volume = e.target.value; });
+    
+    function formatTime(sec) { let m = Math.floor(sec/60); let s = Math.floor(sec%60); return `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`; }
+    function escapeHtml(str) { return str.replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+    
+    function savePlaylistToLocal() { localStorage.setItem('solara_playlist', JSON.stringify(playlist)); }
+    function saveFavorites() { localStorage.setItem('solara_favorites', JSON.stringify(favorites)); }
+    function loadData() { let p = localStorage.getItem('solara_playlist'); if(p) { playlist = JSON.parse(p); renderPlaylist(); } let f = localStorage.getItem('solara_favorites'); if(f) { favorites = JSON.parse(f); renderFavorites(); } }
+    
+    // 搜索逻辑
+    document.getElementById('searchBtn').onclick = async () => {
+        let kw = document.getElementById('searchInput').value.trim();
+        if(!kw) return showMsg('请输入关键词');
+        showMsg('搜索中...');
+        searchResults = await searchMusic(kw, currentSource);
+        selectedSearchIndices.clear();
+        renderSearchResults();
+    };
+    document.getElementById('sourceBtn').onclick = () => document.getElementById('sourceMenu').classList.toggle('show');
+    document.querySelectorAll('#sourceMenu button').forEach(btn => {
+        btn.addEventListener('click', (e) => { currentSource = btn.dataset.source; document.getElementById('sourceName').innerText = btn.innerText; document.getElementById('sourceMenu').classList.remove('show'); });
+    });
+    document.getElementById('importSelectedBtn').onclick = () => importSelectedToPlaylist();
+    document.getElementById('clearPlaylistBtn').onclick = () => { if(confirm('清空播放列表？')) { playlist = []; currentIndex=-1; pauseAudio(); renderPlaylist(); savePlaylistToLocal(); } };
+    document.getElementById('exportPlaylistBtn').onclick = () => { let data = JSON.stringify(playlist); let blob = new Blob([data], {type:'application/json'}); let a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'playlist.json'; a.click(); showMsg('导出成功'); };
+    
+    // 选项卡切换
+    let tabBtns = document.querySelectorAll('#panelTabs .playlist-tab');
+    let playlistDiv = document.getElementById('playlistContainer');
+    let favDiv = document.getElementById('favoritesContainer');
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            tabBtns.forEach(b=>b.classList.remove('active'));
+            btn.classList.add('active');
+            let tab = btn.dataset.tab;
+            if(tab === 'playlist') { playlistDiv.style.display = 'flex'; favDiv.style.display = 'none'; renderPlaylist(); }
+            else { playlistDiv.style.display = 'none'; favDiv.style.display = 'flex'; renderFavorites(); }
+        });
+    });
+    
+    // 设置弹窗风格雷达
+    function renderGenreModal() {
+        let container = document.getElementById('genreList');
+        container.innerHTML = genres.map(g => `<label class="genre-chip"><input type="checkbox" value="${g}" ${selectedGenres.includes(g)?'checked':''}> ${g}</label>`).join('');
+    }
+    document.getElementById('openSettingsModal').onclick = () => { renderGenreModal(); document.getElementById('settingsModal').classList.add('active'); };
+    document.getElementById('closeModalBtn').onclick = () => document.getElementById('settingsModal').classList.remove('active');
+    document.getElementById('saveSettings').onclick = () => {
+        let checks = document.querySelectorAll('#genreList input:checked');
+        selectedGenres = Array.from(checks).map(cb => cb.value);
+        localStorage.setItem('radarGenres', JSON.stringify(selectedGenres));
+        showMsg(`风格已保存: ${selectedGenres.join(',')}`);
+        document.getElementById('settingsModal').classList.remove('active');
+    };
+    // 播放模式切换
+    let modeIdx = 0;
+    document.getElementById('modeBtn').onclick = () => { modeIdx = (modeIdx+1)%3; let modes = ['列表循环','单曲循环','随机']; showMsg(modes[modeIdx]); audio.loop = (modeIdx===1); };
+    document.getElementById('shuffleBtn').onclick = () => { shuffleOn = !shuffleOn; showMsg(shuffleOn?'随机开':'随机关'); };
+    
+    // 初始化加载
+    loadData();
+    if(playlist.length===0){
+        playlist.push({id:'demo1',title:'示例 · 暖阳',artist:'Solara',url:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',source:'demo'});
+        playlist.push({id:'demo2',title:'流光叙事',artist:'边界电台',url:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',source:'demo'});
+        savePlaylistToLocal();
+        renderPlaylist();
+    }
+    renderPlaylist(); renderFavorites();
+    document.getElementById('qualityDesktopBtn').onclick = () => showMsg('音质切换演示 (极高)');
+    document.getElementById('qualityMobileBtn').onclick = () => showMsg('音质: 极高');
+    window.addEventListener('click', (e) => { if(!e.target.closest('.source-select-wrapper')) document.getElementById('sourceMenu')?.classList.remove('show'); });
 </script>
 </body>
 </html>
