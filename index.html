@@ -13,8 +13,8 @@
     <link rel="apple-touch-icon-precomposed" sizes="180x180" href="/favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet" integrity="sha256-ZOC+tycl9tfkxo+nmyGjABX5ZaAblDvmd2wtMleDoFg=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha256-XOqroi11tY4EFQMR9ZYwZWKj5ZXiftSx36RRuC3anlA=" crossorigin="anonymous">
     <link rel="stylesheet" href="css/style.css">
     <script>
         (function () {
@@ -268,7 +268,7 @@
                                 type="button"
                                 aria-label="清空播放列表"
                                 title="清空播放列表"
-                                onclick="clearPlaylist()"
+                                
                                 hidden
                                 aria-hidden="true"
                             >
@@ -371,7 +371,7 @@
                                 class="playlist-action-btn playlist-action-btn--clear clear-playlist-btn"
                                 id="clearPlaylistBtn"
                                 type="button"
-                                onclick="clearPlaylist()"
+                                
                                 title="清空播放列表"
                                 aria-label="清空播放列表"
                             >
@@ -466,9 +466,9 @@
                 <button class="play-mode-btn transport-button transport-button--mode" id="playModeBtn" type="button" title="播放模式">
                     <i class="fas fa-repeat"></i>
                 </button>
-                <button class="transport-button transport-button--prev" onclick="playPrevious()" type="button" title="上一曲"><i class="fas fa-backward-step"></i></button>
+                <button class="transport-button transport-button--prev" id="prevBtn" type="button" title="上一曲"><i class="fas fa-backward-step"></i></button>
                 <button class="transport-button transport-button--play" id="playPauseBtn" type="button" title="播放 / 暂停"><i class="fas fa-play"></i></button>
-                <button class="transport-button transport-button--next" onclick="playNext()" type="button" title="下一曲"><i class="fas fa-forward-step"></i></button>
+                <button class="transport-button transport-button--next" id="nextBtn" type="button" title="下一曲"><i class="fas fa-forward-step"></i></button>
                 <button class="transport-button transport-button--queue" id="mobileQueueToggle" type="button" title="打开播放列表" aria-label="打开播放列表"><i class="fas fa-bars"></i></button>
                 <button class="transport-button transport-button--shuffle" id="shuffleToggleBtn" type="button" title="随机播放" aria-label="切换随机播放"><i class="fas fa-shuffle shuffle-icon shuffle-icon--off"></i></button>
             </div>
@@ -508,7 +508,7 @@
 <!-- 调试信息容器 -->
 <div id="debugInfo" class="debug-info"></div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
 <script src="js/index.js"></script>
 <script>
     if (window.__SOLARA_IS_MOBILE) {

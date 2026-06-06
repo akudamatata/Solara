@@ -853,25 +853,15 @@ body.mobile-view .search-results-list {
     margin: 0 auto;
 }
 
-body.mobile-view .search-area > :not(.mobile-close-btn) {
-    width: min(100%, 360px);
-    align-self: center;
-}
 
 body.mobile-view .search-area > :not(.mobile-close-btn) {
     width: min(100%, 340px);
     align-self: center;
 }
 
-body.mobile-view .search-area > :not(.mobile-close-btn) {
-    width: min(100%, 340px);
-    align-self: center;
-}
 
-body.mobile-view .search-area > :not(.mobile-close-btn) {
-    width: min(100%, 340px);
-    align-self: center;
-}
+
+
 
 body.mobile-view .search-container {
     background: rgba(255, 255, 255, 0.08);

@@ -39,6 +39,8 @@ const dom = {
     exportPlaylistBtn: document.getElementById("exportPlaylistBtn"),
     importPlaylistInput: document.getElementById("importPlaylistInput"),
     clearPlaylistBtn: document.getElementById("clearPlaylistBtn"),
+    nextBtn: document.getElementById("nextBtn"),
+    prevBtn: document.getElementById("prevBtn"),
     mobileImportPlaylistBtn: document.getElementById("mobileImportPlaylistBtn"),
     mobileExportPlaylistBtn: document.getElementById("mobileExportPlaylistBtn"),
     playModeBtn: document.getElementById("playModeBtn"),
@@ -774,6 +776,7 @@ const API = {
                 headers: {
                     "Accept": "application/json",
                 },
+                signal: AbortSignal.timeout(15000),
             });
 
             if (!response.ok) {
@@ -893,6 +896,7 @@ Object.freeze(API);
 
 const state = {
     onlineSongs: [],
+    _exploringRadar: false,
     searchResults: cloneSearchResults(savedLastSearchState?.results) || [],
     renderedSearchCount: 0,
     currentTrackIndex: savedCurrentTrackIndex,
@@ -3146,7 +3150,19 @@ function setupInteractions() {
     }
 
     dom.loadOnlineBtn.addEventListener("click", exploreOnlineMusic);
+    
+    // Bind prev/next button event listeners (replacing inline onclick)
+    if (dom.prevBtn) {
+        dom.prevBtn.addEventListener("click", playPrevious);
+    }
+    if (dom.nextBtn) {
+        dom.nextBtn.addEventListener("click", playNext);
+    }
     if (dom.mobileExploreButton) {
+    // Bind clearPlaylist button (replacing inline onclick)
+    if (dom.clearPlaylistBtn) {
+        dom.clearPlaylistBtn.addEventListener("click", function(e) { e.preventDefault(); clearPlaylist(); });
+    }
         dom.mobileExploreButton.addEventListener("click", (event) => {
             event.preventDefault();
             event.stopPropagation();
@@ -3176,6 +3192,10 @@ function setupInteractions() {
 
     if (dom.mobileExportPlaylistBtn) {
         dom.mobileExportPlaylistBtn.addEventListener("click", exportPlaylist);
+    }
+
+    if (dom.mobileClearPlaylistBtn) {
+        dom.mobileClearPlaylistBtn.addEventListener("click", function(e) { e.preventDefault(); clearPlaylist(); });
     }
 
     if (dom.addAllFavoritesBtn) {
@@ -5596,6 +5616,9 @@ function pickRandomExploreSource() {
 
 // 探索雷达：通过代理后端随机搜歌并刷新播放列表
 async function exploreOnlineMusic() {
+    // Guard against concurrent radar exploration
+    if (state._exploringRadar) return;
+    state._exploringRadar = true;
     const desktopButton = dom.loadOnlineBtn;
     const mobileButton = dom.mobileExploreButton;
     const btnText = desktopButton ? desktopButton.querySelector(".btn-text") : null;
@@ -5686,6 +5709,7 @@ async function exploreOnlineMusic() {
         console.error("探索雷达错误:", error);
         showNotification("探索雷达获取失败，请稍后重试", "error");
     } finally {
+        state._exploringRadar = false;
         setLoadingState(false);
     }
 }
@@ -5788,7 +5812,7 @@ function clearLyricsIfLibraryEmpty() {
 // 修复：显示歌词
 function displayLyrics() {
     const lyricsHtml = state.lyricsData.map((lyric, index) =>
-        `<div data-time="${lyric.time}" data-index="${index}">${lyric.text}</div>`
+        `<div data-time="${lyric.time}" data-index="${index}">${escapeHtml(lyric.text)}</div>`
     ).join("");
     setLyricsContentHtml(lyricsHtml);
     if (dom.lyrics) {
@@ -5935,23 +5959,12 @@ async function downloadSong(song, quality = "320") {
 }
 
 // 修复：移动端视图切换
+// 修复：移动端视图切换
 function switchMobileView(view) {
     if (view === "playlist") {
-        if (dom.showPlaylistBtn) {
-            dom.showPlaylistBtn.classList.add("active");
-        }
-        if (dom.showLyricsBtn) {
-            dom.showLyricsBtn.classList.remove("active");
-        }
         dom.playlist.classList.add("active");
         dom.lyrics.classList.remove("active");
     } else if (view === "lyrics") {
-        if (dom.showLyricsBtn) {
-            dom.showLyricsBtn.classList.add("active");
-        }
-        if (dom.showPlaylistBtn) {
-            dom.showPlaylistBtn.classList.remove("active");
-        }
         dom.lyrics.classList.add("active");
         dom.playlist.classList.remove("active");
     }
@@ -5959,6 +5972,11 @@ function switchMobileView(view) {
         document.body.setAttribute("data-mobile-panel-view", view);
         updateMobileClearPlaylistVisibility();
     }
+}
+
+function escapeHtml(str) {
+    if (typeof str !== "string") return "";
+    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
 
 // 修复：显示通知

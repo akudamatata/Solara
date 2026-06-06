@@ -1,6 +1,16 @@
 const MAX_AGE_SECONDS = 48 * 60 * 60;
 
-export async function onRequestPost(context: any) {
+async function hashToHex(password: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = new Uint8Array(hashBuffer);
+  return Array.from(hashArray)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+export async function onRequestPost(context: { request: Request; env: { PASSWORD?: string } }) {
   const { request, env } = context;
   const passwordEnv = env.PASSWORD;
   const url = new URL(request.url);
@@ -17,7 +27,7 @@ export async function onRequestPost(context: any) {
 
   if (providedPassword === passwordEnv) {
     const cookieSegments = [
-      `auth=${btoa(passwordEnv)}`,
+      `auth=${await hashToHex(passwordEnv)}`,
       `Max-Age=${MAX_AGE_SECONDS}`,
       "Path=/",
       "SameSite=Lax",

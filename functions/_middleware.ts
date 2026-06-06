@@ -1,3 +1,13 @@
+async function hashToHex(password: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  const hashArray = new Uint8Array(hashBuffer);
+  return Array.from(hashArray)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
 const PUBLIC_PATH_PATTERNS = [/^\/login(?:\/|$)/, /^\/api\/login(?:\/|$)/];
 const PUBLIC_FILE_EXTENSIONS = new Set([
   ".css",
@@ -32,7 +42,7 @@ function isPublicPath(pathname: string): boolean {
   );
 }
 
-export async function onRequest(context: any) {
+export async function onRequest(context: { request: Request; env: { PASSWORD?: string }; next: () => Promise<Response> }) {
   const { request, env } = context;
   const password = env.PASSWORD;
 
@@ -60,7 +70,8 @@ export async function onRequest(context: any) {
     }
   });
 
-  if (cookies.auth && cookies.auth === btoa(password)) {
+  const expectedHash = await hashToHex(password);
+  if (cookies.auth && cookies.auth === expectedHash) {
     return context.next();
   }
 
