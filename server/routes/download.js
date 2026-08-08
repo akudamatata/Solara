@@ -2,10 +2,10 @@ const { Router } = require('express');
 const fs = require('fs');
 const path = require('path');
 const { pipeline } = require('stream/promises');
+const { Readable } = require('stream');
 
 const NAS_DOWNLOAD_DIR = process.env.NAS_DOWNLOAD_DIR || '/app/downloads';
 const API_BASE_URL = process.env.API_BASE_URL || 'https://music-api.gdstudio.xyz/api.php';
-const FETCH_TIMEOUT_MS = Number(process.env.DOWNLOAD_FETCH_TIMEOUT_MS || 30000);
 
 function ensureDir(dir) {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
@@ -13,21 +13,7 @@ function ensureDir(dir) {
 
 function sanitizeFilename(name) {
   if (!name) return 'unknown';
-  return name.replace(/[<>:\"/\\|?*\x00-\x1f]/g, '_').trim();
-}
-
-async function fetchJsonWithTimeout(url, options = {}) {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-  try {
-    const res = await fetch(url, { ...options, signal: controller.signal });
-    const text = await res.text();
-    let json = null;
-    try { json = text ? JSON.parse(text) : null; } catch (e) { json = text; }
-    return { ok: res.ok, status: res.status, body: json };
-  } finally {
-    clearTimeout(timeout);
-  }
+  return name.replace(/[<>:"/\\|?*\x00-\x1f]/g, '_').trim();
 }
 
 async function fetchSongUrl(songId, source, quality) {
@@ -36,57 +22,15 @@ async function fetchSongUrl(songId, source, quality) {
   url.searchParams.set('id', songId);
   url.searchParams.set('source', source);
   url.searchParams.set('br', quality);
-
-  const { ok, status, body } = await fetchJsonWithTimeout(url.toString(), { headers: { 'User-Agent': 'Mozilla/5.0' } });
-  if (!ok) {
-    const err = new Error(` upstream returned ${status}`);
-    err.payload = body;
-    throw err;
-  }
-
-  // Normalize common response shapes to find a URL
-  if (!body) return null;
-  // Common patterns: { url: '...' }  OR { data: [{ url: '...'}] } OR { data: { url: '...'} } OR [{ url: '...'}]
-  if (typeof body === 'string') {
-    return { url: body };
-  }
-  if (body.url && typeof body.url === 'string') return { url: body.url };
-  if (Array.isArray(body) && body.length > 0 && body[0] && body[0].url) return { url: body[0].url };
-  if (body.data) {
-    if (Array.isArray(body.data) && body.data.length > 0 && body.data[0] && body.data[0].url) return { url: body.data[0].url };
-    if (typeof body.data === 'object' && body.data.url) return { url: body.data.url };
-  }
-
-  // Some providers embed the real url in body.data[0].url or body.data[0].src
-  const maybe = (obj) => {
-    if (!obj || typeof obj !== 'object') return null;
-    if (obj.url && typeof obj.url === 'string') return obj.url;
-    if (obj.src && typeof obj.src === 'string') return obj.src;
-    return null;
-  };
-
-  if (Array.isArray(body)) {
-    for (const el of body) {
-      const candidate = maybe(el);
-      if (candidate) return { url: candidate };
-    }
-  }
-
-  if (body.data && Array.isArray(body.data)) {
-    for (const el of body.data) {
-      const candidate = maybe(el);
-      if (candidate) return { url: candidate };
-    }
-  }
-
-  return null;
+  const res = await fetch(url.toString(), { headers: { 'User-Agent': 'Mozilla/5.0' } });
+  return res.json();
 }
 
 module.exports = function createDownloadRouter() {
   const router = Router();
 
   router.post('/', async (req, res) => {
-    const { song, quality = '320' } = req.body || {};
+    const { song, quality = '320' } = req.body;
     if (!song || !song.id || !song.source) {
       return res.status(400).json({ error: 'Missing song info' });
     }
@@ -105,7 +49,7 @@ module.exports = function createDownloadRouter() {
       try {
         const match = new URL(audioData.url).pathname.match(/\.([a-z0-9]+)$/i);
         if (match) ext = match[1];
-      } catch (e) {}
+      } catch(e) {}
 
       const artist = Array.isArray(song.artist) ? song.artist.join(', ') : (song.artist || '未知艺术家');
       const filename = `${sanitizeFilename(song.name)} - ${sanitizeFilename(artist)}.${ext}`;
@@ -115,31 +59,27 @@ module.exports = function createDownloadRouter() {
         return res.json({ success: true, message: '文件已存在', filename });
       }
 
-      // Download with timeout and streaming
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-      let response;
-      try {
-        response = await fetch(audioData.url, { headers: { 'User-Agent': 'Mozilla/5.0' }, signal: controller.signal });
-      } catch (fetchErr) {
-        if (fetchErr.name === 'AbortError') {
-          return res.status(504).json({ error: '下载请求超时' });
+      const response = await fetch(audioData.url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+      if (!response.ok) return res.status(502).json({ error: '下载音频失败' });
+
+      // response.body 可能是 WHATWG ReadableStream（在 Node fetch 中）或 Node Readable
+      let sourceStream = response.body;
+      if (!sourceStream || typeof sourceStream.pipe !== 'function') {
+        if (typeof Readable.fromWeb === 'function' && sourceStream && typeof sourceStream.getReader === 'function') {
+          // Node 16+ / 18+：Readable.fromWeb 可直接从 WHATWG ReadableStream 创建
+          sourceStream = Readable.fromWeb(sourceStream);
+        } else {
+          // fallback: create a Node Readable from async iterable
+          sourceStream = Readable.from(sourceStream);
         }
-        console.error('[Download fetch error]', fetchErr);
-        return res.status(502).json({ error: '下载音频失败' });
-      } finally {
-        clearTimeout(timer);
       }
 
-      if (!response || !response.ok) return res.status(502).json({ error: '下载音频失败' });
-
-      // Stream to file
-      await pipeline(response.body, fs.createWriteStream(filepath));
-
+      await pipeline(sourceStream, fs.createWriteStream(filepath));
       res.json({ success: true, message: '下载成功', filename });
 
     } catch (error) {
       console.error('[Download to NAS]', error);
+      if (error.name === 'AbortError') return res.status(504).json({ error: '下载请求超时' });
       res.status(500).json({ error: error.message });
     }
   });
