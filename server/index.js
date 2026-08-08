@@ -23,6 +23,7 @@ const createLoginRouter     = require('./routes/login');
 const createStorageRouter   = require('./routes/storage');
 const createProxyRouter     = require('./routes/proxy');
 const createPaletteRouter   = require('./routes/palette');
+const createDownloadRouter  = require('./routes/download');
 
 const PORT     = parseInt(process.env.PORT  || '8787', 10);
 const HOST     = process.env.HOST || '0.0.0.0';
