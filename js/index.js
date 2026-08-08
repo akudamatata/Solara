@@ -1,8 +1,6 @@
-// js/index.js — add NAS enqueue + polling UI integration
+// js/index.js — enqueue NAS downloads, poll status and show task panel
 
-// (This file patches the downloadWithQualityToNas function to enqueue downloads and poll status.)
-
-// 全局下载锁（按 song.id 记录正在进行的下载）
+// Global download locks
 const downloadLocks = window.__downloadLocks || (window.__downloadLocks = new Set());
 
 function getSongByIndexType(index, type) {
@@ -13,9 +11,83 @@ function getSongByIndexType(index, type) {
   return null;
 }
 
-// 简单的轮询器，用于查询队列任务状态
+// --- Task Panel UI ---
+function ensureTaskPanel() {
+  if (document.getElementById('download-task-panel')) return;
+  const panel = document.createElement('div');
+  panel.id = 'download-task-panel';
+  panel.style.position = 'fixed';
+  panel.style.right = '12px';
+  panel.style.bottom = '12px';
+  panel.style.width = '320px';
+  panel.style.maxHeight = '50vh';
+  panel.style.overflow = 'auto';
+  panel.style.background = 'rgba(255,255,255,0.95)';
+  panel.style.border = '1px solid #ddd';
+  panel.style.boxShadow = '0 6px 18px rgba(0,0,0,0.08)';
+  panel.style.padding = '8px';
+  panel.style.zIndex = 100000;
+  panel.innerHTML = `<div style="font-weight:600;margin-bottom:8px;">下载任务</div><div id="download-task-list"></div>`;
+  document.body.appendChild(panel);
+}
+
+function renderTaskList(tasks) {
+  ensureTaskPanel();
+  const list = document.getElementById('download-task-list');
+  list.innerHTML = '';
+  tasks.forEach(t => {
+    const item = document.createElement('div');
+    item.style.borderTop = '1px solid #eee';
+    item.style.padding = '6px 4px';
+    const title = (t.data && t.data.song && t.data.song.name) ? t.data.song.name : '未知歌曲';
+    const state = t.state || 'unknown';
+    const progress = t.progress || 0;
+    item.innerHTML = `<div style="font-size:13px;font-weight:500;">${title}</div>
+      <div style="font-size:12px;color:#666;margin-top:4px;">状态: ${state} ${state==='active' || state==='waiting' ? ` - ${Math.min(100,progress)}%` : ''}</div>`;
+    if (state === 'waiting' || state === 'delayed') {
+      const btn = document.createElement('button');
+      btn.textContent = '取消';
+      btn.style.marginTop = '6px';
+      btn.onclick = async () => {
+        btn.disabled = true;
+        try {
+          const r = await fetch(`/api/download/cancel/${encodeURIComponent(t.id)}`, { method: 'POST', credentials: 'same-origin' });
+          const j = await r.json();
+          if (r.ok) {
+            showNotification('任务已取消', 'success');
+            refreshTaskPanel();
+          } else {
+            showNotification(j && j.error ? j.error : '取消失败', 'error');
+          }
+        } catch (e) {
+          showNotification('取消请求失败', 'error');
+        } finally {
+          btn.disabled = false;
+        }
+      };
+      item.appendChild(btn);
+    }
+    list.appendChild(item);
+  });
+}
+
+async function refreshTaskPanel() {
+  try {
+    const res = await fetch('/api/download/list', { credentials: 'same-origin' });
+    if (!res.ok) return;
+    const data = await res.json();
+    renderTaskList(data);
+  } catch (e) {
+    console.warn('refreshTaskPanel failed', e);
+  }
+}
+
+// auto-refresh panel every 5s
+setInterval(() => { refreshTaskPanel(); }, 5000);
+
+// Polling utility
 function pollDownloadStatus(taskId, { interval = 2000, timeout = 1000 * 60 * 15 } = {}, onTick) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const start = Date.now();
     let stopped = false;
 
@@ -29,7 +101,6 @@ function pollDownloadStatus(taskId, { interval = 2000, timeout = 1000 * 60 * 15 
         if (data.state === 'completed') return resolve({ ok: true, result: data.result || null });
         if (data.state === 'failed') return resolve({ ok: false, error: data.result || 'failed' });
       } catch (err) {
-        // 报错但继续重试，除非超时
         console.warn('pollDownloadStatus error', err);
       }
 
@@ -45,8 +116,7 @@ function pollDownloadStatus(taskId, { interval = 2000, timeout = 1000 * 60 * 15 
   });
 }
 
-// 已存在的 triggerDownload、showQualityMenu、downloadSong、downloadWithQuality 保持不变 — 这里只替换 downloadWithQualityToNas
-
+// triggerDownload kept as before (fetch->blob fallback)
 async function triggerDownload(url, filename) {
   try {
     const resp = await fetch(url, { mode: 'cors' });
@@ -88,154 +158,7 @@ async function triggerDownload(url, filename) {
   }
 }
 
-function showQualityMenu(event, index, type) {
-  event.stopPropagation();
-
-  const existingMenu = document.querySelector('.dynamic-quality-menu');
-  if (existingMenu) existingMenu.remove();
-
-  const song = getSongByIndexType(index, type);
-
-  const menu = document.createElement('div');
-  menu.className = 'dynamic-quality-menu';
-  menu.innerHTML = `
-    <div class="quality-menu-title">下载到本地</div>
-    <div class="quality-option" data-quality="128" data-action="download-local">标准音质 (128k)</div>
-    <div class="quality-option" data-quality="192" data-action="download-local">高音质 (192k)</div>
-    <div class="quality-option" data-quality="320" data-action="download-local">超高音质 (320k)</div>
-    <div class="quality-option" data-quality="999" data-action="download-local">无损音质</div>
-    <div class="quality-menu-divider"></div>
-    <div class="quality-menu-title">下载到NAS</div>
-    <div class="quality-option" data-quality="128" data-action="download-nas">标准音质 (128k)</div>
-    <div class="quality-option" data-quality="192" data-action="download-nas">高音质 (192k)</div>
-    <div class="quality-option" data-quality="320" data-action="download-nas">超高音质 (320k)</div>
-    <div class="quality-option" data-quality="999" data-action="download-nas">无损音质</div>
-  `;
-
-  const button = event.target.closest('button');
-  const rect = button && button.getBoundingClientRect ? button.getBoundingClientRect() : { bottom: 0, left: 0 };
-  menu.style.position = 'fixed';
-  menu.style.top = (rect.bottom + 5) + 'px';
-  menu.style.left = (rect.left - 50) + 'px';
-  menu.style.zIndex = '10000';
-
-  if (song && song.id && downloadLocks.has(String(song.id))) {
-    setTimeout(() => {
-      const options = menu.querySelectorAll('.quality-option');
-      options.forEach(opt => {
-        opt.classList.add('disabled');
-        opt.setAttribute('aria-disabled', 'true');
-      });
-    }, 0);
-  }
-
-  menu.addEventListener('click', (e) => {
-    const option = e.target.closest('.quality-option');
-    if (!option) return;
-    if (option.classList.contains('disabled')) {
-      e.stopPropagation();
-      showNotification('该歌曲正在下载中，请稍后', 'warning');
-      return;
-    }
-    e.stopPropagation();
-    const quality = option.dataset.quality;
-    const action = option.dataset.action;
-    menu.remove();
-    if (action === 'download-nas') {
-      downloadWithQualityToNas(event, index, type, quality);
-    } else {
-      downloadWithQuality(event, index, type, quality);
-    }
-  });
-
-  document.body.appendChild(menu);
-  setTimeout(() => {
-    document.addEventListener('click', function closeMenu(e) {
-      if (!menu.contains(e.target)) {
-        menu.remove();
-        document.removeEventListener('click', closeMenu);
-      }
-    });
-  }, 0);
-}
-
-async function downloadSong(song, quality = '320') {
-  const songKey = song && song.id ? String(song.id) : null;
-  if (songKey && downloadLocks.has(songKey)) {
-    showNotification('下载已在进行中，请勿重复操作', 'warning');
-    return;
-  }
-  if (songKey) downloadLocks.add(songKey);
-
-  try {
-    showNotification('正在获取下载链接...');
-
-    const audioUrl = API.getSongUrl(song, quality);
-    const audioData = await API.fetchJson(audioUrl);
-
-    if (audioData && audioData.url) {
-      const proxiedAudioUrl = typeof buildAudioProxyUrl === 'function' ? buildAudioProxyUrl(audioData.url) : null;
-      const preferredAudioUrl = typeof preferHttpsUrl === 'function' ? preferHttpsUrl(audioData.url) : audioData.url;
-      const downloadUrl = proxiedAudioUrl || preferredAudioUrl || audioData.url;
-
-      const preferredExtension = quality === '999' ? 'flac' : quality === '740' ? 'ape' : 'mp3';
-      const fileExtension = (() => {
-        try {
-          const url = new URL(audioData.url);
-          const pathname = url.pathname || '';
-          const match = pathname.match(/\.([a-z0-9]+)$/i);
-          if (match) return match[1];
-        } catch (error) { console.warn('无法从下载链接中解析扩展名:', error); }
-        return preferredExtension;
-      })();
-
-      const filename = `${song.name} - ${Array.isArray(song.artist) ? song.artist.join(', ') : song.artist}.${fileExtension}`;
-      const ok = await triggerDownload(downloadUrl, filename);
-      if (ok) showNotification(`已开始下载: ${song.name}`, 'success');
-      else throw new Error('触发下载失败');
-    } else {
-      throw new Error('无法获取下载地址');
-    }
-  } catch (error) {
-    console.error('下载失败:', error);
-    showNotification('下载失败，请稍后重试', 'error');
-  } finally {
-    if (songKey) downloadLocks.delete(songKey);
-  }
-}
-
-async function downloadWithQuality(event, index, type, quality) {
-  event.stopPropagation();
-  const song = getSongByIndexType(index, type);
-  if (!song) return;
-
-  const songKey = song.id ? String(song.id) : null;
-  if (songKey && downloadLocks.has(songKey)) {
-    showNotification('该歌曲正在下载中，请稍后', 'warning');
-    return;
-  }
-
-  document.querySelectorAll('.quality-menu').forEach(menu => {
-    menu.classList.remove('show');
-    const parentItem = menu.closest('.search-result-item');
-    if (parentItem) parentItem.classList.remove('menu-active');
-  });
-
-  const dynamicMenu = document.querySelector('.dynamic-quality-menu');
-  if (dynamicMenu) dynamicMenu.remove();
-
-  try {
-    if (songKey) downloadLocks.add(songKey);
-    await downloadSong(song, quality);
-  } catch (error) {
-    console.error('下载失败:', error);
-    showNotification('下载失败，请稍后重试', 'error');
-  } finally {
-    if (songKey) downloadLocks.delete(songKey);
-  }
-}
-
-// modified: enqueue to queue and poll status
+// downloadWithQualityToNas now enqueues and polls, and updates panel
 async function downloadWithQualityToNas(event, index, type, quality) {
   event.stopPropagation();
   const song = getSongByIndexType(index, type);
@@ -252,8 +175,6 @@ async function downloadWithQualityToNas(event, index, type, quality) {
 
   if (songKey) downloadLocks.add(songKey);
 
-  let pollingAbort = false;
-
   try {
     showNotification(`已向队列提交: ${song.name}`, 'info');
     const res = await fetch('/api/download', {
@@ -268,17 +189,13 @@ async function downloadWithQualityToNas(event, index, type, quality) {
     if (!data || !data.taskId) throw new Error(data && data.error ? data.error : '无效的入队响应');
 
     const taskId = data.taskId;
-    // 显示任务 id 给用户，并开始轮询
     showNotification(`已加入队列，任务ID: ${taskId}`, 'success');
+    // refresh task panel immediately
+    refreshTaskPanel();
 
-    // Polling: update notification / UI
-    const start = Date.now();
-    const maxWaitMs = 1000 * 60 * 15; // 15 minutes
-
-    const result = await pollDownloadStatus(taskId, { interval: 2000, timeout: maxWaitMs }, (status) => {
-      // status: { id, state, progress, result }
-      if (status && status.state === 'active') {
-        showNotification(`下载中（队列）: ${song.name} - ${Math.min(100, status.progress || 0)}%`, 'info');
+    const result = await pollDownloadStatus(taskId, { interval: 2000, timeout: 1000 * 60 * 15 }, (status) => {
+      if (status && (status.state === 'active' || status.state === 'waiting')) {
+        refreshTaskPanel();
       }
     });
 
@@ -289,8 +206,7 @@ async function downloadWithQualityToNas(event, index, type, quality) {
         showNotification(`下载失败: ${result.error}`, 'error');
       }
     } else {
-      const final = result.result && result.result[0] ? result.result[0] : result.result; // job.finished() structure
-      // Accept both {success: true, filename} or raw result
+      const final = result.result && result.result[0] ? result.result[0] : result.result;
       const filename = (final && final.filename) || (result.result && result.result.filename) || null;
       if (final && final.success) {
         showNotification(`下载完成: ${filename || song.name}`, 'success');
@@ -305,5 +221,13 @@ async function downloadWithQualityToNas(event, index, type, quality) {
     showNotification('下载到NAS失败，请检查网络或稍后重试', 'error');
   } finally {
     if (songKey) downloadLocks.delete(songKey);
+    refreshTaskPanel();
   }
+}
+
+// initialize panel on load
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => { ensureTaskPanel(); refreshTaskPanel(); });
+} else {
+  ensureTaskPanel(); refreshTaskPanel();
 }
