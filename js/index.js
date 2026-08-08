@@ -1,13 +1,20 @@
-/* js/index.js — 部分替换/补丁版
+/* js/index.js — 更新：为下载操作添加防重复点击与 UI 禁用（download锁）
 
-说明：此文件保留了原仓库中大部分内容，但为便于 review 和避免大体量贴出，我在此文件中明确替换/插入了你提供的四个函数：
-  - showQualityMenu
-  - downloadSong
-  - downloadWithQuality
-  - downloadWithQualityToNas
-
-其余代码保持不变（原始文件内容已包含在分支上）。如果你需要整文件的完整 diff，我可以把这四个函数的上下文位置和完整替换内容列出，或提交真实整文件替换。
+该文件片段包含已替换的四个函数 showQualityMenu / downloadSong / downloadWithQuality / downloadWithQualityToNas
+以及全局的下载锁 (downloadLocks) 用于防止重复下载并提供用户可见的禁用状态。
 */
+
+// 全局下载锁（按 song.id 记录正在进行的下载）
+const downloadLocks = window.__downloadLocks || (window.__downloadLocks = new Set());
+
+// 辅助：根据 (index, type) 获取 song
+function getSongByIndexType(index, type) {
+  if (type === "search") return state.searchResults[index];
+  if (type === "online") return state.onlineSongs[index];
+  if (type === "playlist") return state.playlistSongs[index];
+  if (type === "favorites") return state.favoriteSongs[index];
+  return null;
+}
 
 // ====== 替换的函数：showQualityMenu ======
 function showQualityMenu(event, index, type) {
@@ -18,6 +25,8 @@ function showQualityMenu(event, index, type) {
   if (existingMenu) {
     existingMenu.remove();
   }
+
+  const song = getSongByIndexType(index, type);
 
   // 创建新的质量菜单
   const menu = document.createElement("div");
@@ -38,16 +47,33 @@ function showQualityMenu(event, index, type) {
 
   // 设置菜单位置
   const button = event.target.closest("button");
-  const rect = button.getBoundingClientRect();
+  const rect = button && button.getBoundingClientRect ? button.getBoundingClientRect() : { bottom: 0, left: 0 };
   menu.style.position = "fixed";
   menu.style.top = (rect.bottom + 5) + "px";
   menu.style.left = (rect.left - 50) + "px";
   menu.style.zIndex = "10000";
 
+  // 如果该 song 正在下载，则把所有 option 标记为禁用（不可点击）
+  if (song && song.id && downloadLocks.has(String(song.id))) {
+    // 添加 disabled 样式到每个 option
+    setTimeout(() => {
+      const options = menu.querySelectorAll('.quality-option');
+      options.forEach(opt => {
+        opt.classList.add('disabled');
+        opt.setAttribute('aria-disabled', 'true');
+      });
+    }, 0);
+  }
+
   // 绑定点击事件
   menu.addEventListener("click", (e) => {
     const option = e.target.closest(".quality-option");
     if (!option) return;
+    if (option.classList.contains('disabled')) {
+      e.stopPropagation();
+      showNotification('该歌曲正在下载中，请稍后', 'warning');
+      return;
+    }
     e.stopPropagation();
     const quality = option.dataset.quality;
     const action = option.dataset.action;
@@ -75,6 +101,13 @@ function showQualityMenu(event, index, type) {
 
 // ====== 替换的函数：downloadSong ======
 async function downloadSong(song, quality = "320") {
+  const songKey = song && song.id ? String(song.id) : null;
+  if (songKey && downloadLocks.has(songKey)) {
+    showNotification('下载已在进行中，请勿重复操作', 'warning');
+    return;
+  }
+  if (songKey) downloadLocks.add(songKey);
+
   try {
     showNotification("正在获取下载链接...");
 
@@ -123,25 +156,22 @@ async function downloadSong(song, quality = "320") {
   } catch (error) {
     console.error("下载失败:", error);
     showNotification("下载失败，请稍后重试", "error");
+  } finally {
+    if (songKey) downloadLocks.delete(songKey);
   }
 }
 
 // ====== 替换的函数：downloadWithQuality ======
 async function downloadWithQuality(event, index, type, quality) {
   event.stopPropagation();
-  let song;
-
-  if (type === "search") {
-    song = state.searchResults[index];
-  } else if (type === "online") {
-    song = state.onlineSongs[index];
-  } else if (type === "playlist") {
-    song = state.playlistSongs[index];
-  } else if (type === "favorites") {
-    song = state.favoriteSongs[index];
-  }
-
+  const song = getSongByIndexType(index, type);
   if (!song) return;
+
+  const songKey = song.id ? String(song.id) : null;
+  if (songKey && downloadLocks.has(songKey)) {
+    showNotification('该歌曲正在下载中，请稍后', 'warning');
+    return;
+  }
 
   // 关闭菜单并移除 menu-active 类
   document.querySelectorAll(".quality-menu").forEach(menu => {
@@ -157,35 +187,37 @@ async function downloadWithQuality(event, index, type, quality) {
   }
 
   try {
+    // add lock
+    if (songKey) downloadLocks.add(songKey);
     await downloadSong(song, quality);
   } catch (error) {
     console.error("下载失败:", error);
     showNotification("下载失败，请稍后重试", "error");
+  } finally {
+    if (songKey) downloadLocks.delete(songKey);
   }
 }
 
 // ====== 新增函数：downloadWithQualityToNas ======
 async function downloadWithQualityToNas(event, index, type, quality) {
   event.stopPropagation();
-  let song;
-
-  if (type === "search") {
-    song = state.searchResults[index];
-  } else if (type === "online") {
-    song = state.onlineSongs[index];
-  } else if (type === "playlist") {
-    song = state.playlistSongs[index];
-  } else if (type === "favorites") {
-    song = state.favoriteSongs[index];
-  }
-
+  const song = getSongByIndexType(index, type);
   if (!song) return;
+
+  const songKey = song.id ? String(song.id) : null;
+  if (songKey && downloadLocks.has(songKey)) {
+    showNotification('该歌曲正在下载中，请稍后', 'warning');
+    return;
+  }
 
   // 关闭动态质量菜单
   const dynamicMenu = document.querySelector(".dynamic-quality-menu");
   if (dynamicMenu) {
     dynamicMenu.remove();
   }
+
+  // add lock
+  if (songKey) downloadLocks.add(songKey);
 
   try {
     showNotification(`正在下载到NAS: ${song.name}...`);
@@ -207,5 +239,7 @@ async function downloadWithQualityToNas(event, index, type, quality) {
   } catch (error) {
     console.error("下载到NAS失败:", error);
     showNotification("下载到NAS失败，请检查网络", "error");
+  } finally {
+    if (songKey) downloadLocks.delete(songKey);
   }
 }
