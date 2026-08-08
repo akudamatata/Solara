@@ -1,7 +1,8 @@
-/* js/index.js — 更新：为下载操作添加防重复点击与 UI 禁用（download锁）
+/* js/index.js — frontend download fallback and credentials added
 
-该文件片段包含已替换的四个函数 showQualityMenu / downloadSong / downloadWithQuality / downloadWithQualityToNas
-以及全局的下载锁 (downloadLocks) 用于防止重复下载并提供用户可见的禁用状态。
+This file contains the previously-added download helpers (locks, getSongByIndexType)
+and replaces downloadSong to use a robust triggerDownload() that falls back to fetch->blob
+if needed. It also ensures /api/download calls use credentials: 'same-origin'.
 */
 
 // 全局下载锁（按 song.id 记录正在进行的下载）
@@ -14,6 +15,53 @@ function getSongByIndexType(index, type) {
   if (type === "playlist") return state.playlistSongs[index];
   if (type === "favorites") return state.favoriteSongs[index];
   return null;
+}
+
+// ===== helper: triggerDownload =====
+// Try to download a URL in a way that works cross-origin and avoids CORS issues
+async function triggerDownload(url, filename) {
+  // First attempt: try fetching the resource and download as blob (works around CORS if server allows)
+  try {
+    const resp = await fetch(url, { mode: 'cors' });
+    if (resp.ok) {
+      // If the response is HTML or text error page, fallback to direct link
+      const contentType = resp.headers.get('content-type') || '';
+      if (contentType.includes('text/html') && !contentType.includes('audio')) {
+        throw new Error('response is HTML');
+      }
+      const blob = await resp.blob();
+      const href = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = href;
+      a.download = filename || '';
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      // release object URL shortly after
+      setTimeout(() => URL.revokeObjectURL(href), 10000);
+      return true;
+    } else {
+      throw new Error('fetch failed');
+    }
+  } catch (err) {
+    // Fallback: create an anchor and let the browser handle it (may still be blocked by CORS in some cases)
+    try {
+      const a = document.createElement('a');
+      a.href = url;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      if (filename) a.download = filename;
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      return true;
+    } catch (err2) {
+      console.warn('triggerDownload fallback failed', err2);
+      return false;
+    }
+  }
 }
 
 // ====== 替换的函数：showQualityMenu ======
@@ -99,7 +147,7 @@ function showQualityMenu(event, index, type) {
   }, 0);
 }
 
-// ====== 替换的函数：downloadSong ======
+// ====== 替换的函数：downloadSong (with fallback triggerDownload) ======
 async function downloadSong(song, quality = "320") {
   const songKey = song && song.id ? String(song.id) : null;
   if (songKey && downloadLocks.has(songKey)) {
@@ -126,8 +174,6 @@ async function downloadSong(song, quality = "320") {
 
       const downloadUrl = proxiedAudioUrl || preferredAudioUrl || audioData.url;
 
-      const link = document.createElement("a");
-      link.href = downloadUrl;
       const preferredExtension =
         quality === "999" ? "flac" : quality === "740" ? "ape" : "mp3";
       const fileExtension = (() => {
@@ -143,13 +189,15 @@ async function downloadSong(song, quality = "320") {
         }
         return preferredExtension;
       })();
-      link.download = `${song.name} - ${Array.isArray(song.artist) ? song.artist.join(", ") : song.artist}.${fileExtension}`;
-      link.target = "_blank";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
 
-      showNotification(`已开始下载: ${song.name}`, "success");
+      const filename = `${song.name} - ${Array.isArray(song.artist) ? song.artist.join(", ") : song.artist}.${fileExtension}`;
+
+      const ok = await triggerDownload(downloadUrl, filename);
+      if (ok) {
+        showNotification(`已开始下载: ${song.name}`, "success");
+      } else {
+        throw new Error('触发下载失败');
+      }
     } else {
       throw new Error("无法获取下载地址");
     }
@@ -223,6 +271,7 @@ async function downloadWithQualityToNas(event, index, type, quality) {
     showNotification(`正在下载到NAS: ${song.name}...`);
     const res = await fetch('/api/download', {
       method: 'POST',
+      credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ song, quality })
     });
