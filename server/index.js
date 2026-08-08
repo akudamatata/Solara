@@ -53,6 +53,7 @@ app.use(createAuthMiddleware(PASSWORD));
 app.use('/api/storage', createStorageRouter());
 app.use('/proxy',       createProxyRouter());
 app.use('/palette',     createPaletteRouter());
+app.use('/api/download', createDownloadRouter());
 
 // ─── 静态文件服务（css/, js/, favicon.png 等）──────────────────────────────────
 app.use(express.static(ROOT_DIR, {
