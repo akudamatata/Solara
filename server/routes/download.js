@@ -66,16 +66,41 @@ module.exports = function createDownloadRouter() {
       let sourceStream = response.body;
       if (!sourceStream || typeof sourceStream.pipe !== 'function') {
         if (typeof Readable.fromWeb === 'function' && sourceStream && typeof sourceStream.getReader === 'function') {
-          // Node 16+ / 18+：Readable.fromWeb 可直接从 WHATWG ReadableStream 创建
           sourceStream = Readable.fromWeb(sourceStream);
         } else {
-          // fallback: create a Node Readable from async iterable
           sourceStream = Readable.from(sourceStream);
         }
       }
 
-      await pipeline(sourceStream, fs.createWriteStream(filepath));
-      res.json({ success: true, message: '下载成功', filename });
+      // 原子写入：先写入临时文件，下载成功后重命名为最终文件；失败时清理临时文件
+      const tempPath = filepath + '.part';
+      try {
+        await pipeline(sourceStream, fs.createWriteStream(tempPath));
+
+        // 如果目标文件在此期间被创建，则移除临时文件并返回已存在
+        if (fs.existsSync(filepath)) {
+          await fs.promises.unlink(tempPath).catch(() => {});
+          return res.json({ success: true, message: '文件已存在', filename });
+        }
+
+        // 将临时文件原子重命名为最终文件
+        try {
+          await fs.promises.rename(tempPath, filepath);
+        } catch (renameErr) {
+          // 如果目标已存在（race），删除临时文件并返回已存在
+          if (renameErr && renameErr.code === 'EEXIST') {
+            await fs.promises.unlink(tempPath).catch(() => {});
+            return res.json({ success: true, message: '文件已存在', filename });
+          }
+          throw renameErr;
+        }
+
+        return res.json({ success: true, message: '下载成功', filename });
+      } catch (streamErr) {
+        // 清理临时文件
+        try { if (fs.existsSync(tempPath)) await fs.promises.unlink(tempPath); } catch(e) {}
+        throw streamErr;
+      }
 
     } catch (error) {
       console.error('[Download to NAS]', error);
