@@ -4,11 +4,13 @@
   "description": "Solara 独立 Node.js 服务器（Docker 版，不依赖 Cloudflare/Wrangler）",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "start-worker": "node server/workers/downloadWorker.js"
   },
   "dependencies": {
     "cookie-parser": "^1.4.6",
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "bull": "^4.11.0"
   },
   "engines": {
     "node": ">=22.5.0"
