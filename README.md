@@ -64,7 +64,21 @@ services:
       # 持久化 SQLite 数据库（收藏夹和播放记录）
       - ./data:/data
 ```
-
+services:
+  solara:
+    image: ghcr.io/akudamatata/solara:latest
+    container_name: solara
+    restart: always
+    init: true
+    ports:
+      - "8080:8787"
+    environment:
+      - PASSWORD=your_secure_password_here
+      - API_BASE_URL=https://music-api.gdstudio.xyz/api.php
+      - NAS_DOWNLOAD_DIR=/app/downloads
+    volumes:
+      - ./data:/data
+      - /volume1/Music:/app/downloads
 ---
 
 保存文件后，在同一目录下打开终端，依次执行以下两条命令：

@@ -1,27 +1,38 @@
 version: '3.8'
-
 services:
-  solara:
-    image: ghcr.io/akudamatata/solara:latest
-    container_name: solara
-    restart: always
-    init: true # 解决容器停止时 Node/Wrangler 进程无法优雅响应 SIGTERM 导致卡顿的问题
+  redis:
+    image: redis:7
+    restart: unless-stopped
     ports:
-      # 如无端口冲突可改为 80:8787 或 8787:8787
-      # 配合 Nginx 反向代理时，映射到 Nginx 上游端口即可（默认 8080）
-      - "8080:8787"
+      - "6379:6379"
+
+  app:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
     environment:
-      # ── 必填：登录密码（留空则关闭密码保护，任何人可访问）──────────────────
-      - PASSWORD=your_secure_password_here
-
-      # ── 可选：音乐聚合 API 地址 ────────────────────────────────────────────
-      # 当默认节点被你的服务器 IP 封锁时，可替换为以下备用地址：
-      #   https://music-api-cn.gdstudio.xyz/api.php  （国内节点）
-      #   https://music-api-hk.gdstudio.xyz/api.php  （香港节点）
-      - API_BASE_URL=https://music-api.gdstudio.xyz/api.php
-
-      # ── 可选：界面语言（默认中文，填 ENG 切换为英文）─────────────────────
-      # - language=ENG
+      - REDIS_URL=redis://redis:6379
+      - NAS_DOWNLOAD_DIR=/app/downloads
+      - API_BASE_URL=${API_BASE_URL}
     volumes:
-      # 持久化 SQLite 数据库（收藏夹和播放记录跨重启保留）
-      - ./data:/data
+      - ./server:/app
+      - ./downloads:/app/downloads
+    ports:
+      - "3000:3000"
+    depends_on:
+      - redis
+
+  worker:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    command: ["node", "server/workers/downloadWorker.js"]
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - NAS_DOWNLOAD_DIR=/app/downloads
+      - API_BASE_URL=${API_BASE_URL}
+    volumes:
+      - ./server:/app
+      - ./downloads:/app/downloads
+    depends_on:
+      - redis

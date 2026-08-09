@@ -23,6 +23,8 @@ const createLoginRouter     = require('./routes/login');
 const createStorageRouter   = require('./routes/storage');
 const createProxyRouter     = require('./routes/proxy');
 const createPaletteRouter   = require('./routes/palette');
+const createDownloadRouter  = require('./routes/download');
+const createDownloadRouterHelper = require('./routes/download_queue_routes');
 
 const PORT     = parseInt(process.env.PORT  || '8787', 10);
 const HOST     = process.env.HOST || '0.0.0.0';
@@ -31,7 +33,7 @@ const ROOT_DIR = path.join(__dirname, '..');  // 项目根目录（index.html, c
 
 const app = express();
 
-// ─── 基础中间件 ────────────────────────────────────────────────────────────────
+// ─── 基础中间件 ───────────────────────────────────────────────────────
 app.use(cookieParser());
 app.use(express.json({ limit: '10mb' }));
 
@@ -48,10 +50,12 @@ app.get('/login', (req, res) => {
 // ─── 认证中间件（公开路径会被自动跳过，见 routes/auth.js）───────────────────
 app.use(createAuthMiddleware(PASSWORD));
 
-// ─── 受保护的 API 路由 ──────────────────────────────────────────────────────────
+// ─── 受保护的 API 路由 ─────────────────────────────────────────────────────
 app.use('/api/storage', createStorageRouter());
 app.use('/proxy',       createProxyRouter());
 app.use('/palette',     createPaletteRouter());
+app.use('/api/download', createDownloadRouter());
+app.use('/api/download', createDownloadRouterHelper());
 
 // ─── 静态文件服务（css/, js/, favicon.png 等）──────────────────────────────────
 app.use(express.static(ROOT_DIR, {
@@ -64,12 +68,12 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(ROOT_DIR, 'index.html'));
 });
 
-// ─── 404 兜底 ──────────────────────────────────────────────────────────────────
+// ─── 404 兜底 ─────────────────────────────────────────────────────────
 app.use((req, res) => {
   res.status(404).send('Not Found');
 });
 
-// ─── 启动 ──────────────────────────────────────────────────────────────────────
+// ─── 启动 ──────────────────────────────────────────────────────────
 app.listen(PORT, HOST, () => {
   console.log('');
   console.log('  🌟 Solara Standalone Server');
