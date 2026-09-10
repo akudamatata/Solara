@@ -154,11 +154,29 @@ export function syncLyrics(state, dom) {
     }
 }
 
+const lyricsMemoryCache = new Map();
+
 export async function loadLyrics(song, state, dom, debugLogger = null) {
     const log = (msg) => {
         if (typeof debugLogger === "function") debugLogger(msg);
         else if (typeof window !== "undefined" && typeof window.__solaraDebugLog === "function") window.__solaraDebugLog(msg);
     };
+
+    if (!song) return;
+    const cacheKey = `${song.source || 'netease'}_${song.lyric_id || song.id}`;
+
+    // 1. 优先命中前端内存缓存（0 网络请求）
+    if (lyricsMemoryCache.has(cacheKey)) {
+        const cachedLyric = lyricsMemoryCache.get(cacheKey);
+        log(`[歌词缓存] 命中内存缓存，无需请求网络`);
+        parseLyrics(cachedLyric, state);
+        if (dom.lyrics) {
+            dom.lyrics.classList.remove("empty");
+            dom.lyrics.dataset.placeholder = "default";
+        }
+        displayLyrics(state, dom);
+        return;
+    }
 
     try {
         const lyricUrl = API.getLyric(song);
@@ -167,6 +185,7 @@ export async function loadLyrics(song, state, dom, debugLogger = null) {
         const lyricData = await API.fetchJson(lyricUrl);
 
         if (lyricData && lyricData.lyric) {
+            lyricsMemoryCache.set(cacheKey, lyricData.lyric);
             parseLyrics(lyricData.lyric, state);
             if (dom.lyrics) {
                 dom.lyrics.classList.remove("empty");

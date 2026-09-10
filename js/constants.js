@@ -210,16 +210,20 @@ export const API = {
 
             if (tracks.length === 0) throw new Error("No tracks found");
 
-            return tracks.map(track => ({
-                id: track.id,
-                name: track.name,
-                artist: Array.isArray(track.ar) ? track.ar.map(artist => artist.name).join(" / ") : (track.ar?.name || "未知艺术家"),
-                album: track.al?.name || "",
-                source: "netease",
-                lyric_id: track.id,
-                pic_id: track.al?.pic_str || track.al?.pic || track.al?.picUrl || "",
-                url_id: track.id,
-            }));
+            return tracks.map(track => {
+                const directPicUrl = track.al?.picUrl || (typeof track.al?.pic === "string" && track.al.pic.startsWith("http") ? track.al.pic : "");
+                return {
+                    id: track.id,
+                    name: track.name,
+                    artist: Array.isArray(track.ar) ? track.ar.map(artist => artist.name).join(" / ") : (track.ar?.name || "未知艺术家"),
+                    album: track.al?.name || "",
+                    source: "netease",
+                    lyric_id: track.id,
+                    pic: directPicUrl,
+                    pic_id: track.al?.pic_str || track.al?.pic || "",
+                    url_id: track.id,
+                };
+            });
         } catch (error) {
             console.error("API request failed:", error);
             throw error;

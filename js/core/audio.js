@@ -14,6 +14,10 @@ export const playModeTexts = {
     "random": "随机播放"
 };
 
+// 短期音频地址内存缓存（15分钟 TTL），避免用户在播放列表内切歌反复请求 types=url
+const audioUrlMemoryCache = new Map();
+const AUDIO_URL_CACHE_TTL = 15 * 60 * 1000;
+
 export const APPLE_SVG_ICONS = {
     play: `<svg class="apple-svg-icon icon-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5.5v13a1.5 1.5 0 0 0 2.3 1.28l10.5-6.5a1.5 1.5 0 0 0 0-2.56L9.3 4.22A1.5 1.5 0 0 0 7 5.5z"/></svg>`,
     pause: `<svg class="apple-svg-icon icon-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h1zm11 0a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h1z"/></svg>`,
@@ -285,24 +289,47 @@ export async function playSong(song, options = {}, state, dom, callbacks = {}, d
         const quality = state.playbackQuality || '320';
         log(`[音频播放] 准备加载: ${song.name || "未知歌曲"} (音质: ${quality}k, 来源: ${song.source || 'netease'})`);
 
-        let audioUrl = API.getSongUrl(song, quality);
-        if (isRetry) {
-            audioUrl += '&nocache=true';
-            log(`[音频重试] 正在通过非缓存链路重试请求...`);
-        }
-        log(`[音频解析] 请求接口: ${audioUrl}`);
+        const cacheKey = `${song.source || 'netease'}_${song.id}_${quality}`;
+        let originalAudioUrl = null;
 
-        const audioData = await API.fetchJson(audioUrl);
-        if (myToken !== currentPlaybackToken) {
-            return;
-        }
-
-        if (!audioData || !audioData.url) {
-            throw new Error('无法获取音频播放地址');
+        // 1. 优先命中前端内存短期直链缓存（0 网络请求）
+        if (!isRetry && audioUrlMemoryCache.has(cacheKey)) {
+            const cachedItem = audioUrlMemoryCache.get(cacheKey);
+            if (Date.now() - cachedItem.timestamp < AUDIO_URL_CACHE_TTL && cachedItem.url) {
+                originalAudioUrl = cachedItem.url;
+                log(`[音频缓存] 命中内存直链: ${song.name} (${quality}k)，省去 1 次网络请求`);
+            } else {
+                audioUrlMemoryCache.delete(cacheKey);
+            }
         }
 
-        const originalAudioUrl = audioData.url;
-        log(`[音频地址] 解析成功: ${originalAudioUrl.slice(0, 50)}...`);
+        // 2. 未命中或重试时，发起实际网络请求
+        if (!originalAudioUrl) {
+            let audioUrl = API.getSongUrl(song, quality);
+            if (isRetry) {
+                audioUrl += '&nocache=true';
+                log(`[音频重试] 正在通过非缓存链路重试请求...`);
+            }
+            log(`[音频解析] 请求接口: ${audioUrl}`);
+
+            const audioData = await API.fetchJson(audioUrl);
+            if (myToken !== currentPlaybackToken) {
+                return;
+            }
+
+            if (!audioData || !audioData.url) {
+                throw new Error('无法获取音频播放地址');
+            }
+
+            originalAudioUrl = audioData.url;
+            // 存入短期缓存（15分钟有效）
+            audioUrlMemoryCache.set(cacheKey, {
+                url: originalAudioUrl,
+                timestamp: Date.now()
+            });
+        }
+
+        log(`[音频地址] 解析就绪: ${originalAudioUrl.slice(0, 50)}...`);
         const proxiedAudioUrl = buildAudioProxyUrl(originalAudioUrl);
         const preferredAudioUrl = preferHttpsUrl(originalAudioUrl);
         const candidateAudioUrls = Array.from(

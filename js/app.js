@@ -155,6 +155,9 @@ export function saveFavoriteState(options = {}) {
     safeSetLocalStorage("favoritePlaybackTime", String(state.favoritePlaybackTime || 0), { skipRemote });
 }
 
+// 封面图片前端内存持久缓存
+const coverPicMemoryCache = new Map();
+
 // 歌曲信息更新
 export async function updateCurrentSongInfo(song, options = {}) {
     const { loadArtwork = true } = options;
@@ -173,20 +176,43 @@ export async function updateCurrentSongInfo(song, options = {}) {
 
     if (loadArtwork) {
         try {
-            if (song.pic_id) {
+            const cacheKey = `${song.source || 'netease'}_${song.pic_id || song.id}`;
+            const isDirectUrl = (val) => typeof val === "string" && (val.startsWith("http://") || val.startsWith("https://") || val.startsWith("//"));
+
+            // 1. 优先命中前端内存缓存（0 网络请求）
+            if (coverPicMemoryCache.has(cacheKey)) {
+                const finalPicUrl = coverPicMemoryCache.get(cacheKey);
+                debugLog(`[封面缓存] 命中内存缓存，无需请求网络`);
+                setAlbumCoverImage(finalPicUrl, dom, state);
+                scheduleDeferredPaletteUpdate(finalPicUrl, state, dom, {}, debugLog);
+            }
+            // 2. 歌曲本身自带直接可用的图片 URL（如雷达抓取到的数据），直接使用并存入缓存
+            else if (isDirectUrl(song.pic)) {
+                const finalPicUrl = preferHttpsUrl(song.pic);
+                coverPicMemoryCache.set(cacheKey, finalPicUrl);
+                setAlbumCoverImage(finalPicUrl, dom, state);
+                scheduleDeferredPaletteUpdate(finalPicUrl, state, dom, {}, debugLog);
+            }
+            // 3. pic_id 本身就是图片 URL
+            else if (isDirectUrl(song.pic_id)) {
+                const finalPicUrl = preferHttpsUrl(song.pic_id);
+                coverPicMemoryCache.set(cacheKey, finalPicUrl);
+                setAlbumCoverImage(finalPicUrl, dom, state);
+                scheduleDeferredPaletteUpdate(finalPicUrl, state, dom, {}, debugLog);
+            }
+            // 4. 确实没有直链时，才向后端请求 types=pic 解析
+            else if (song.pic_id) {
                 const picUrl = API.getPicUrl(song);
+                debugLog(`[封面请求] 解析接口: ${picUrl}`);
                 const picData = await API.fetchJson(picUrl, debugLog);
                 if (picData && picData.url) {
                     const finalPicUrl = preferHttpsUrl(picData.url);
+                    coverPicMemoryCache.set(cacheKey, finalPicUrl);
                     setAlbumCoverImage(finalPicUrl, dom, state);
                     scheduleDeferredPaletteUpdate(finalPicUrl, state, dom, {}, debugLog);
                 } else {
                     showAlbumCoverPlaceholder(dom, state);
                 }
-            } else if (song.pic) {
-                const finalPicUrl = preferHttpsUrl(song.pic);
-                setAlbumCoverImage(finalPicUrl, dom, state);
-                scheduleDeferredPaletteUpdate(finalPicUrl, state, dom, {}, debugLog);
             } else {
                 showAlbumCoverPlaceholder(dom, state);
             }
@@ -556,7 +582,8 @@ export async function exploreOnlineMusic() {
             album: song.album || "",
             source: song.source || "netease",
             lyric_id: song.lyric_id || song.id,
-            pic_id: song.pic_id || song.pic || "",
+            pic: song.pic || "",
+            pic_id: song.pic_id || "",
             url_id: song.url_id || song.id,
         }));
 
@@ -1547,15 +1574,15 @@ export async function bootstrap() {
         dom.currentTimeDisplay.textContent = formatTime(savedTime);
         updateProgressBarBackground(dom, savedTime, Number(dom.progressBar.max || 1));
 
-        playSong(state.currentSong, {
-            autoplay: false,
-            startTime: savedTime,
-            preserveProgress: true
-        }, state, dom, getAudioCallbacks(), debugLog).catch((err) => {
-            console.warn("恢复继续播放音频流待播失败，降级展示封面:", err);
-            updateCurrentSongInfo(state.currentSong, { loadArtwork: true });
-            loadLyrics(state.currentSong, state, dom, debugLog);
-        });
+        // 纯本地待播就绪（0 网络请求）：仅恢复曲目展示与封面，不提前请求音频直链与歌词
+        updateCurrentSongInfo(state.currentSong, { loadArtwork: true });
+        updatePlayPauseButton(dom);
+        if (state.currentList === "favorite") {
+            updateFavoriteHighlight(state, dom);
+        } else {
+            updatePlaylistHighlight(state, dom);
+        }
+        debugLog(`[冷启动] 已恢复【${state.currentSong.name}】就绪待播（0 网络请求，点击播放才拉取）`);
     } else {
         showAlbumCoverPlaceholder(dom, state);
     }
