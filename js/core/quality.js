@@ -421,6 +421,7 @@ export async function selectPlaybackQuality(quality, state, dom, callbacks = {})
     closePlayerQualityMenu(state, dom);
 
     const option = QUALITY_OPTIONS.find(item => item.value === normalized);
+    window.__solaraDebugLog?.(`[音质配置] 已设为: ${option ? option.label : normalized} (${option?.description || ''})`);
     if (option && typeof callbacks.showNotification === "function") {
         callbacks.showNotification(`音质已切换为 ${option.label} (${option.description})`, "info", dom);
     }

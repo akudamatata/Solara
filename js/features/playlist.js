@@ -357,10 +357,12 @@ export function removeFromPlaylist(index, state, dom, callbacks = {}) {
 
     // 2. 从本地数组中安全移除
     state.playlistSongs.splice(index, 1);
+    window.__solaraDebugLog?.(`[播放列表] 移除曲目: ${removingSong.name || "未知歌曲"} (剩余: ${state.playlistSongs.length} 首)`);
 
     // 3. 场景 A：列表已经被彻底删空了
     if (state.playlistSongs.length === 0) {
         state.currentTrackIndex = -1;
+        window.__solaraDebugLog?.(`[播放列表] 列表已被清空，自动重置为空闲待机态`);
         // 只要列表删空，或删掉的是当前播放的歌，播放器必须彻底停止发声并回到空闲态
         if (removingCurrent || state.currentPlaylist === "playlist" || isSameSong) {
             if (typeof callbacks.resetPlayerToIdle === "function") {
@@ -399,6 +401,7 @@ export function removeFromPlaylist(index, state, dom, callbacks = {}) {
 
         // 顶上来的曲目纯本地就绪待播（不发音频/歌词网络请求，零 API 开销）
         const nextSong = state.playlistSongs[targetIndex];
+        window.__solaraDebugLog?.(`[播放列表] 顶上来待播曲目: ${nextSong.name} (索引: ${targetIndex})`);
         if (typeof callbacks.setSongAsPending === "function") {
             callbacks.setSongAsPending(nextSong, targetIndex, "playlist");
         }
@@ -434,8 +437,10 @@ export function clearPlaylist(state, dom, callbacks = {}) {
         (state.currentSong?.id && state.playlistSongs.some((song) => String(song.id) === String(state.currentSong.id))) ||
         (state.currentSong?.name && state.playlistSongs.some((song) => song.name === state.currentSong.name));
 
+    const oldCount = state.playlistSongs.length;
     state.playlistSongs = [];
     state.currentTrackIndex = -1;
+    window.__solaraDebugLog?.(`[播放列表] 全部清空: 移除了 ${oldCount} 首歌曲`);
 
     if (isPlayingFromPlaylist) {
         if (typeof callbacks.resetPlayerToIdle === "function") {

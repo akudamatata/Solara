@@ -602,31 +602,40 @@ input[type="range"]:active::-moz-range-thumb {
 }
 
 /* 调试信息样式 (Apple 风格浮动控制台) */
+/* 调试信息样式 (Apple 风格浮动控制台) */
 .debug-info {
     position: fixed;
     top: max(12px, env(safe-area-inset-top, 12px));
     right: max(12px, env(safe-area-inset-right, 12px));
     left: auto;
-    width: min(340px, calc(100vw - 24px));
-    max-height: 48vh;
-    background: rgba(18, 20, 26, 0.88);
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    width: min(360px, calc(100vw - 24px));
+    max-height: 52vh;
+    background: rgba(18, 20, 26, 0.9);
+    backdrop-filter: blur(28px) saturate(190%);
+    -webkit-backdrop-filter: blur(28px) saturate(190%);
+    border: 1px solid rgba(255, 255, 255, 0.16);
     color: #e2e8f0;
     padding: 0;
     border-radius: 14px;
     font-size: 11.5px;
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     z-index: 100002;
-    box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.65);
+    box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.05);
     display: none;
     flex-direction: column;
     overflow: hidden;
+    touch-action: none;
+    transition: width 0.25s cubic-bezier(0.2, 0.9, 0.3, 1), max-height 0.25s cubic-bezier(0.2, 0.9, 0.3, 1), border-radius 0.25s ease, box-shadow 0.2s ease;
 }
 
 .debug-info.show {
     display: flex;
+}
+
+.debug-info.is-dragging {
+    transition: none !important;
+    opacity: 0.94;
+    box-shadow: 0 24px 50px -10px rgba(0, 0, 0, 0.8), 0 0 20px rgba(59, 130, 246, 0.3);
 }
 
 .debug-info-header {
@@ -634,54 +643,120 @@ input[type="range"]:active::-moz-range-thumb {
     align-items: center;
     justify-content: space-between;
     padding: 8px 12px;
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.06);
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.debug-info.is-dragging .debug-info-header {
+    cursor: grabbing;
 }
 
 .debug-info-title {
     font-weight: 600;
     font-size: 11px;
-    color: var(--primary-color);
+    color: var(--primary-color, #38bdf8);
     letter-spacing: 0.03em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    pointer-events: none;
 }
 
 .debug-info-actions {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
 }
 
 .debug-tool-btn {
     background: rgba(255, 255, 255, 0.1);
     border: none;
-    color: rgba(255, 255, 255, 0.8);
-    padding: 2px 8px;
+    color: rgba(255, 255, 255, 0.85);
+    padding: 3px 8px;
     border-radius: 6px;
     font-size: 10.5px;
     cursor: pointer;
-    transition: background 0.2s ease;
+    line-height: 1.2;
+    transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
 }
 
 .debug-tool-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.22);
     color: #ffffff;
+}
+
+.debug-tool-btn:active {
+    transform: scale(0.94);
 }
 
 .debug-info-content {
     padding: 8px 12px;
     overflow-y: auto;
-    max-height: calc(48vh - 40px);
+    max-height: calc(52vh - 40px);
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 5px;
     word-break: break-all;
     scrollbar-width: thin;
 }
 
 .debug-info-entry {
-    line-height: 1.4;
-    border-bottom: 1px dashed rgba(255, 255, 255, 0.06);
-    padding-bottom: 3px;
+    line-height: 1.45;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.07);
+    padding-bottom: 4px;
+    font-size: 11px;
+    color: rgba(226, 232, 240, 0.92);
+}
+
+.debug-info-entry .debug-time {
+    color: rgba(148, 163, 184, 0.7);
+    margin-right: 4px;
+    font-size: 10px;
+}
+
+.debug-info-entry .debug-tag {
+    display: inline-block;
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 9.5px;
+    margin-right: 4px;
+    line-height: 1.2;
+}
+
+.debug-tag-audio { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+.debug-tag-search { background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); }
+.debug-tag-radar { background: rgba(249, 115, 22, 0.2); color: #fb923c; border: 1px solid rgba(249, 115, 22, 0.3); }
+.debug-tag-lyrics { background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
+.debug-tag-visual { background: rgba(236, 72, 153, 0.2); color: #f472b6; border: 1px solid rgba(236, 72, 153, 0.3); }
+.debug-tag-playlist { background: rgba(234, 179, 8, 0.2); color: #facc15; border: 1px solid rgba(234, 179, 8, 0.3); }
+.debug-tag-error { background: rgba(239, 68, 68, 0.25); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.35); font-weight: bold; }
+
+/* 缩小折叠横条状态 (Minified Capsule Mode) */
+.debug-info.minimized {
+    width: auto !important;
+    min-width: 190px;
+    max-width: 260px;
+    max-height: 38px;
+    border-radius: 999px;
+    box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.debug-info.minimized .debug-info-header {
+    border-bottom: none;
+    padding: 6px 14px;
+    background: transparent;
+}
+
+.debug-info.minimized .debug-info-content {
+    display: none !important;
+}
+
+.debug-info.minimized #clearDebugLogBtn {
+    display: none;
 }
 
 .loader { 

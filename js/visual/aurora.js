@@ -357,7 +357,12 @@ export async function updateDynamicBackground(imageUrl, state, dom, debugLogger 
         return;
     }
 
-    if (typeof debugLogger === "function") debugLogger(`动态背景: 更新至新的图片 ${imageUrl}`);
+    const log = (msg) => {
+        if (typeof debugLogger === "function") debugLogger(msg);
+        else if (typeof window !== "undefined" && typeof window.__solaraDebugLog === "function") window.__solaraDebugLog(msg);
+    };
+
+    log(`[极光背景] 准备提取封面色彩: ${imageUrl.slice(0, 50)}...`);
 
     if (paletteAbortController) {
         paletteAbortController.abort();
@@ -369,13 +374,13 @@ export async function updateDynamicBackground(imageUrl, state, dom, debugLogger 
         paletteCache.delete(imageUrl);
         paletteCache.set(imageUrl, cached);
         queuePaletteApplication(cached, imageUrl, state, dom);
-        if (typeof debugLogger === "function") debugLogger("[本地缓存] 动态背景提取成功");
+        log("[极光背景] 命中本地色盘缓存，平滑应用流动极光");
         return;
     }
 
     if (state.currentPaletteImage === imageUrl && state.dynamicPalette) {
         queuePaletteApplication(state.dynamicPalette, imageUrl, state, dom);
-        if (typeof debugLogger === "function") debugLogger("[内存复用] 动态背景提取成功");
+        log("[极光背景] 内存色盘复用就绪");
         return;
     }
 
@@ -393,20 +398,22 @@ export async function updateDynamicBackground(imageUrl, state, dom, debugLogger 
             return;
         }
         queuePaletteApplication(palette, imageUrl, state, dom);
-        if (typeof debugLogger === "function") debugLogger("[后端解析] 动态背景提取成功");
+        log("[极光背景] 后端动态取色提取完成");
     } catch (error) {
         if (error?.name === "AbortError") {
             return;
         }
 
         console.warn(`[Palette ERROR] Backend extraction failed:`, error);
-        if (typeof debugLogger === "function") debugLogger("[后端解析] 失败，尝试前端降级");
+        log("[极光背景] 后端提取失败，降级前端Canvas采样");
 
         try {
             const clientPalette = await extractPaletteFromCanvas(imageUrl);
             if (requestId !== paletteRequestId) {
                 return;
             }
+            queuePaletteApplication(clientPalette, imageUrl, state, dom);
+            log("[极光背景] 前端Canvas色彩采样就绪");
 
             if (paletteCache.has(imageUrl)) {
                 paletteCache.delete(imageUrl);

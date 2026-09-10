@@ -115,8 +115,10 @@ export function setPlayMode(mode, state, dom, callbacks = {}, { announce = true 
 
     updatePlayModeUI(state, dom);
 
+    const modeText = playModeTexts[mode] || playModeTexts.list;
+    window.__solaraDebugLog?.(`[模式切换] 播放模式已切换为: ${modeText}`);
+
     if (announce) {
-        const modeText = playModeTexts[mode] || playModeTexts.list;
         showNotification(`播放模式: ${modeText}`, "info", dom);
     }
 
@@ -270,17 +272,25 @@ export async function playSong(song, options = {}, state, dom, callbacks = {}, d
 
     state.audioReadyForPalette = false;
 
+    const log = (msg) => {
+        if (typeof debugLogger === "function") debugLogger(msg);
+        else if (typeof window !== "undefined" && typeof window.__solaraDebugLog === "function") window.__solaraDebugLog(msg);
+    };
+
     try {
         if (typeof callbacks.updateCurrentSongInfo === "function") {
             callbacks.updateCurrentSongInfo(song, { loadArtwork: false });
         }
 
         const quality = state.playbackQuality || '320';
+        log(`[音频播放] 准备加载: ${song.name || "未知歌曲"} (音质: ${quality}k, 来源: ${song.source || 'netease'})`);
+
         let audioUrl = API.getSongUrl(song, quality);
         if (isRetry) {
             audioUrl += '&nocache=true';
+            log(`[音频重试] 正在通过非缓存链路重试请求...`);
         }
-        if (typeof debugLogger === "function") debugLogger(`获取音频URL: ${audioUrl}`);
+        log(`[音频解析] 请求接口: ${audioUrl}`);
 
         const audioData = await API.fetchJson(audioUrl);
         if (myToken !== currentPlaybackToken) {
@@ -292,6 +302,7 @@ export async function playSong(song, options = {}, state, dom, callbacks = {}, d
         }
 
         const originalAudioUrl = audioData.url;
+        log(`[音频地址] 解析成功: ${originalAudioUrl.slice(0, 50)}...`);
         const proxiedAudioUrl = buildAudioProxyUrl(originalAudioUrl);
         const preferredAudioUrl = preferHttpsUrl(originalAudioUrl);
         const candidateAudioUrls = Array.from(
@@ -364,11 +375,14 @@ export async function playSong(song, options = {}, state, dom, callbacks = {}, d
         state.lastSavedPlaybackTime = state.currentPlaybackTime;
 
         let playPromise = null;
+        log(`[音频解码] 缓冲就绪 (${autoplay ? '开始自动播放' : '静音待播'})`);
+
         if (autoplay) {
             playPromise = dom.audioPlayer.play();
             if (playPromise !== undefined) {
                 playPromise.catch(async error => {
                     console.error('播放失败:', error);
+                    log(`[音频异常] 播放失败: ${error?.message || error}`);
                     if (!isRetry) {
                         try {
                             await playSong(song, { ...options, isRetry: true }, state, dom, callbacks, debugLogger);

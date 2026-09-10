@@ -155,9 +155,14 @@ export function syncLyrics(state, dom) {
 }
 
 export async function loadLyrics(song, state, dom, debugLogger = null) {
+    const log = (msg) => {
+        if (typeof debugLogger === "function") debugLogger(msg);
+        else if (typeof window !== "undefined" && typeof window.__solaraDebugLog === "function") window.__solaraDebugLog(msg);
+    };
+
     try {
         const lyricUrl = API.getLyric(song);
-        if (typeof debugLogger === "function") debugLogger(`获取歌词URL: ${lyricUrl}`);
+        log(`[歌词请求] 解析接口: ${lyricUrl}`);
 
         const lyricData = await API.fetchJson(lyricUrl);
 
@@ -168,7 +173,7 @@ export async function loadLyrics(song, state, dom, debugLogger = null) {
                 dom.lyrics.dataset.placeholder = "default";
             }
             displayLyrics(state, dom);
-            if (typeof debugLogger === "function") debugLogger(`歌词加载成功: ${state.lyricsData.length} 行`);
+            log(`[歌词解析] 加载成功，共 ${state.lyricsData.length} 行歌词`);
         } else {
             setLyricsContentHtml("<div>暂无歌词</div>", dom);
             if (dom.lyrics) {
@@ -177,7 +182,7 @@ export async function loadLyrics(song, state, dom, debugLogger = null) {
             }
             state.lyricsData = [];
             state.currentLyricLine = -1;
-            if (typeof debugLogger === "function") debugLogger("歌词加载失败: 无歌词数据");
+            log("[歌词解析] 接口返回空，暂无歌词数据");
         }
     } catch (error) {
         console.error("加载歌词失败:", error);
@@ -188,7 +193,7 @@ export async function loadLyrics(song, state, dom, debugLogger = null) {
         }
         state.lyricsData = [];
         state.currentLyricLine = -1;
-        if (typeof debugLogger === "function") debugLogger(`歌词加载失败: ${error}`);
+        log(`[歌词异常] 解析出错: ${error?.message || error}`);
     }
 }
 

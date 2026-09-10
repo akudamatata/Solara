@@ -643,9 +643,10 @@
 
 <!-- 调试信息容器 -->
 <div id="debugInfo" class="debug-info">
-    <div class="debug-info-header">
-        <span class="debug-info-title">Solara 调试控制台</span>
+    <div class="debug-info-header" id="debugInfoHeader" title="按住拖拽移动，双击折叠/展开">
+        <span class="debug-info-title"><i class="fas fa-terminal"></i> Solara 调试台</span>
         <div class="debug-info-actions">
+            <button type="button" id="minimizeDebugLogBtn" class="debug-tool-btn" title="折叠/展开横条">－</button>
             <button type="button" id="clearDebugLogBtn" class="debug-tool-btn" title="清空日志">清空</button>
             <button type="button" id="closeDebugLogBtn" class="debug-tool-btn" title="关闭控制台">✕</button>
         </div>

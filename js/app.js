@@ -531,8 +531,11 @@ export async function exploreOnlineMusic() {
             ? RADAR_PLAYLISTS[Math.floor(Math.random() * RADAR_PLAYLISTS.length)]
             : { id: "3778678", name: "热歌榜" };
 
+        debugLog(`[音乐雷达] 正在从【${targetPlaylist.name}】(ID: ${targetPlaylist.id}) 抓取官方 Top 20...`);
+
         const results = await API.getRadarPlaylist(targetPlaylist.id, { limit: 20 });
         if (!Array.isArray(results) || results.length === 0) {
+            debugLog(`[音乐雷达] 未能从【${targetPlaylist.name}】获取到数据`);
             showNotification(`探索雷达：未能从【${targetPlaylist.name}】获取到歌曲`, "error", dom);
             return;
         }
@@ -560,9 +563,12 @@ export async function exploreOnlineMusic() {
         }
 
         if (appendedSongs.length === 0) {
+            debugLog(`[音乐雷达] 本次抓取内容与现有播放列表完全重合，无新增歌曲`);
             showNotification(`探索雷达：已刷新【${targetPlaylist.name}】前20首，当前列表已全部包含`, "info", dom);
             return;
         }
+
+        debugLog(`[音乐雷达] 抓取完成！从【${targetPlaylist.name}】成功引入 ${appendedSongs.length} 首全新曲目`);
 
         state.playlistSongs = existingSongs.concat(appendedSongs);
         state.currentPlaylist = "playlist";
@@ -580,6 +586,7 @@ export async function exploreOnlineMusic() {
         }
     } catch (error) {
         console.error("探索雷达错误:", error);
+        debugLog(`[音乐雷达] 抓取异常: ${error.message || error}`);
         showNotification("探索雷达获取失败，请稍后重试", "error", dom);
     } finally {
         setLoadingState(false);
@@ -615,14 +622,17 @@ export async function togglePlayPause() {
     }
 
     if (dom.audioPlayer.paused) {
+        debugLog(`[播放控制] 恢复播放: ${state.currentSong?.name || "当前歌曲"}`);
         const playPromise = dom.audioPlayer.play();
         if (playPromise !== undefined) {
             playPromise.catch(error => {
                 console.error("播放失败:", error);
+                debugLog(`[播放异常] 恢复播放被浏览器限制: ${error?.message || error}`);
                 showNotification("播放失败，请检查网络连接", "error", dom);
             });
         }
     } else {
+        debugLog(`[播放控制] 暂停播放: ${state.currentSong?.name || "当前歌曲"}`);
         dom.audioPlayer.pause();
     }
 }
@@ -1156,11 +1166,8 @@ function setupEventHandlers() {
     if (dom.sourceMenu) {
         dom.sourceMenu.addEventListener("click", (e) => handleSourceSelection(e, state, dom, {
             showNotification,
-            onSourceChange: () => {
-                const query = dom.searchInput ? dom.searchInput.value.trim() : "";
-                if (query) {
-                    performSearch(false, state, dom, getSearchCallbacks(), debugLog);
-                }
+            onSourceChange: (newSource) => {
+                debugLog(`[音源配置] 已切换音源为: ${newSource} (不自动触发搜索)`);
             }
         }));
     }

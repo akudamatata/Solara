@@ -276,11 +276,13 @@ export function toggleFavorite(song, state, dom, callbacks = {}) {
 
     if (existingIndex >= 0) {
         removeFavoriteAtIndex(existingIndex, state, dom, callbacks);
+        window.__solaraDebugLog?.(`[收藏更新] 移除收藏: ${normalizedSong.name}`);
         showNotification("已从收藏列表移除", "success", dom);
     } else {
         favorites.push(normalizedSong);
         if (typeof callbacks.saveFavoriteState === "function") callbacks.saveFavoriteState();
         renderFavorites(state, dom);
+        window.__solaraDebugLog?.(`[收藏更新] 新增收藏: ${normalizedSong.name} (共 ${favorites.length} 首)`);
         showNotification("已添加到收藏列表", "success", dom);
     }
 }

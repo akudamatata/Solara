@@ -388,10 +388,15 @@ export async function performSearch(isLiveSearch = false, state, dom, callbacks 
         if (listContainer) {
             listContainer.classList.add("is-searching");
         }
-        if (typeof debugLogger === "function") debugLogger("已切换到搜索模式");
+        const log = (msg) => {
+            if (typeof debugLogger === "function") debugLogger(msg);
+            else if (typeof window !== "undefined" && typeof window.__solaraDebugLog === "function") window.__solaraDebugLog(msg);
+        };
+
+        log(`[搜索发起] 关键词: "${query}", 音源: ${source}, 页码: ${state.searchPage}`);
 
         const results = await API.search(query, source, 20, state.searchPage, debugLogger);
-        if (typeof debugLogger === "function") debugLogger(`API返回结果数量: ${results.length}`);
+        log(`[搜索结果] API 返回 ${results.length} 首曲目`);
 
         if (listContainer) {
             listContainer.classList.remove("is-searching");
@@ -410,16 +415,21 @@ export async function performSearch(isLiveSearch = false, state, dom, callbacks 
             totalCount: state.searchResults.length,
         }, state, dom, callbacks);
         persistLastSearchState(state);
-        if (typeof debugLogger === "function") debugLogger(`搜索完成: 总共显示 ${state.searchResults.length} 个结果`);
+        log(`[搜索完成] 当前已呈现 ${state.searchResults.length} 首歌曲结果`);
 
         if (state.searchResults.length === 0) {
             showNotification("未找到相关歌曲", "error", dom);
+            log(`[搜索结果] 未匹配到相关歌曲`);
         }
     } catch (error) {
         console.error("搜索失败:", error);
         showNotification("搜索失败，请稍后重试", "error", dom);
         hideSearchResults(state, dom);
-        if (typeof debugLogger === "function") debugLogger(`搜索失败: ${error.message}`);
+        const logErr = (msg) => {
+            if (typeof debugLogger === "function") debugLogger(msg);
+            else if (typeof window !== "undefined" && typeof window.__solaraDebugLog === "function") window.__solaraDebugLog(msg);
+        };
+        logErr(`[搜索异常] 出错: ${error.message || error}`);
     } finally {
         if (listContainer) {
             listContainer.classList.remove("is-searching");
