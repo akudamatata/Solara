@@ -2,10 +2,10 @@
 
 > 🚀 **Solara 2.0 重磅进化**：由轻量后端服务支撑的现代化网页音乐播放器。2.0 版本彻底告别单体脚本，迈向现代化工业级模块解耦架构，带来网易云三大官方顶尖榜单音乐雷达、全功能自由拖拽与胶囊折叠调试台、Apple Design 深度流体美学与 iPhone 性能优化，以及极致平滑稳定的全平台播放体验。
 
-![Review-ezgif com-optimize](https://github.com/user-attachments/assets/487157de-bf71-4bc9-9e49-16a4f0a14472)
+![Solara Preview](./Preview.gif)
 | | | |
 |:--:|:--:|:--:|
-| <img src="https://github.com/user-attachments/assets/7fcfd485-bcd4-46f9-887a-0a972dce3be3" height="700"/> | <img src="https://github.com/user-attachments/assets/bb092569-0a7f-47f6-b7e9-c07ea56949cf" height="700"/> | <img src="https://github.com/user-attachments/assets/02b830e3-292f-4880-91f2-86ec818b877a" height="700"/> |
+| <img src="./1.png" height="700"/> | <img src="./2.png" height="700"/> | <img src="./3.png" height="700"/> |
 
 
 ## 🤝 参与贡献
