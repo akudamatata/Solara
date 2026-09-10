@@ -31,6 +31,19 @@ export function openMobileSearch() {
 
     const searchInput = $("searchInput");
     if (searchInput) {
+        if (!searchInput.value.trim()) {
+            try {
+                const raw = localStorage.getItem("lastSearchState");
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && parsed.keyword) {
+                        searchInput.value = parsed.keyword;
+                        const clearBtn = $("searchClearBtn");
+                        if (clearBtn) clearBtn.style.display = "flex";
+                    }
+                }
+            } catch (e) {}
+        }
         window.requestAnimationFrame(() => {
             try {
                 searchInput.focus({ preventScroll: true });

@@ -12,6 +12,7 @@ import { dom } from "./dom.js";
 import { state, validateStateConsistency } from "./state.js";
 import {
     safeSetLocalStorage,
+    safeGetLocalStorage,
     parseJSON,
     persistentStorage,
     setRemoteSyncEnabled,
@@ -239,11 +240,8 @@ export async function playSearchResult(index) {
     const song = state.searchResults[index];
     if (!song) return;
 
-    // 播放搜索结果单曲后，自动收起搜索面板返回首页
+    // 播放搜索结果单曲后，自动收起搜索面板返回首页（保留输入框关键词与搜索结果缓存）
     hideSearchResults(state, dom);
-    if (dom.searchInput) {
-        dom.searchInput.value = "";
-    }
     if (window.SolaraMobileBridge?.handlers?.closeSearch) {
         window.SolaraMobileBridge.handlers.closeSearch();
     }
@@ -639,24 +637,93 @@ function setupEventHandlers() {
 
         dom.searchInput.addEventListener("input", updateClearBtnVisibility);
 
-        dom.searchInput.addEventListener("focus", () => {
-            const hasText = Boolean(dom.searchInput.value && dom.searchInput.value.trim().length > 0);
-            if (hasText) {
-                if (dom.searchResults) {
-                    dom.searchResults.removeAttribute("hidden");
-                    dom.searchResults.setAttribute("aria-hidden", "false");
-                    dom.searchResults.classList.add("show");
+        // 核心：点击或聚焦输入框时，展开搜索面板并呈现最后一次的搜索结果
+        const handleSearchInputActivate = () => {
+            // 检查是否存在可恢复的搜索结果或缓存
+            const hasMemoryResults = Array.isArray(state.searchResults) && state.searchResults.length > 0;
+            const rawStored = safeGetLocalStorage(LAST_SEARCH_STATE_STORAGE_KEY);
+            let hasStoredResults = false;
+            let storedKeyword = "";
+            if (rawStored) {
+                try {
+                    const parsed = JSON.parse(rawStored);
+                    if (parsed && Array.isArray(parsed.results) && parsed.results.length > 0) {
+                        hasStoredResults = true;
+                        storedKeyword = parsed.keyword || "";
+                    }
+                } catch (e) {}
+            }
+
+            const canRestore = hasMemoryResults || hasStoredResults;
+
+            // 无论是否有历史记录，点击输入框均展示搜索视图
+            if (!state.isSearchMode) {
+                showSearchResults(state, dom);
+            } else if (dom.searchResults) {
+                dom.searchResults.removeAttribute("hidden");
+                dom.searchResults.setAttribute("aria-hidden", "false");
+                dom.searchResults.classList.add("show");
+            }
+
+            if (canRestore) {
+                // 若输入框当前为空，自动恢复上次搜索词
+                const currentVal = dom.searchInput.value ? dom.searchInput.value.trim() : "";
+                if (!currentVal) {
+                    const keywordToRestore = state.searchKeyword || storedKeyword;
+                    if (keywordToRestore) {
+                        dom.searchInput.value = keywordToRestore;
+                        state.searchKeyword = keywordToRestore;
+                    }
                 }
-                if (!state.isSearchMode) {
-                    showSearchResults(state, dom);
+
+                // 更新清空小叉号显隐
+                if (dom.searchClearBtn) {
+                    const hasText = Boolean(dom.searchInput.value && dom.searchInput.value.trim().length > 0);
+                    dom.searchClearBtn.style.display = hasText ? "flex" : "none";
                 }
+
+                // 检查 DOM 结果列表中是否已经渲染有条目
                 const listContainer = dom.searchResultsList || dom.searchResults;
                 const hasRenderedItems = listContainer && listContainer.querySelectorAll(".search-result-item").length > 0;
                 if (!hasRenderedItems) {
                     restoreLastSearchResults(state, dom, getSearchCallbacks(), { showView: true });
+                } else if (listContainer) {
+                    listContainer.classList.remove("is-searching");
+                }
+            } else {
+                // 确实没有搜索记录（如首次进入或主动点击叉号清空后），确保引导框处于就绪状态
+                const listContainer = dom.searchResultsList || dom.searchResults;
+                if (listContainer) {
+                    listContainer.classList.remove("is-searching");
+                }
+                if (dom.searchClearBtn) {
+                    dom.searchClearBtn.style.display = "none";
                 }
             }
-        });
+
+            // 移动端联动
+            if (isMobileView && window.SolaraMobileBridge?.handlers?.openSearch) {
+                const isOpen = document.body?.classList.contains("mobile-search-open");
+                if (!isOpen) {
+                    window.SolaraMobileBridge.handlers.openSearch();
+                }
+            }
+        };
+
+        dom.searchInput.addEventListener("focus", handleSearchInputActivate);
+        dom.searchInput.addEventListener("click", handleSearchInputActivate);
+
+        const searchInputWrapper = dom.searchInput.closest(".search-input-wrapper");
+        if (searchInputWrapper) {
+            searchInputWrapper.addEventListener("click", (e) => {
+                if (e.target.closest("#searchClearBtn")) return;
+                if (document.activeElement !== dom.searchInput) {
+                    dom.searchInput.focus();
+                } else {
+                    handleSearchInputActivate();
+                }
+            });
+        }
 
         if (dom.searchClearBtn) {
             dom.searchClearBtn.addEventListener("click", (e) => {
@@ -1032,10 +1099,9 @@ function setupEventHandlers() {
         }));
     }
 
-    // 关闭搜索结果交互
+    // 关闭搜索结果交互（收起面板，保留输入框关键词与搜索结果缓存）
     const handleCloseSearch = () => {
         hideSearchResults(state, dom);
-        if (dom.searchInput) dom.searchInput.value = "";
         if (isMobileView && window.SolaraMobileBridge?.handlers?.closeSearch) {
             window.SolaraMobileBridge.handlers.closeSearch();
         }
