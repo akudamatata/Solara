@@ -321,69 +321,77 @@ export function removeFromPlaylist(index, state, dom, callbacks = {}) {
         return;
     }
 
+    // 1. 立即中断并作废所有在途排队的异步播放网络请求
+    if (typeof callbacks.cancelPendingPlayback === "function") {
+        callbacks.cancelPendingPlayback();
+    }
+
     const removingSong = state.playlistSongs[index];
     const removingKey = getSongKey(removingSong);
     const currentKey = state.currentSong ? getSongKey(state.currentSong) : null;
-    const removingCurrent = (state.currentPlaylist === "playlist" && state.currentTrackIndex === index) ||
-        Boolean(state.currentSong && removingKey && removingKey === currentKey);
 
-    if (removingCurrent) {
-        // 第一时间停止当前正在播放的声音，防止异步加载待播歌曲时旧歌仍出声
-        if (dom && dom.audioPlayer) {
-            dom.audioPlayer.pause();
-        }
+    // 判断是否删除了当前正在播放/停留的歌曲（支持 key 比对、id 比对、名称+歌手比对以及索引匹配）
+    const isSameSong = Boolean(
+        (removingKey && currentKey && removingKey === currentKey) ||
+        (removingSong?.id && state.currentSong?.id && String(removingSong.id) === String(state.currentSong.id)) ||
+        (removingSong?.name && state.currentSong?.name && removingSong.name === state.currentSong.name)
+    );
+    const removingCurrent = (state.currentPlaylist === "playlist" && state.currentTrackIndex === index) || isSameSong;
 
-        // 如果列表中只有这一首歌，删除后整个列表为空，彻底停播并重置为空态
-        if (state.playlistSongs.length === 1) {
-            state.playlistSongs = [];
-            state.currentTrackIndex = -1;
+    // 2. 从本地数组中安全移除
+    state.playlistSongs.splice(index, 1);
+
+    // 3. 场景 A：列表已经被彻底删空了
+    if (state.playlistSongs.length === 0) {
+        state.currentTrackIndex = -1;
+        // 只要列表删空，或删掉的是当前播放的歌，播放器必须彻底停止发声并回到空闲态
+        if (removingCurrent || state.currentPlaylist === "playlist" || isSameSong) {
             if (typeof callbacks.resetPlayerToIdle === "function") {
                 callbacks.resetPlayerToIdle();
             } else {
                 resetPlayerToIdle(state, dom, callbacks);
             }
-            renderPlaylist(state, dom, callbacks);
-            if (typeof callbacks.clearLyricsIfLibraryEmpty === "function") {
-                callbacks.clearLyricsIfLibraryEmpty();
-            }
-            showNotification("已从播放列表移除", "success", dom);
-            return;
         }
-
-        // 列表中有多首歌，计算接下来顶上来的索引
-        let targetIndex = index;
-        if (index === state.playlistSongs.length - 1) {
-            targetIndex = index - 1;
-        }
-
-        state.playlistSongs.splice(index, 1);
-        state.currentTrackIndex = targetIndex;
         renderPlaylist(state, dom, callbacks);
-
-        // 方案2：停止当前播放，将顶上来的歌曲载入为就绪待播状态，不自动出声（autoplay: false）
-        if (typeof callbacks.playPlaylistSong === "function") {
-            callbacks.playPlaylistSong(targetIndex, { autoplay: false });
+        if (typeof callbacks.clearLyricsIfLibraryEmpty === "function") {
+            callbacks.clearLyricsIfLibraryEmpty();
         }
         showNotification("已从播放列表移除", "success", dom);
         return;
     }
 
-    // 删除的不是当前正在播放的歌曲
-    if (state.currentPlaylist === "playlist" && state.currentTrackIndex > index) {
-        state.currentTrackIndex--;
+    // 4. 场景 B：列表还有歌，且删除了当前正在播放的歌曲
+    if (removingCurrent) {
+        // 第一时间停止当前声音，释放旧音频
+        if (dom && dom.audioPlayer) {
+            try {
+                dom.audioPlayer.pause();
+                dom.audioPlayer.removeAttribute("src");
+                dom.audioPlayer.src = "";
+                dom.audioPlayer.load();
+            } catch (e) {}
+        }
+
+        // 计算顶上来的新索引
+        let targetIndex = index;
+        if (targetIndex >= state.playlistSongs.length) {
+            targetIndex = state.playlistSongs.length - 1;
+        }
+        state.currentTrackIndex = targetIndex;
+        renderPlaylist(state, dom, callbacks);
+
+        // 顶上来的曲目纯本地就绪待播（不发音频/歌词网络请求，零 API 开销）
+        const nextSong = state.playlistSongs[targetIndex];
+        if (typeof callbacks.setSongAsPending === "function") {
+            callbacks.setSongAsPending(nextSong, targetIndex, "playlist");
+        }
+        showNotification("已从播放列表移除", "success", dom);
+        return;
     }
 
-    state.playlistSongs.splice(index, 1);
-
-    if (state.playlistSongs.length === 0) {
-        state.currentTrackIndex = -1;
-        if (state.currentPlaylist === "playlist") {
-            if (typeof callbacks.resetPlayerToIdle === "function") {
-                callbacks.resetPlayerToIdle();
-            } else {
-                resetPlayerToIdle(state, dom, callbacks);
-            }
-        }
+    // 5. 场景 C：删除的是非当前播放歌曲
+    if (state.currentPlaylist === "playlist" && state.currentTrackIndex > index) {
+        state.currentTrackIndex--;
     }
 
     renderPlaylist(state, dom, callbacks);
@@ -398,10 +406,16 @@ export function clearPlaylist(state, dom, callbacks = {}) {
         return;
     }
 
+    if (typeof callbacks.cancelPendingPlayback === "function") {
+        callbacks.cancelPendingPlayback();
+    }
+
     // 检查当前是否正在播放属于播放列表的歌曲
     const currentKey = state.currentSong ? getSongKey(state.currentSong) : null;
     const isPlayingFromPlaylist = state.currentPlaylist === "playlist" ||
-        (currentKey && state.playlistSongs.some((song) => getSongKey(song) === currentKey));
+        (currentKey && state.playlistSongs.some((song) => getSongKey(song) === currentKey)) ||
+        (state.currentSong?.id && state.playlistSongs.some((song) => String(song.id) === String(state.currentSong.id))) ||
+        (state.currentSong?.name && state.playlistSongs.some((song) => song.name === state.currentSong.name));
 
     state.playlistSongs = [];
     state.currentTrackIndex = -1;

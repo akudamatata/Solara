@@ -258,7 +258,14 @@ export function waitForAudioReady(player) {
     });
 }
 
+let currentPlaybackToken = 0;
+
+export function cancelPendingPlayback() {
+    currentPlaybackToken++;
+}
+
 export async function playSong(song, options = {}, state, dom, callbacks = {}, debugLogger = null) {
+    const myToken = ++currentPlaybackToken;
     const { autoplay = true, startTime = 0, preserveProgress = false, isRetry = false } = options;
 
     state.audioReadyForPalette = false;
@@ -276,6 +283,10 @@ export async function playSong(song, options = {}, state, dom, callbacks = {}, d
         if (typeof debugLogger === "function") debugLogger(`获取音频URL: ${audioUrl}`);
 
         const audioData = await API.fetchJson(audioUrl);
+        if (myToken !== currentPlaybackToken) {
+            return;
+        }
+
         if (!audioData || !audioData.url) {
             throw new Error('无法获取音频播放地址');
         }
@@ -329,8 +340,16 @@ export async function playSong(song, options = {}, state, dom, callbacks = {}, d
             }
         }
 
+        if (myToken !== currentPlaybackToken) {
+            return;
+        }
+
         if (!selectedAudioUrl) {
             throw lastAudioError || new Error('音频加载失败');
+        }
+
+        if (myToken !== currentPlaybackToken) {
+            return;
         }
 
         state.currentAudioUrl = selectedAudioUrl;
@@ -575,6 +594,8 @@ export async function downloadSong(song, quality = "320", dom = null) {
  * 彻底重置播放器为空闲/空态（停止播放、释放音频缓冲、重置界面与系统状态）
  */
 export function resetPlayerToIdle(state, dom, callbacks = {}) {
+    cancelPendingPlayback();
+
     if (dom.audioPlayer) {
         try {
             dom.audioPlayer.pause();

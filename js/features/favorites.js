@@ -181,46 +181,59 @@ export function removeFavoriteAtIndex(index, state, dom, callbacks = {}) {
         return null;
     }
 
+    if (typeof callbacks.cancelPendingPlayback === "function") {
+        callbacks.cancelPendingPlayback();
+    }
+
     const removingSong = favorites[index];
     const removingKey = getSongKey(removingSong);
     const currentKey = state.currentSong ? getSongKey(state.currentSong) : null;
     const isPlayingFavorites = state.currentList === "favorite";
-    const removingCurrent = isPlayingFavorites && ((state.currentFavoriteIndex === index) ||
-        Boolean(state.currentSong && removingKey && removingKey === currentKey));
+
+    const isSameSong = Boolean(
+        (removingKey && currentKey && removingKey === currentKey) ||
+        (removingSong?.id && state.currentSong?.id && String(removingSong.id) === String(state.currentSong.id)) ||
+        (removingSong?.name && state.currentSong?.name && removingSong.name === state.currentSong.name)
+    );
+    const removingCurrent = (isPlayingFavorites && state.currentFavoriteIndex === index) || isSameSong;
 
     const [removed] = favorites.splice(index, 1);
 
-    if (isPlayingFavorites) {
-        if (removingCurrent) {
-            // 第一时间停止当前正在播放的声音，防止异步加载待播歌曲时旧歌仍出声
-            if (dom && dom.audioPlayer) {
-                dom.audioPlayer.pause();
-            }
-
-            if (favorites.length === 0) {
-                // 收藏夹删空了，彻底停播并重置为空态
-                state.currentFavoriteIndex = -1;
-                state.favoritePlaybackTime = 0;
-                state.favoriteLastSavedPlaybackTime = 0;
-                if (typeof callbacks.resetPlayerToIdle === "function") {
-                    callbacks.resetPlayerToIdle();
-                } else {
-                    resetPlayerToIdle(state, dom, callbacks);
-                }
+    if (favorites.length === 0) {
+        // 收藏夹删空了，彻底停播并重置为空态
+        state.currentFavoriteIndex = -1;
+        state.favoritePlaybackTime = 0;
+        state.favoriteLastSavedPlaybackTime = 0;
+        if (removingCurrent || isPlayingFavorites) {
+            if (typeof callbacks.resetPlayerToIdle === "function") {
+                callbacks.resetPlayerToIdle();
             } else {
-                // 还有其他收藏歌曲，计算顶上来的下一首并载入为待播状态，不自动出声
-                let targetIndex = index;
-                if (index >= favorites.length) {
-                    targetIndex = favorites.length - 1;
-                }
-                state.currentFavoriteIndex = targetIndex;
-                if (typeof callbacks.playFavoriteSong === "function") {
-                    callbacks.playFavoriteSong(targetIndex, { autoplay: false });
-                }
+                resetPlayerToIdle(state, dom, callbacks);
             }
-        } else if (state.currentFavoriteIndex > index) {
-            state.currentFavoriteIndex--;
         }
+    } else if (removingCurrent) {
+        // 第一时间停止当前正在播放的声音，防止异步加载待播歌曲时旧歌仍出声
+        if (dom && dom.audioPlayer) {
+            try {
+                dom.audioPlayer.pause();
+                dom.audioPlayer.removeAttribute("src");
+                dom.audioPlayer.src = "";
+                dom.audioPlayer.load();
+            } catch (e) {}
+        }
+
+        // 还有其他收藏歌曲，计算顶上来的下一首并纯本地就绪待播（不发 API）
+        let targetIndex = index;
+        if (index >= favorites.length) {
+            targetIndex = favorites.length - 1;
+        }
+        state.currentFavoriteIndex = targetIndex;
+        const nextSong = favorites[targetIndex];
+        if (typeof callbacks.setSongAsPending === "function") {
+            callbacks.setSongAsPending(nextSong, targetIndex, "favorite");
+        }
+    } else if (isPlayingFavorites && state.currentFavoriteIndex > index) {
+        state.currentFavoriteIndex--;
     }
 
     if (typeof callbacks.saveFavoriteState === "function") callbacks.saveFavoriteState();

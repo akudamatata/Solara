@@ -118,7 +118,8 @@ import {
     playPrevious,
     downloadSong,
     formatTime,
-    resetPlayerToIdle
+    resetPlayerToIdle,
+    cancelPendingPlayback
 } from "./core/audio.js";
 import { initMediaSession } from "./core/media-session.js";
 
@@ -196,6 +197,83 @@ export async function updateCurrentSongInfo(song, options = {}) {
 
     // 实时同步主播放界面爱心状态与列表收藏标记
     updateFavoriteIcons(state, dom);
+}
+
+let pendingArtworkTimer = null;
+
+// 将某一首歌曲设为就绪待播状态（纯本地UI更新，不发起任何音频/歌词网络请求，避免连删时 API 洪峰）
+export function setSongAsPending(song, index, listType = "playlist") {
+    cancelPendingPlayback();
+
+    if (!song) return;
+
+    if (dom.audioPlayer) {
+        try {
+            dom.audioPlayer.pause();
+            dom.audioPlayer.removeAttribute("src");
+            dom.audioPlayer.src = "";
+            dom.audioPlayer.load();
+        } catch (e) {
+            console.warn("停止音频播放异常:", e);
+        }
+    }
+
+    state.isPlaying = false;
+    state.currentSong = song;
+    state.currentAudioUrl = null;
+    state.currentPlaybackTime = 0;
+    state.lastSavedPlaybackTime = 0;
+    state.currentList = listType;
+    state.currentPlaylist = listType === "favorite" ? "favorites" : "playlist";
+
+    if (listType === "favorite") {
+        state.currentFavoriteIndex = index;
+        state.favoritePlaybackTime = 0;
+        state.favoriteLastSavedPlaybackTime = 0;
+        updateFavoriteHighlight(state, dom);
+    } else {
+        state.currentTrackIndex = index;
+        updatePlaylistHighlight(state, dom);
+    }
+
+    // 重置进度条
+    if (dom.progressBar) {
+        dom.progressBar.value = 0;
+        dom.progressBar.max = 0;
+        updateProgressBarBackground(dom, 0, 1);
+    }
+    if (dom.currentTimeDisplay) dom.currentTimeDisplay.textContent = "00:00";
+    if (dom.durationDisplay) dom.durationDisplay.textContent = "00:00";
+
+    // 播放按钮重置为待播（播放图标）
+    updatePlayPauseButton(dom);
+
+    // 纯本地文字更新，0 次网络 API
+    if (dom.currentSongTitle) dom.currentSongTitle.textContent = song.name || "未知歌曲";
+    if (dom.currentSongArtist) {
+        dom.currentSongArtist.textContent = Array.isArray(song.artist)
+            ? song.artist.join(" / ")
+            : (song.artist || "未知艺术家");
+    }
+
+    // 同步爱心图标
+    updateFavoriteIcons(state, dom);
+
+    // 清空歌词（待播期间不发歌词 API）
+    clearLyricsContent(state, dom, isMobileView);
+
+    // 封面防抖加载（400ms）：连删时多次触发会被自动清空，停手后才为最终曲目拉取 1 次
+    if (pendingArtworkTimer) {
+        clearTimeout(pendingArtworkTimer);
+        pendingArtworkTimer = null;
+    }
+    pendingArtworkTimer = setTimeout(() => {
+        if (state.currentSong && state.currentSong === song) {
+            updateCurrentSongInfo(song, { loadArtwork: true });
+        }
+    }, 400);
+
+    savePlayerState();
 }
 
 // 播放列表中单曲点击播放
@@ -306,7 +384,9 @@ function getAudioCallbacks() {
 function getPlaylistCallbacks() {
     return {
         savePlayerState,
+        cancelPendingPlayback: () => cancelPendingPlayback(),
         playPlaylistSong: (idx, opts) => playPlaylistSong(idx, opts),
+        setSongAsPending: (song, idx, type) => setSongAsPending(song, idx, type),
         showAlbumCoverPlaceholder: () => showAlbumCoverPlaceholder(dom, state),
         clearLyricsContent: () => clearLyricsContent(state, dom, isMobileView),
         resetPlayerToIdle: () => resetPlayerToIdle(state, dom, {
@@ -888,7 +968,9 @@ function setupEventHandlers() {
                 if (removeBtn) {
                     removeFavoriteAtIndex(index, state, dom, {
                         saveFavoriteState,
+                        cancelPendingPlayback: () => cancelPendingPlayback(),
                         playFavoriteSong: (idx, opts) => playFavoriteSong(idx, opts),
+                        setSongAsPending: (song, idx, type) => setSongAsPending(song, idx, type),
                         updatePlayModeUI: () => updatePlayModeUI(state, dom),
                         resetPlayerToIdle: () => resetPlayerToIdle(state, dom, {
                             showAlbumCoverPlaceholder: () => showAlbumCoverPlaceholder(dom, state),
