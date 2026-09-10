@@ -199,7 +199,7 @@ export async function updateCurrentSongInfo(song, options = {}) {
 }
 
 // 播放列表中单曲点击播放
-export async function playPlaylistSong(index) {
+export async function playPlaylistSong(index, options = {}) {
     if (index < 0 || index >= state.playlistSongs.length) return;
 
     const song = state.playlistSongs[index];
@@ -208,7 +208,7 @@ export async function playPlaylistSong(index) {
     state.currentList = "playlist";
 
     try {
-        await playSong(song, {}, state, dom, getAudioCallbacks(), debugLog);
+        await playSong(song, options, state, dom, getAudioCallbacks(), debugLog);
         updatePlaylistHighlight(state, dom);
         updatePlayModeUI(state, dom);
     } catch (error) {
@@ -218,7 +218,7 @@ export async function playPlaylistSong(index) {
 }
 
 // 播放收藏列表中单曲
-export async function playFavoriteSong(index) {
+export async function playFavoriteSong(index, options = {}) {
     const favorites = ensureFavoriteSongsArray(state);
     if (index < 0 || index >= favorites.length) {
         return;
@@ -230,7 +230,7 @@ export async function playFavoriteSong(index) {
     state.currentPlaylist = "favorites";
 
     try {
-        await playSong(song, {}, state, dom, getAudioCallbacks(), debugLog);
+        await playSong(song, options, state, dom, getAudioCallbacks(), debugLog);
         updateFavoriteHighlight(state, dom);
         updatePlayModeUI(state, dom);
         saveFavoriteState();
@@ -306,7 +306,7 @@ function getAudioCallbacks() {
 function getPlaylistCallbacks() {
     return {
         savePlayerState,
-        playPlaylistSong: (idx) => playPlaylistSong(idx),
+        playPlaylistSong: (idx, opts) => playPlaylistSong(idx, opts),
         showAlbumCoverPlaceholder: () => showAlbumCoverPlaceholder(dom, state),
         clearLyricsContent: () => clearLyricsContent(state, dom, isMobileView),
         resetPlayerToIdle: () => resetPlayerToIdle(state, dom, {
@@ -888,7 +888,7 @@ function setupEventHandlers() {
                 if (removeBtn) {
                     removeFavoriteAtIndex(index, state, dom, {
                         saveFavoriteState,
-                        playFavoriteSong: (idx) => playFavoriteSong(idx),
+                        playFavoriteSong: (idx, opts) => playFavoriteSong(idx, opts),
                         updatePlayModeUI: () => updatePlayModeUI(state, dom),
                         resetPlayerToIdle: () => resetPlayerToIdle(state, dom, {
                             showAlbumCoverPlaceholder: () => showAlbumCoverPlaceholder(dom, state),

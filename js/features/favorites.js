@@ -192,6 +192,11 @@ export function removeFavoriteAtIndex(index, state, dom, callbacks = {}) {
 
     if (isPlayingFavorites) {
         if (removingCurrent) {
+            // 第一时间停止当前正在播放的声音，防止异步加载待播歌曲时旧歌仍出声
+            if (dom && dom.audioPlayer) {
+                dom.audioPlayer.pause();
+            }
+
             if (favorites.length === 0) {
                 // 收藏夹删空了，彻底停播并重置为空态
                 state.currentFavoriteIndex = -1;
@@ -203,14 +208,14 @@ export function removeFavoriteAtIndex(index, state, dom, callbacks = {}) {
                     resetPlayerToIdle(state, dom, callbacks);
                 }
             } else {
-                // 还有其他收藏歌曲，计算下一首并自动连贯播放
+                // 还有其他收藏歌曲，计算顶上来的下一首并载入为待播状态，不自动出声
                 let targetIndex = index;
                 if (index >= favorites.length) {
                     targetIndex = favorites.length - 1;
                 }
                 state.currentFavoriteIndex = targetIndex;
                 if (typeof callbacks.playFavoriteSong === "function") {
-                    callbacks.playFavoriteSong(targetIndex);
+                    callbacks.playFavoriteSong(targetIndex, { autoplay: false });
                 }
             }
         } else if (state.currentFavoriteIndex > index) {

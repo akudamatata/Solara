@@ -328,6 +328,11 @@ export function removeFromPlaylist(index, state, dom, callbacks = {}) {
         Boolean(state.currentSong && removingKey && removingKey === currentKey);
 
     if (removingCurrent) {
+        // 第一时间停止当前正在播放的声音，防止异步加载待播歌曲时旧歌仍出声
+        if (dom && dom.audioPlayer) {
+            dom.audioPlayer.pause();
+        }
+
         // 如果列表中只有这一首歌，删除后整个列表为空，彻底停播并重置为空态
         if (state.playlistSongs.length === 1) {
             state.playlistSongs = [];
@@ -345,7 +350,7 @@ export function removeFromPlaylist(index, state, dom, callbacks = {}) {
             return;
         }
 
-        // 列表中有多首歌，计算接下来要播放的索引
+        // 列表中有多首歌，计算接下来顶上来的索引
         let targetIndex = index;
         if (index === state.playlistSongs.length - 1) {
             targetIndex = index - 1;
@@ -355,9 +360,9 @@ export function removeFromPlaylist(index, state, dom, callbacks = {}) {
         state.currentTrackIndex = targetIndex;
         renderPlaylist(state, dom, callbacks);
 
-        // 自动连续播放下一首（或最后一首切到前一首）
+        // 方案2：停止当前播放，将顶上来的歌曲载入为就绪待播状态，不自动出声（autoplay: false）
         if (typeof callbacks.playPlaylistSong === "function") {
-            callbacks.playPlaylistSong(targetIndex);
+            callbacks.playPlaylistSong(targetIndex, { autoplay: false });
         }
         showNotification("已从播放列表移除", "success", dom);
         return;
