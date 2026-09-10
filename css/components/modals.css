@@ -234,6 +234,65 @@
     transform: scale(0.96);
 }
 
+/* 设置操作动作按钮组 */
+.settings-actions-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.settings-action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--apple-glass-border);
+    border-radius: 12px;
+    color: var(--text-color);
+    font-size: 13.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s var(--spring-smooth);
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.dark-mode .settings-action-btn {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.settings-action-btn:hover {
+    background: rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+}
+
+.dark-mode .settings-action-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.settings-action-btn:active {
+    transform: scale(0.98);
+}
+
+.settings-action-btn.is-active {
+    background: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 14px -2px var(--palette-glow);
+}
+
+.settings-action-btn svg {
+    width: 17px;
+    height: 17px;
+    flex-shrink: 0;
+}
+
 /* 适配移动端 */
 @media (max-width: 820px) {
     body.layout-compact .container {

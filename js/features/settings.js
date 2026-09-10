@@ -4,6 +4,7 @@
 
 import { EXPLORE_RADAR_GENRES } from "../constants.js";
 import { safeGetLocalStorage, safeSetLocalStorage, persistStorageItems } from "../core/storage.js";
+import { toggleDebugMode } from "../visual/spotlight.js";
 
 const NOTIFICATION_ICONS = {
     success: `<svg class="notification-svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd"/></svg>`,
@@ -70,8 +71,19 @@ export function showNotification(message, type = "success", dom = null) {
     }, displayDuration);
 }
 
-export function openSettingsModal(dom) {
+export function openSettingsModal(dom, state = null) {
     if (dom && dom.settingsModal) {
+        // 同步调试模式按钮外观
+        if (state) {
+            const toggleDebugBtn = document.getElementById("toggleDebugBtn");
+            const toggleDebugText = document.getElementById("toggleDebugText");
+            if (toggleDebugBtn) {
+                toggleDebugBtn.classList.toggle("is-active", Boolean(state.debugMode));
+            }
+            if (toggleDebugText) {
+                toggleDebugText.textContent = state.debugMode ? "关闭调试模式" : "开启调试模式";
+            }
+        }
         dom.settingsModal.classList.add("show");
         dom.settingsModal.setAttribute("aria-hidden", "false");
     }
@@ -192,11 +204,11 @@ export function initLayoutMode(dom) {
     }
 }
 
-export function initSettings(dom, state) {
+export function initSettings(dom, state, callbacks = {}) {
     renderGenreList(dom);
 
     if (dom.logo) {
-        dom.logo.addEventListener("dblclick", () => openSettingsModal(dom));
+        dom.logo.addEventListener("dblclick", () => openSettingsModal(dom, state));
     }
     
     let lastToolbarClick = 0;
@@ -204,7 +216,7 @@ export function initSettings(dom, state) {
         const now = Date.now();
         if (now - lastToolbarClick < 300) {
             e.preventDefault();
-            openSettingsModal(dom);
+            openSettingsModal(dom, state);
         }
         lastToolbarClick = now;
     };
@@ -221,11 +233,41 @@ export function initSettings(dom, state) {
     }
     const openBtn = dom.openSettingsBtn || document.getElementById("openSettingsBtn");
     if (openBtn) {
-        openBtn.addEventListener("click", () => openSettingsModal(dom));
+        openBtn.addEventListener("click", () => openSettingsModal(dom, state));
     }
     if (dom.settingsModal) {
         dom.settingsModal.addEventListener("click", (e) => {
             if (e.target === dom.settingsModal) closeSettingsModal(dom);
+        });
+    }
+
+    // 绑定开启/关闭调试模式按钮
+    const toggleDebugBtn = document.getElementById("toggleDebugBtn");
+    if (toggleDebugBtn) {
+        toggleDebugBtn.addEventListener("click", () => {
+            const isEnabled = toggleDebugMode(state, dom, callbacks.debugLog);
+            showNotification(isEnabled ? "已开启调试控制台" : "已关闭调试控制台", isEnabled ? "success" : "info", dom);
+        });
+    }
+
+    // 绑定手动云端同步按钮
+    const manualSyncBtn = document.getElementById("manualSyncBtn");
+    if (manualSyncBtn) {
+        manualSyncBtn.addEventListener("click", async () => {
+            if (typeof callbacks.manualSync === "function") {
+                manualSyncBtn.disabled = true;
+                const origHtml = manualSyncBtn.innerHTML;
+                manualSyncBtn.innerHTML = '<span class="loader" style="width:14px;height:14px;border-width:2px;"></span><span>正在同步中...</span>';
+                try {
+                    await callbacks.manualSync();
+                    showNotification("云端数据漫游同步成功", "success", dom);
+                } catch (e) {
+                    showNotification("云端同步失败，请检查网络或服务端", "error", dom);
+                } finally {
+                    manualSyncBtn.disabled = false;
+                    manualSyncBtn.innerHTML = origHtml;
+                }
+            }
         });
     }
 

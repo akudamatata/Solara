@@ -133,6 +133,20 @@ export function removePersistentItems(keys = []) {
     });
 }
 
+export function syncLocalDataToCloud() {
+    if (!remoteSyncEnabled) return;
+    const itemsToUpload = {};
+    for (const key of STORAGE_KEYS_TO_SYNC) {
+        const val = safeGetLocalStorage(key);
+        if (val != null && val !== "") {
+            itemsToUpload[key] = val;
+        }
+    }
+    if (Object.keys(itemsToUpload).length > 0) {
+        persistStorageItems(itemsToUpload);
+    }
+}
+
 export function safeGetLocalStorage(key) {
     try {
         return localStorage.getItem(key);
