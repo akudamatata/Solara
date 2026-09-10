@@ -57,19 +57,35 @@ export function updateFavoriteHighlight(state, dom) {
         return;
     }
     const items = dom.favoriteItems.querySelectorAll(".playlist-item");
-    const currentSongKey = state.currentSong ? getSongKey(state.currentSong) : null;
-    const isPlayingFavorites = state.currentList === "favorite" && state.currentSong != null && state.currentFavoriteIndex >= 0;
+    if (!items.length) return;
+
+    let targetIndex = -1;
+    const favorites = ensureFavoriteSongsArray(state);
+    const isPlayingFavorites = state.currentList === "favorite" && state.currentSong != null;
+
+    if (isPlayingFavorites && favorites.length > 0) {
+        const currentKey = getSongKey(state.currentSong);
+        const currentId = state.currentSong?.id ? String(state.currentSong.id) : null;
+        const currentName = state.currentSong?.name || null;
+
+        const matchedIndex = favorites.findIndex((song) => {
+            const k = getSongKey(song);
+            if (currentKey && k && k === currentKey) return true;
+            if (currentId && song?.id && String(song.id) === currentId) return true;
+            if (currentName && song?.name && song.name === currentName) return true;
+            return false;
+        });
+
+        if (matchedIndex >= 0) {
+            targetIndex = matchedIndex;
+            state.currentFavoriteIndex = matchedIndex;
+        } else if (state.currentFavoriteIndex >= 0 && state.currentFavoriteIndex < favorites.length) {
+            targetIndex = state.currentFavoriteIndex;
+        }
+    }
 
     items.forEach((item, index) => {
-        let isCurrent = false;
-        if (isPlayingFavorites) {
-            const itemKey = item.dataset.favoriteKey;
-            if (currentSongKey && itemKey) {
-                isCurrent = (itemKey === currentSongKey) || (index === state.currentFavoriteIndex);
-            } else {
-                isCurrent = (index === state.currentFavoriteIndex);
-            }
-        }
+        const isCurrent = (index === targetIndex);
         item.classList.toggle("current", isCurrent);
         item.setAttribute("aria-current", isCurrent ? "true" : "false");
         item.setAttribute("aria-pressed", isCurrent ? "true" : "false");

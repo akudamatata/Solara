@@ -170,19 +170,36 @@ export function updatePlaylistActionStates(state, dom) {
 export function updatePlaylistHighlight(state, dom) {
     if (!dom.playlistItems) return;
     const items = dom.playlistItems.querySelectorAll(".playlist-item");
-    const currentSongKey = state.currentSong ? getSongKey(state.currentSong) : null;
-    const isPlayingPlaylist = state.currentPlaylist === "playlist" && state.currentSong != null && state.currentTrackIndex >= 0;
+    if (!items.length) return;
+
+    let targetIndex = -1;
+    const isPlayingPlaylist = state.currentPlaylist === "playlist" && state.currentSong != null;
+
+    if (isPlayingPlaylist && Array.isArray(state.playlistSongs) && state.playlistSongs.length > 0) {
+        const currentKey = getSongKey(state.currentSong);
+        const currentId = state.currentSong?.id ? String(state.currentSong.id) : null;
+        const currentName = state.currentSong?.name || null;
+
+        // 优先根据唯一特征（Key / ID / 歌名）在播放列表中匹配出唯一目标索引
+        const matchedIndex = state.playlistSongs.findIndex((song) => {
+            const k = getSongKey(song);
+            if (currentKey && k && k === currentKey) return true;
+            if (currentId && song?.id && String(song.id) === currentId) return true;
+            if (currentName && song?.name && song.name === currentName) return true;
+            return false;
+        });
+
+        if (matchedIndex >= 0) {
+            targetIndex = matchedIndex;
+            // 自动纠偏当前索引，确保状态与视图完全一致
+            state.currentTrackIndex = matchedIndex;
+        } else if (state.currentTrackIndex >= 0 && state.currentTrackIndex < state.playlistSongs.length) {
+            targetIndex = state.currentTrackIndex;
+        }
+    }
 
     items.forEach((item, index) => {
-        let isCurrent = false;
-        if (isPlayingPlaylist) {
-            const itemKey = item.dataset.favoriteKey;
-            if (currentSongKey && itemKey) {
-                isCurrent = (itemKey === currentSongKey) || (index === state.currentTrackIndex);
-            } else {
-                isCurrent = (index === state.currentTrackIndex);
-            }
-        }
+        const isCurrent = (index === targetIndex);
         item.classList.toggle("current", isCurrent);
         item.setAttribute("aria-current", isCurrent ? "true" : "false");
         item.setAttribute("aria-pressed", isCurrent ? "true" : "false");
