@@ -2,10 +2,20 @@
  * Solara 全局常量与配置
  */
 
+export const DEFAULT_RADAR_GENRES = [
+    "热歌榜",
+    "新歌榜",
+    "飙升榜",
+];
+
 export const EXPLORE_RADAR_GENRES = [
     "热歌榜",
     "新歌榜",
     "飙升榜",
+    "潮流风向榜",
+    "原创榜",
+    "网易云全球说唱榜",
+    "美国Billboard榜",
 ];
 
 export const SOURCE_OPTIONS = [
@@ -18,7 +28,11 @@ export const SOURCE_OPTIONS = [
 export const RADAR_PLAYLISTS = [
     { id: "3778678", name: "热歌榜", description: "网易云音乐官方热歌榜" },
     { id: "19723756", name: "飙升榜", description: "网易云音乐官方飙升榜" },
-    { id: "3779629", name: "新歌榜", description: "网易云音乐官方新歌榜" }
+    { id: "3779629", name: "新歌榜", description: "网易云音乐官方新歌榜" },
+    { id: "13372522766", name: "潮流风向榜", description: "网易云音乐官方潮流风向榜" },
+    { id: "2884035", name: "原创榜", description: "网易云音乐官方原创榜" },
+    { id: "14028249541", name: "网易云全球说唱榜", description: "网易云音乐全球说唱榜" },
+    { id: "60198", name: "美国Billboard榜", description: "网易云音乐美国Billboard榜" }
 ];
 
 export function normalizeSource(value) {

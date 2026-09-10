@@ -119,6 +119,14 @@
     display: none;
 }
 
+.settings-section {
+    margin-bottom: 24px;
+}
+
+.settings-section:last-child {
+    margin-bottom: 0;
+}
+
 .settings-section h3 {
     margin: 0 0 6px 0;
     font-size: 15px;
@@ -130,14 +138,15 @@
 .settings-hint {
     font-size: 13px;
     color: var(--text-secondary-color);
-    margin-bottom: 16px;
+    margin-bottom: 12px;
     line-height: 1.45;
 }
 
 .genre-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
     gap: 10px;
+    margin-top: 4px;
 }
 
 .genre-item {
@@ -156,12 +165,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 9px 12px;
+    padding: 8.5px 10px;
     background: rgba(0, 0, 0, 0.04);
     border: 1px solid var(--apple-glass-border);
     border-radius: 10px;
     text-align: center;
-    font-size: 13px;
+    font-size: 12.5px;
     font-weight: 500;
     color: var(--text-color);
     cursor: pointer;

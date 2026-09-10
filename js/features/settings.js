@@ -2,7 +2,7 @@
  * Solara 设置面板、探索雷达偏好与大留白小播放器/全景双模态切换
  */
 
-import { EXPLORE_RADAR_GENRES } from "../constants.js";
+import { EXPLORE_RADAR_GENRES, DEFAULT_RADAR_GENRES } from "../constants.js";
 import { safeGetLocalStorage, safeSetLocalStorage, persistStorageItems } from "../core/storage.js";
 import { toggleDebugMode } from "../visual/spotlight.js";
 
@@ -96,14 +96,19 @@ export function closeSettingsModal(dom) {
     }
 }
 
-export function renderGenreList(dom) {
+export function renderGenreList(dom, state = null) {
     if (!dom || !dom.radarGenreList) return;
     
+    const selectedGenres = Array.isArray(state?.radarSettings?.genres) && state.radarSettings.genres.length > 0
+        ? state.radarSettings.genres
+        : DEFAULT_RADAR_GENRES;
+
     dom.radarGenreList.innerHTML = EXPLORE_RADAR_GENRES.map(genre => {
+        const isChecked = selectedGenres.includes(genre) ? "checked" : "";
         const label = (typeof window !== "undefined" && typeof window.t === "function") ? window.t(genre) : genre;
         return `
         <div class="genre-item">
-            <input type="checkbox" id="genre-${genre}" value="${genre}" checked>
+            <input type="checkbox" id="genre-${genre}" value="${genre}" ${isChecked}>
             <label for="genre-${genre}" class="genre-label">${label}</label>
         </div>
         `;
@@ -111,11 +116,15 @@ export function renderGenreList(dom) {
 }
 
 export function applySettingsToUI(dom, state) {
-    if (!state.radarSettings || !state.radarSettings.genres || !dom.radarGenreList) return;
+    if (!dom || !dom.radarGenreList) return;
     
+    const selectedGenres = Array.isArray(state?.radarSettings?.genres) && state.radarSettings.genres.length > 0
+        ? state.radarSettings.genres
+        : DEFAULT_RADAR_GENRES;
+
     const checkboxes = dom.radarGenreList.querySelectorAll("input[type='checkbox']");
     checkboxes.forEach(cb => {
-        cb.checked = state.radarSettings.genres.includes(cb.value);
+        cb.checked = selectedGenres.includes(cb.value);
     });
 }
 
@@ -124,21 +133,21 @@ export async function loadSettings(dom, state) {
     if (localSettings) {
         try {
             state.radarSettings = JSON.parse(localSettings);
-            // 兼容迁移：如果旧数据中全是旧曲风（如“流行”、“摇滚”），自动重置为三大官方榜单
+            // 兼容迁移：若包含旧曲风（如“流行”、“摇滚”等），过滤只保留有效榜单；若全无效则回退至默认三大官方榜单
             if (Array.isArray(state.radarSettings?.genres)) {
                 const validGenres = state.radarSettings.genres.filter(g => EXPLORE_RADAR_GENRES.includes(g));
-                state.radarSettings.genres = validGenres.length > 0 ? validGenres : [...EXPLORE_RADAR_GENRES];
+                state.radarSettings.genres = validGenres.length > 0 ? validGenres : [...DEFAULT_RADAR_GENRES];
             } else {
-                state.radarSettings = { genres: [...EXPLORE_RADAR_GENRES] };
+                state.radarSettings = { genres: [...DEFAULT_RADAR_GENRES] };
             }
             applySettingsToUI(dom, state);
         } catch (e) {
             console.error("解析本地设置失败:", e);
-            state.radarSettings = { genres: [...EXPLORE_RADAR_GENRES] };
+            state.radarSettings = { genres: [...DEFAULT_RADAR_GENRES] };
             applySettingsToUI(dom, state);
         }
     } else {
-        state.radarSettings = { genres: [...EXPLORE_RADAR_GENRES] };
+        state.radarSettings = { genres: [...DEFAULT_RADAR_GENRES] };
         applySettingsToUI(dom, state);
     }
 }
@@ -226,7 +235,7 @@ export function initLayoutMode(dom) {
 }
 
 export function initSettings(dom, state, callbacks = {}) {
-    renderGenreList(dom);
+    renderGenreList(dom, state);
 
     if (dom.logo) {
         dom.logo.addEventListener("dblclick", () => openSettingsModal(dom, state));

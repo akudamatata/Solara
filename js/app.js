@@ -4,6 +4,7 @@
 
 import {
     API,
+    DEFAULT_RADAR_GENRES,
     EXPLORE_RADAR_GENRES,
     RADAR_PLAYLISTS,
     LAST_SEARCH_STATE_STORAGE_KEY,
@@ -526,10 +527,10 @@ export async function exploreOnlineMusic() {
     try {
         setLoadingState(true);
 
-        // 获取用户在设置中勾选的榜单（若未配置或空则默认全选）
+        // 获取用户在设置中勾选的榜单（若未配置或空则默认全选默认三大榜单）
         const selectedGenres = Array.isArray(state?.radarSettings?.genres) && state.radarSettings.genres.length > 0
             ? state.radarSettings.genres
-            : EXPLORE_RADAR_GENRES;
+            : DEFAULT_RADAR_GENRES;
 
         const availablePlaylists = (Array.isArray(RADAR_PLAYLISTS) ? RADAR_PLAYLISTS : [])
             .filter(p => selectedGenres.includes(p.name) || selectedGenres.includes(p.id));

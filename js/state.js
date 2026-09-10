@@ -7,7 +7,8 @@ import {
     normalizeSource,
     LAST_SEARCH_STATE_STORAGE_KEY,
     SOURCE_OPTIONS,
-    EXPLORE_RADAR_GENRES
+    EXPLORE_RADAR_GENRES,
+    DEFAULT_RADAR_GENRES
 } from "./constants.js";
 import {
     safeGetLocalStorage,
@@ -113,7 +114,7 @@ const savedRadarSettings = (() => {
         const valid = parsed.genres.filter(g => EXPLORE_RADAR_GENRES.includes(g));
         if (valid.length > 0) return { genres: valid };
     }
-    return { genres: [...EXPLORE_RADAR_GENRES] };
+    return { genres: [...DEFAULT_RADAR_GENRES] };
 })();
 
 // 2. 构建状态单例
