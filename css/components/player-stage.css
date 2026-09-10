@@ -74,7 +74,6 @@
 
 /* 仅在播放中 (is-playing) 呈现克制、内敛的精致微光氛 */
 body.is-playing .album-cover {
-    animation: cover-drift 7s ease-in-out infinite alternate;
     box-shadow: 
         0 0 22px -2px var(--palette-glow),
         0 8px 22px -6px var(--palette-glow),

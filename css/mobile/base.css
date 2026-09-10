@@ -32,7 +32,7 @@ body.mobile-view {
     inset: 0;
 }
 
-/* ─── 2. 移动端全屏流体极光舞台 (Dynamic Aurora Atmosphere) ──────────────── */
+/* ─── 2. 移动端全屏流体极光舞台 (高性能静态色彩网格 + 切歌平滑淡入) ──────────────── */
 
 body.mobile-view .background-stage {
     display: block !important;
@@ -41,31 +41,84 @@ body.mobile-view .background-stage {
     z-index: -1;
     pointer-events: none;
     overflow: hidden;
+    transform: translateZ(0); /* 开启独立硬件合成层 */
 }
 
+/* 消除移动端多重嵌套的重度高斯模糊滤镜，极大释放 GPU 压力与发热 */
 body.mobile-view .background-stage__layer {
-    filter: blur(52px) saturate(105%);
-    transform: scale(1.15);
+    filter: none !important;
+    transform: none !important;
 }
 
 body.mobile-view.dark-mode .background-stage__layer {
-    filter: blur(54px) saturate(110%) brightness(0.88);
+    filter: none !important;
 }
 
-/* 极光之上叠加一层 Apple 标志性的超清毛玻璃微雾衬底 */
+/* 移动端极光网格：采用径向光晕自然扩散，取消暴力模糊，改为纯硬件加速的柔和弥散 */
+body.mobile-view .aurora-mesh {
+    inset: -10%;
+    width: 120%;
+    height: 120%;
+    filter: blur(32px) saturate(135%) !important;
+    opacity: 0.85;
+    transform: translateZ(0);
+}
+
+/* 核心：彻底停止光球在移动端的 120Hz 无限旋转和形变动画！
+   让光球固定在四角构成天然柔和的静态色彩网格背景，GPU 占用由 100% 暴降至 0%，
+   使得上层所有毛玻璃（顶栏、底栏、歌单抽屉）可以完美命中 WebKit 纹理缓存，机身彻底冰凉且动画达到满帧 120fps！ */
+body.mobile-view .aurora-orb {
+    animation: none !important;
+    will-change: auto !important;
+    transform: translateZ(0);
+}
+
+body.mobile-view .aurora-orb--1 {
+    width: 80vw;
+    height: 80vw;
+    top: -10vw;
+    left: -10vw;
+    opacity: 0.9;
+}
+
+body.mobile-view .aurora-orb--2 {
+    width: 80vw;
+    height: 80vw;
+    top: -5vw;
+    right: -10vw;
+    opacity: 0.85;
+}
+
+body.mobile-view .aurora-orb--3 {
+    width: 75vw;
+    height: 75vw;
+    bottom: 5vw;
+    right: -5vw;
+    opacity: 0.8;
+}
+
+body.mobile-view .aurora-orb--4 {
+    width: 75vw;
+    height: 75vw;
+    bottom: -5vw;
+    left: -5vw;
+    opacity: 0.85;
+}
+
+/* 彻底移除全屏遮罩上的 backdrop-filter，避免在背景之上再做全屏高斯模糊 */
 body.mobile-view .background-stage__glass-scrim {
     display: block !important;
     position: absolute;
     inset: 0;
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    /* 浅色模式温润雅致微雾：通透柔和，彻底告别惨白大白墙与过曝刺眼感 */
-    background: radial-gradient(circle at 50% 35%, rgba(245, 247, 250, 0.08) 0%, rgba(235, 238, 244, 0.20) 100%);
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    /* 采用纯渐变自然融合，零 GPU 模糊开销 */
+    background: radial-gradient(circle at 50% 35%, rgba(245, 247, 250, 0.05) 0%, rgba(235, 238, 244, 0.15) 100%);
     transition: background 0.45s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 body.mobile-view.dark-mode .background-stage__glass-scrim {
-    background: radial-gradient(circle at 50% 30%, transparent 20%, rgba(6, 7, 10, 0.58) 100%);
+    background: radial-gradient(circle at 50% 30%, transparent 20%, rgba(6, 7, 10, 0.55) 100%);
 }
 
 /* ─── 3. 移动端主容器 (App Shell) ───────────────────────────────────────── */

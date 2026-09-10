@@ -103,7 +103,6 @@ body.mobile-view.dark-mode .album-cover {
 
 /* 播放态：精致优雅的微浮与调色板外发光 */
 body.mobile-view.is-playing .album-cover {
-    animation: cover-drift 7s ease-in-out infinite alternate;
     box-shadow: 
         0 0 32px -4px var(--palette-glow),
         0 22px 52px -8px rgba(0, 0, 0, 0.28);

@@ -3,6 +3,11 @@
  */
 
 export function initSpotlightEffect() {
+    // 移动设备触屏操作无需鼠标跟随聚光灯效果，避免无谓的重排计算与能耗
+    if (window.__SOLARA_IS_MOBILE || document.documentElement.classList.contains("mobile-view")) {
+        return;
+    }
+
     let ticking = false;
     window.addEventListener("mousemove", (e) => {
         if (!ticking) {

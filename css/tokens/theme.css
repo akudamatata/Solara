@@ -159,13 +159,14 @@ body.background-transitioning .background-stage__layer--transition {
 
 .aurora-mesh {
     position: absolute;
-    inset: -30%;
-    width: 160%;
-    height: 160%;
+    inset: -20%;
+    width: 140%;
+    height: 140%;
     overflow: hidden;
-    filter: blur(95px) saturate(170%);
+    filter: blur(50px) saturate(140%);
     pointer-events: none;
-    opacity: 0.9;
+    opacity: 0.85;
+    transform: translateZ(0);
 }
 
 .aurora-orb {
@@ -246,8 +247,8 @@ body.background-transitioning .background-stage__layer--transition {
 .background-stage__glass-scrim {
     position: absolute;
     inset: 0;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
     background: radial-gradient(circle at 50% 40%, rgba(0,0,0,0.01) 0%, rgba(0,0,0,0.18) 100%);
 }
 
