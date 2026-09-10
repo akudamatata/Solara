@@ -10,35 +10,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- 核心：直接复用主站设计系统 Tokens 与主题材质规范 -->
   <link rel="stylesheet" href="css/style.css">
   <script src="js/i18n.js"></script>
 
   <style>
     /* ==========================================================================
-       Apple Design Tokens & Reset
+       Solara Login Page - 100% 契合主站色彩与 Apple 拟态材质系统
        ========================================================================== */
-    :root {
-      --font-sf: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
-      --apple-teal: #34d1b6;
-      --apple-teal-hover: #2db8a0;
-      --apple-teal-active: #259d88;
-      --apple-teal-glow: rgba(52, 209, 182, 0.4);
-      --apple-red: #ff453a;
-      --apple-red-glow: rgba(255, 69, 58, 0.35);
-      --card-bg: rgba(18, 26, 32, 0.65);
-      --card-border-top: rgba(255, 255, 255, 0.32);
-      --card-border-side: rgba(255, 255, 255, 0.12);
-      --card-border-bottom: rgba(255, 255, 255, 0.06);
-      --input-bg: rgba(255, 255, 255, 0.065);
-      --input-bg-focus: rgba(255, 255, 255, 0.095);
-      --input-border: rgba(255, 255, 255, 0.14);
-      --text-primary: #f5f5f7;
-      --text-secondary: rgba(235, 235, 245, 0.68);
-      --text-tertiary: rgba(235, 235, 245, 0.42);
-      --spring-snappy: cubic-bezier(0.16, 1, 0.3, 1);
-      --spring-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-
     *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
@@ -52,7 +31,6 @@
       -webkit-text-size-adjust: 100%;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
-      background-color: #06090d;
       overflow: hidden;
     }
 
@@ -60,8 +38,8 @@
       min-height: 100%;
       min-height: 100dvh;
       width: 100vw;
-      font-family: var(--font-sf);
-      color: var(--text-primary);
+      font-family: var(--font-main);
+      color: var(--text-color);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -70,103 +48,68 @@
       padding: clamp(20px, 4vw, 40px);
       padding-top: calc(env(safe-area-inset-top, 0px) + clamp(20px, 4vw, 40px));
       padding-bottom: calc(env(safe-area-inset-bottom, 0px) + clamp(20px, 4vw, 40px));
+      background-color: transparent;
+      transition: color 0.4s ease;
     }
 
-    /* ==========================================================================
-       Ambient Fluid Aurora Mesh (流体极光环境背景)
-       ========================================================================== */
-    .ambient-stage {
+    /* 顶部独立主题切换按钮 (与主站右上角保持统一) */
+    .top-toolbar {
       position: fixed;
-      inset: -20vmax;
-      width: 140vmax;
-      height: 140vmax;
-      pointer-events: none;
-      z-index: 0;
-      overflow: hidden;
-      filter: blur(75px);
-      opacity: 0.88;
-      will-change: transform;
+      top: calc(env(safe-area-inset-top, 0px) + 16px);
+      right: calc(env(safe-area-inset-right, 0px) + 20px);
+      z-index: 100;
     }
 
-    .ambient-orb {
-      position: absolute;
+    .theme-toggle-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
-      mix-blend-mode: screen;
-      will-change: transform, opacity;
-      animation-iteration-count: infinite;
-      animation-direction: alternate;
-      animation-timing-function: ease-in-out;
+      background: var(--component-bg);
+      border: 1px solid var(--border-color);
+      backdrop-filter: var(--apple-glass-blur);
+      -webkit-backdrop-filter: var(--apple-glass-blur);
+      color: var(--text-color);
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+      transition: transform 0.2s var(--spring-snappy), background-color 0.25s ease, border-color 0.25s ease;
     }
 
-    .ambient-orb-1 {
-      width: 48vmax;
-      height: 48vmax;
-      top: 15%;
-      left: 15%;
-      background: radial-gradient(circle, rgba(16, 163, 127, 0.45) 0%, rgba(26, 188, 156, 0.15) 55%, transparent 70%);
-      animation: floatOrb1 22s infinite alternate;
+    .theme-toggle-pill:hover {
+      transform: scale(1.06);
     }
 
-    .ambient-orb-2 {
-      width: 55vmax;
-      height: 55vmax;
-      bottom: 10%;
-      right: 15%;
-      background: radial-gradient(circle, rgba(46, 134, 193, 0.38) 0%, rgba(52, 152, 219, 0.12) 60%, transparent 75%);
-      animation: floatOrb2 26s infinite alternate;
+    .theme-toggle-pill:active {
+      transform: scale(0.92);
     }
 
-    .ambient-orb-3 {
-      width: 40vmax;
-      height: 40vmax;
-      top: 35%;
-      right: 25%;
-      background: radial-gradient(circle, rgba(80, 227, 194, 0.28) 0%, rgba(18, 53, 60, 0.08) 60%, transparent 75%);
-      animation: floatOrb3 18s infinite alternate;
+    .theme-toggle-pill .theme-icon {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: transform 0.3s var(--spring-snappy);
     }
 
-    @keyframes floatOrb1 {
-      0% { transform: translate3d(0, 0, 0) scale(1); }
-      50% { transform: translate3d(6vw, 8vh, 0) scale(1.08); }
-      100% { transform: translate3d(-4vw, 4vh, 0) scale(0.96); }
+    .theme-icon--moon {
+      display: none;
     }
 
-    @keyframes floatOrb2 {
-      0% { transform: translate3d(0, 0, 0) scale(1); }
-      50% { transform: translate3d(-8vw, -6vh, 0) scale(1.06); }
-      100% { transform: translate3d(5vw, -4vh, 0) scale(0.94); }
+    body.dark-mode .theme-icon--sun {
+      display: none;
     }
 
-    @keyframes floatOrb3 {
-      0% { transform: translate3d(0, 0, 0) scale(0.95); }
-      100% { transform: translate3d(-6vw, 7vh, 0) scale(1.12); }
-    }
-
-    /* 胶片微噪点层 (消除阶断，增强物理质感) */
-    .ambient-noise {
-      position: fixed;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      opacity: 0.032;
-      pointer-events: none;
-      z-index: 1;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-    }
-
-    /* 极光边缘暗角 */
-    .ambient-vignette {
-      position: fixed;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      background: radial-gradient(circle at center, transparent 35%, rgba(4, 7, 10, 0.72) 100%);
-      pointer-events: none;
-      z-index: 2;
+    body.dark-mode .theme-icon--moon {
+      display: block;
     }
 
     /* ==========================================================================
-       Login Shell & Card (Apple Glassmorphism)
+       登录卡片：完全继承主站玻璃拟态卡片 (--container-bg 等 Tokens)
        ========================================================================== */
     .login-shell {
       position: relative;
@@ -181,23 +124,18 @@
 
     .login-card {
       width: 100%;
-      background: var(--card-bg);
-      backdrop-filter: blur(48px) saturate(190%);
-      -webkit-backdrop-filter: blur(48px) saturate(190%);
+      background: var(--container-bg);
+      backdrop-filter: var(--apple-glass-blur);
+      -webkit-backdrop-filter: var(--apple-glass-blur);
       border-radius: 28px;
       padding: clamp(32px, 5.5vw, 42px) clamp(28px, 5vw, 36px);
-      border-top: 1px solid var(--card-border-top);
-      border-left: 1px solid var(--card-border-side);
-      border-right: 1px solid var(--card-border-side);
-      border-bottom: 1px solid var(--card-border-bottom);
-      box-shadow:
-        0 30px 70px -15px rgba(0, 0, 0, 0.65),
-        0 12px 30px -8px rgba(0, 0, 0, 0.4),
-        0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+      border: 1px solid var(--apple-glass-border);
+      border-top: 1px solid var(--apple-glass-border-top);
+      box-shadow: var(--container-shadow);
       display: flex;
       flex-direction: column;
       gap: 28px;
-      transition: transform 0.4s var(--spring-snappy), box-shadow 0.4s ease;
+      transition: transform 0.4s var(--spring-snappy), box-shadow 0.4s ease, border-color 0.3s ease;
       will-change: transform;
     }
 
@@ -217,103 +155,82 @@
     }
 
     .login-card.has-error {
-      border-color: var(--apple-red);
+      border-color: var(--warning-color, #ff3b30) !important;
       box-shadow:
-        0 30px 70px -15px rgba(0, 0, 0, 0.65),
-        0 0 0 2px var(--apple-red-glow),
-        0 0 28px var(--apple-red-glow);
+        var(--container-shadow),
+        0 0 0 2px rgba(255, 59, 48, 0.35),
+        0 0 24px rgba(255, 59, 48, 0.25) !important;
     }
 
     /* ==========================================================================
-       Header & App Icon (macOS Squircle)
+       头部品牌区：彻底移除多余生硬方框，还原纯净灵动的 Solara 品牌质感
        ========================================================================== */
     .login-header {
       display: flex;
       flex-direction: column;
       align-items: center;
       text-align: center;
-      gap: 16px;
+      gap: 12px;
     }
 
-    .logo-squircle-wrapper {
-      position: relative;
-      width: 72px;
-      height: 72px;
+    /* 纯粹的太阳光芒星徽，无任何多余方框容器 */
+    .brand-symbol-wrap {
       display: flex;
       align-items: center;
       justify-content: center;
+      width: 56px;
+      height: 56px;
+      color: var(--primary-color);
+      filter: drop-shadow(0 4px 14px var(--palette-glow));
+      transition: transform 0.35s var(--spring-bounce), color 0.3s ease;
     }
 
-    /* 图标外围呼吸光环 */
-    .logo-squircle-glow {
-      position: absolute;
-      inset: -6px;
-      border-radius: 26px;
-      background: radial-gradient(circle, var(--apple-teal-glow) 0%, transparent 70%);
-      filter: blur(10px);
-      opacity: 0.75;
-      animation: logoGlowPulse 4.5s ease-in-out infinite alternate;
+    .brand-symbol-wrap:hover {
+      transform: scale(1.08) rotate(15deg);
     }
 
-    @keyframes logoGlowPulse {
-      0% { opacity: 0.5; transform: scale(0.96); }
-      100% { opacity: 0.95; transform: scale(1.06); }
+    .brand-symbol-icon {
+      width: 48px;
+      height: 48px;
+      stroke: currentColor;
+      fill: none;
+      animation: sunGlowPulse 4s ease-in-out infinite alternate;
     }
 
-    .logo-squircle {
-      position: relative;
-      width: 68px;
-      height: 68px;
-      border-radius: 20px;
-      background: linear-gradient(145deg, rgba(32, 45, 54, 0.88), rgba(15, 23, 28, 0.94));
-      border: 1px solid rgba(255, 255, 255, 0.22);
-      border-top-color: rgba(255, 255, 255, 0.42);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow:
-        0 12px 28px -6px rgba(0, 0, 0, 0.55),
-        0 0 1px 1px rgba(255, 255, 255, 0.15) inset;
-      backdrop-filter: blur(16px);
-      overflow: hidden;
-      transition: transform 0.3s var(--spring-snappy);
-    }
-
-    .logo-squircle:hover {
-      transform: scale(1.04);
-    }
-
-    .logo-squircle img {
-      width: 44px;
-      height: 44px;
-      object-fit: contain;
-      filter: drop-shadow(0 2px 8px rgba(52, 209, 182, 0.4));
+    @keyframes sunGlowPulse {
+      0% { transform: scale(0.96); opacity: 0.88; }
+      100% { transform: scale(1.04); opacity: 1; }
     }
 
     .title-group {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 5px;
+      gap: 6px;
     }
 
+    /* 主站标志性渐变标题字 */
     .login-title {
-      font-size: clamp(1.65rem, 3.5vw, 1.85rem);
+      font-size: clamp(1.8rem, 4vw, 2.1rem);
       font-weight: 700;
-      letter-spacing: -0.025em;
-      color: var(--text-primary);
-      line-height: 1.15;
+      letter-spacing: -0.03em;
+      margin: 0;
+      line-height: 1.1;
+      background: linear-gradient(135deg, var(--text-color) 35%, var(--primary-color) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      transition: transform 0.3s var(--spring-bounce);
     }
 
     .login-desc {
       font-size: 0.88rem;
-      font-weight: 400;
-      color: var(--text-secondary);
-      letter-spacing: -0.005em;
+      font-weight: 500;
+      color: var(--text-secondary-color);
+      letter-spacing: -0.01em;
     }
 
     /* ==========================================================================
-       Form & macOS Lock Screen Input
+       表单与输入区 (继承主站组件材质)
        ========================================================================== */
     .login-form {
       display: flex;
@@ -336,9 +253,9 @@
 
     .field-label {
       font-size: 0.8rem;
-      font-weight: 500;
+      font-weight: 600;
       letter-spacing: 0.02em;
-      color: var(--text-secondary);
+      color: var(--text-secondary-color);
       text-transform: uppercase;
     }
 
@@ -349,8 +266,9 @@
       gap: 4px;
       padding: 2px 7px;
       border-radius: 6px;
-      background: rgba(255, 255, 255, 0.12);
-      color: #fff;
+      background: var(--component-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-color);
       font-size: 0.72rem;
       font-weight: 600;
       letter-spacing: 0.02em;
@@ -371,20 +289,17 @@
       fill: currentColor;
     }
 
-    /* macOS 密码输入胶囊框 */
+    /* 苹果密码输入胶囊框 */
     .input-wrapper {
       position: relative;
       display: flex;
       align-items: center;
-      background: var(--input-bg);
-      border: 1px solid var(--input-border);
-      border-top-color: rgba(255, 255, 255, 0.24);
+      background: var(--component-bg);
+      border: 1px solid var(--border-color);
       border-radius: 16px;
       padding: 0 14px;
       height: 52px;
-      box-shadow:
-        0 2px 6px rgba(0, 0, 0, 0.2) inset,
-        0 1px 0 rgba(255, 255, 255, 0.06);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) inset;
       transition:
         background-color 0.2s ease,
         border-color 0.25s var(--spring-snappy),
@@ -392,16 +307,14 @@
     }
 
     .input-wrapper:hover {
-      background: var(--input-bg-focus);
-      border-color: rgba(255, 255, 255, 0.22);
+      border-color: var(--primary-color);
     }
 
     .input-wrapper:focus-within {
-      background: var(--input-bg-focus);
-      border-color: var(--apple-teal);
+      border-color: var(--primary-color);
       box-shadow:
-        0 0 0 3.5px var(--apple-teal-glow),
-        0 2px 8px rgba(0, 0, 0, 0.3) inset;
+        0 0 0 3.5px var(--palette-glow),
+        0 2px 8px rgba(0, 0, 0, 0.08) inset;
     }
 
     .input-leading-icon {
@@ -411,13 +324,13 @@
       width: 20px;
       height: 20px;
       margin-right: 10px;
-      color: var(--text-tertiary);
+      color: var(--text-tertiary-color);
       transition: color 0.2s ease;
       flex-shrink: 0;
     }
 
     .input-wrapper:focus-within .input-leading-icon {
-      color: var(--apple-teal);
+      color: var(--primary-color);
     }
 
     .login-form input {
@@ -426,7 +339,7 @@
       background: transparent;
       border: none;
       outline: none;
-      color: #ffffff;
+      color: var(--text-color);
       font-size: 1rem;
       font-family: inherit;
       letter-spacing: 0.03em;
@@ -434,14 +347,14 @@
     }
 
     .login-form input::placeholder {
-      color: var(--text-tertiary);
+      color: var(--text-tertiary-color);
       font-size: 0.94rem;
       letter-spacing: 0;
       transition: opacity 0.2s ease;
     }
 
     .login-form input:focus::placeholder {
-      opacity: 0.6;
+      opacity: 0.55;
     }
 
     /* 眼睛切换按钮 */
@@ -454,7 +367,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      color: var(--text-tertiary);
+      color: var(--text-tertiary-color);
       border-radius: 8px;
       cursor: pointer;
       flex-shrink: 0;
@@ -462,8 +375,8 @@
     }
 
     .input-action-btn:hover {
-      color: var(--text-primary);
-      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-color);
+      background: var(--item-hover-bg);
     }
 
     .input-action-btn:active {
@@ -483,14 +396,14 @@
     .login-hint {
       margin-top: 2px;
       font-size: 0.81rem;
-      color: var(--text-tertiary);
+      color: var(--text-tertiary-color);
       line-height: 1.45;
       text-align: center;
       letter-spacing: -0.01em;
     }
 
     /* ==========================================================================
-       Primary Action Button (Apple Push Button)
+       提交按钮：使用主站标准的 --primary-color
        ========================================================================== */
     .btn-submit {
       position: relative;
@@ -499,8 +412,8 @@
       margin-top: 4px;
       border: none;
       border-radius: 16px;
-      background: linear-gradient(180deg, #37ddbf 0%, #20b898 100%);
-      color: #061c16;
+      background: var(--primary-color);
+      color: #ffffff;
       font-size: 0.98rem;
       font-weight: 600;
       letter-spacing: 0.01em;
@@ -510,37 +423,42 @@
       justify-content: center;
       gap: 8px;
       box-shadow:
-        0 14px 28px -6px rgba(46, 214, 175, 0.42),
+        0 14px 28px -6px var(--palette-glow),
         0 1px 0 rgba(255, 255, 255, 0.45) inset;
       transition:
         transform 0.12s var(--spring-snappy),
         box-shadow 0.2s ease,
         filter 0.2s ease,
-        background 0.2s ease;
+        background-color 0.2s ease;
       will-change: transform;
       user-select: none;
       -webkit-user-select: none;
     }
 
+    body.dark-mode .btn-submit {
+      color: #041611;
+      font-weight: 700;
+    }
+
     .btn-submit:hover {
+      background: var(--primary-color-dark);
       filter: brightness(1.05);
       box-shadow:
-        0 18px 34px -6px rgba(46, 214, 175, 0.55),
+        0 18px 34px -6px var(--palette-glow),
         0 1px 0 rgba(255, 255, 255, 0.6) inset;
     }
 
-    /* 遵循 Apple Design 规范：按下瞬间即时响应微缩放 */
     .btn-submit:active {
       transform: scale(0.975);
       filter: brightness(0.96);
       box-shadow:
-        0 8px 18px -4px rgba(46, 214, 175, 0.35),
+        0 8px 18px -4px var(--palette-glow),
         0 1px 0 rgba(255, 255, 255, 0.3) inset;
     }
 
     .btn-submit:disabled {
       cursor: not-allowed;
-      opacity: 0.85;
+      opacity: 0.82;
       transform: none !important;
     }
 
@@ -559,7 +477,7 @@
       transform: translateX(2px);
     }
 
-    /* Apple 系统级菊花转圈 Spinner */
+    /* Apple 系统菊花 Spinner */
     .apple-spinner {
       display: none;
       width: 20px;
@@ -581,7 +499,7 @@
       width: 2px;
       height: 5px;
       border-radius: 1px;
-      background: #061c16;
+      background: currentColor;
     }
 
     .apple-spinner div:nth-child(1) { transform: rotate(0deg); animation-delay: -0.7s; }
@@ -608,7 +526,7 @@
     }
 
     /* ==========================================================================
-       Footer & Security Badge
+       底部安全状态胶囊
        ========================================================================== */
     .login-footer {
       display: flex;
@@ -622,30 +540,29 @@
       gap: 8px;
       padding: 6px 14px;
       border-radius: 9999px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      background: var(--component-bg);
+      border: 1px solid var(--border-color);
+      backdrop-filter: var(--apple-glass-blur);
+      -webkit-backdrop-filter: var(--apple-glass-blur);
       font-size: 0.78rem;
       font-weight: 500;
-      color: var(--text-tertiary);
+      color: var(--text-tertiary-color);
       letter-spacing: 0.01em;
       transition: border-color 0.2s ease, color 0.2s ease;
     }
 
     .security-capsule:hover {
-      border-color: rgba(255, 255, 255, 0.16);
-      color: var(--text-secondary);
+      border-color: var(--apple-glass-border);
+      color: var(--text-secondary-color);
     }
 
-    /* 脉冲呼吸安全指示灯 */
     .pulse-dot {
       position: relative;
       width: 7px;
       height: 7px;
       border-radius: 50%;
-      background-color: var(--apple-teal);
-      box-shadow: 0 0 8px var(--apple-teal);
+      background-color: var(--primary-color);
+      box-shadow: 0 0 8px var(--palette-glow);
     }
 
     .pulse-dot::after {
@@ -653,7 +570,7 @@
       position: absolute;
       inset: -3px;
       border-radius: 50%;
-      border: 1.5px solid var(--apple-teal);
+      border: 1.5px solid var(--primary-color);
       opacity: 0.6;
       animation: dotPulse 2.4s cubic-bezier(0.25, 1, 0.5, 1) infinite;
     }
@@ -678,15 +595,13 @@
       gap: 10px;
       padding: 10px 18px;
       border-radius: 9999px;
-      background: rgba(30, 36, 44, 0.82);
-      backdrop-filter: blur(28px) saturate(190%);
-      -webkit-backdrop-filter: blur(28px) saturate(190%);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      border-top-color: rgba(255, 255, 255, 0.35);
-      box-shadow:
-        0 16px 36px -8px rgba(0, 0, 0, 0.5),
-        0 0 0 1px rgba(255, 255, 255, 0.08) inset;
-      color: var(--text-primary);
+      background: var(--container-bg);
+      backdrop-filter: var(--apple-glass-blur);
+      -webkit-backdrop-filter: var(--apple-glass-blur);
+      border: 1px solid var(--apple-glass-border);
+      border-top: 1px solid var(--apple-glass-border-top);
+      box-shadow: var(--container-shadow);
+      color: var(--text-color);
       font-size: 0.88rem;
       font-weight: 500;
       opacity: 0;
@@ -704,8 +619,7 @@
     }
 
     .apple-toast.error {
-      border-color: rgba(255, 69, 58, 0.5);
-      background: rgba(38, 22, 24, 0.85);
+      border-color: rgba(255, 59, 48, 0.5);
     }
 
     .toast-icon {
@@ -718,16 +632,14 @@
     }
 
     .apple-toast.error .toast-icon {
-      color: var(--apple-red);
+      color: var(--warning-color, #ff3b30);
     }
 
     .apple-toast.success .toast-icon {
-      color: var(--apple-teal);
+      color: var(--primary-color);
     }
 
-    /* ==========================================================================
-       Responsive & Reduced Motion
-       ========================================================================== */
+    /* 移动端响应式 */
     @media (max-width: 480px) {
       .login-shell {
         max-width: 100%;
@@ -739,65 +651,51 @@
         gap: 24px;
       }
 
-      .logo-squircle-wrapper {
-        width: 64px;
-        height: 64px;
-      }
-
-      .logo-squircle {
-        width: 60px;
-        height: 60px;
-        border-radius: 17px;
-      }
-
-      .logo-squircle img {
-        width: 38px;
-        height: 38px;
-      }
-
       .login-title {
-        font-size: 1.55rem;
+        font-size: 1.7rem;
       }
 
       .btn-submit {
         height: 48px;
       }
     }
-
-    @media (prefers-reduced-motion: reduce) {
-      .ambient-stage,
-      .ambient-orb,
-      .pulse-dot::after,
-      .logo-squircle-glow {
-        animation: none !important;
-      }
-      .login-card.shake {
-        animation: none !important;
-      }
-      .apple-toast,
-      .btn-submit,
-      .input-wrapper {
-        transition: opacity 0.15s ease !important;
-      }
-    }
   </style>
 </head>
 <body class="login-page">
 
-  <!-- 流体极光深邃背景 -->
-  <div class="ambient-stage" aria-hidden="true">
-    <div class="ambient-orb ambient-orb-1"></div>
-    <div class="ambient-orb ambient-orb-2"></div>
-    <div class="ambient-orb ambient-orb-3"></div>
+  <!-- 100% 复用 Solara 主界面原生沉浸式极光流体舞台架构 -->
+  <div class="background-stage" id="backgroundStage" aria-hidden="true">
+    <div class="background-stage__layer background-stage__layer--base" id="backgroundBaseLayer">
+      <div class="aurora-mesh">
+        <div class="aurora-orb aurora-orb--1"></div>
+        <div class="aurora-orb aurora-orb--2"></div>
+        <div class="aurora-orb aurora-orb--3"></div>
+        <div class="aurora-orb aurora-orb--4"></div>
+      </div>
+      <div class="aurora-noise"></div>
+    </div>
+    <div class="background-stage__glass-scrim"></div>
   </div>
-  <div class="ambient-noise" aria-hidden="true"></div>
-  <div class="ambient-vignette" aria-hidden="true"></div>
 
-  <!-- macOS 风格悬浮 Toast 提示 -->
+  <!-- 顶部主题快速切换胶囊 (与主站右上角保持统一) -->
+  <div class="top-toolbar">
+    <button id="themeToggleBtn" class="theme-toggle-pill" type="button" aria-label="切换深浅色模式" title="切换深浅色模式">
+      <!-- 太阳 (浅色模式显示) -->
+      <svg class="theme-icon theme-icon--sun" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="4"></circle>
+        <path d="M12 2.5v1.5m0 16v1.5m-9.5-9.5H4m16 0h1.5m-2.6-6.4-.9.9M6.4 17.6l-.9.9m0-13 .9.9m11.3 11.3.9.9"></path>
+      </svg>
+      <!-- 月亮 (深色模式显示) -->
+      <svg class="theme-icon theme-icon--moon" viewBox="0 0 24 24">
+        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+        <path d="M19 3v4m2-2h-4"></path>
+      </svg>
+    </button>
+  </div>
+
+  <!-- macOS 悬浮 Toast 提示 -->
   <aside id="apple-toast" class="apple-toast" role="status" aria-live="polite">
-    <span class="toast-icon" id="toast-icon">
-      <!-- 动态插入 SVG 图标 -->
-    </span>
+    <span class="toast-icon" id="toast-icon"></span>
     <span class="toast-msg" id="toast-msg"></span>
   </aside>
 
@@ -805,13 +703,13 @@
   <main class="login-shell">
     <section class="login-card spotlight-card" id="login-card">
       
-      <!-- 头部应用图标与品牌 -->
+      <!-- 头部：彻底移除多余生硬方框，仅展示轻灵纯粹的太阳光芒星徽与品牌字 -->
       <header class="login-header">
-        <div class="logo-squircle-wrapper">
-          <div class="logo-squircle-glow"></div>
-          <div class="logo-squircle">
-            <img src="/favicon.svg" alt="Solara Logo">
-          </div>
+        <div class="brand-symbol-wrap" aria-hidden="true">
+          <svg class="brand-symbol-icon" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4.2"></circle>
+            <path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.93 4.93l1.77 1.77M17.3 17.3l1.77 1.77M4.93 19.07l1.77-1.77M17.3 6.7l1.77-1.77"></path>
+          </svg>
         </div>
         <div class="title-group">
           <h1 class="login-title">Solara</h1>
@@ -893,17 +791,38 @@
 
   <script>
     (function () {
-      // 1. 清除遗留认证缓存
+      // 1. 同步并初始化主站深浅色模式
+      const themeToggleBtn = document.getElementById("themeToggleBtn");
+      const applyTheme = (isDark) => {
+        document.body.classList.toggle("dark-mode", isDark);
+        if (themeToggleBtn) {
+          const label = isDark ? "切换为浅色模式" : "切换为深色模式";
+          themeToggleBtn.setAttribute("aria-label", label);
+          themeToggleBtn.setAttribute("title", label);
+        }
+      };
+
+      const savedTheme = localStorage.getItem("theme");
+      const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const initialIsDark = savedTheme ? savedTheme === "dark" : prefersDark;
+      applyTheme(initialIsDark);
+
+      themeToggleBtn?.addEventListener("click", () => {
+        const isDark = !document.body.classList.contains("dark-mode");
+        applyTheme(isDark);
+        localStorage.setItem("theme", isDark ? "dark" : "light");
+      });
+
+      // 2. 清除遗留认证缓存
       const storedExpiry = localStorage.getItem("authExpiry");
       if (storedExpiry) {
         localStorage.removeItem("authExpiry");
       }
 
-      // 2. DOM 元素
+      // 3. DOM 元素
       const loginCard = document.getElementById("login-card");
       const loginForm = document.getElementById("login-form");
       const passwordInput = document.getElementById("password");
-      const inputWrapper = document.getElementById("input-wrapper");
       const togglePasswordBtn = document.getElementById("toggle-password");
       const eyeIcon = document.getElementById("eye-icon");
       const submitBtn = document.getElementById("submit-button");
@@ -914,7 +833,7 @@
 
       let toastTimer = null;
 
-      // 3. Apple 风格 Toast 浮动通知系统
+      // 4. Apple Toast 浮动通知
       const showToast = (message, type = "error") => {
         if (!appleToast) return;
         
@@ -925,7 +844,7 @@
           toastIcon.innerHTML = `
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12"></line>
               <line x1="12" y1="16" x2="12.01" y2="16"></line>
             </svg>
           `;
@@ -946,38 +865,33 @@
         }, 3200);
       };
 
-      // 兼容旧接口调用
       window.showNotification = showToast;
 
-      // 4. macOS 经典密码错误果冻晃动效果
+      // 5. macOS 密码错误果冻晃动效果
       const triggerShakeError = (msg) => {
         if (!loginCard) return;
         
         loginCard.classList.remove("shake", "has-error");
-        // 强制重绘，使动画重置
         void loginCard.offsetWidth;
         loginCard.classList.add("shake", "has-error");
 
         showToast(msg, "error");
 
-        // 触发触觉反馈 (Haptic feedback)
         if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
           navigator.vibrate([24, 40, 24]);
         }
 
-        // 晃动结束后移除 shake 类，保留提示
         setTimeout(() => {
           loginCard.classList.remove("shake");
         }, 500);
 
-        // 重新聚焦并选中文本，方便用户直接重新输入
         if (passwordInput) {
           passwordInput.focus();
           passwordInput.select();
         }
       };
 
-      // 5. 密码显隐切换交互
+      // 6. 密码显隐切换交互
       let isPasswordVisible = false;
       const eyeOpenSVG = `
         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
@@ -996,7 +910,7 @@
         passwordInput.focus();
       });
 
-      // 6. macOS 标志性 Caps Lock 大写锁定检测
+      // 7. Caps Lock 大写锁定侦测
       const checkCapsLock = (e) => {
         if (!capsLockIndicator) return;
         const isCapsLock = e.getModifierState && e.getModifierState("CapsLock");
@@ -1015,10 +929,8 @@
         }
       });
 
-      // 7. 用户重新输入时恢复正常状态边框
       passwordInput?.addEventListener("input", () => {
         loginCard?.classList.remove("has-error");
-        // 过滤非 ASCII 字符（保持原逻辑）
         passwordInput.value = passwordInput.value.replace(/[^\x00-\x7F]/g, '');
       });
 
@@ -1032,7 +944,6 @@
           return;
         }
 
-        // 进入加载状态
         submitBtn.disabled = true;
         submitBtn.classList.add("loading");
 
@@ -1046,7 +957,6 @@
 
           if (response.ok) {
             submitBtn.classList.remove("loading");
-            // 登录成功微过渡
             showToast("验证成功，正在进入...", "success");
             setTimeout(() => {
               window.location.href = "/";
@@ -1054,7 +964,6 @@
             return;
           }
 
-          // 密码错误
           triggerShakeError("密码错误，请重试");
         } catch (error) {
           console.error(error);
@@ -1074,17 +983,7 @@
         loginCard.style.setProperty("--mouse-y", `${y}px`);
       });
 
-      // 10. 移动端 VisualViewport 防键盘弹起抖动
-      if (window.visualViewport) {
-        const updateViewport = () => {
-          document.documentElement.style.setProperty("--mobile-vh", `${window.visualViewport.height}px`);
-        };
-        window.visualViewport.addEventListener("resize", updateViewport);
-        window.visualViewport.addEventListener("scroll", updateViewport);
-        updateViewport();
-      }
-
-      // 11. 桌面端自动对焦
+      // 10. 桌面端自动对焦
       window.addEventListener("DOMContentLoaded", () => {
         if (!("ontouchstart" in window) && passwordInput) {
           setTimeout(() => passwordInput.focus(), 250);
