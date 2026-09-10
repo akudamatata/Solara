@@ -59,47 +59,132 @@ html.desktop-view .playlist-action-btn:disabled {
     cursor: not-allowed;
 }
 
-/* ===== 桌面端：导入已选按钮 - 独立定位，不影响搜索栏布局 ===== */
+/* ===== 桌面端：导入已选按钮 - 自然并排在搜索按钮右侧，高度对齐，统一Apple风格 ===== */
 
-/* 默认隐藏，仅在搜索模式下显示 */
+/* 默认未搜索时隐藏 */
 html.desktop-view .search-results-toolbar {
     display: none;
 }
 
-/* search-controls-wrapper 已有 position:relative，toolbar absolute 定位以它为锚 */
+/* 搜索模式下优雅融入搜索栏单行流中 */
 html.desktop-view .container.search-mode .search-results-toolbar {
-    display: block;
-    position: absolute;      /* 脱离 flex 流，不占任何宽度 */
-    top: 100%;               /* 紧贴 wrapper 底部 */
-    margin-top: 46px;        /* 下移到原本的相对位置 (15px + 15px + 16px) */
-    right: 0;
-    z-index: 10;
-    pointer-events: auto;
-    /* 重置移动端样式 */
-    width: auto;
-    max-width: none;
-    align-self: auto;
-    flex-shrink: unset;
+    display: inline-flex;
+    align-items: center;
+    position: static;
+    margin: 0;
     padding: 0;
+    z-index: 2;
+    flex-shrink: 0;
 }
 
 html.desktop-view .search-results-toolbar .import-dropdown {
-    width: auto;             /* 重置移动端 width:100% */
+    position: relative;
+    display: inline-flex;
+    align-items: stretch;
+    height: 38px;
+    width: auto;
 }
 
 html.desktop-view .search-results-toolbar .import-selected-btn {
-    width: auto;             /* 重置移动端 width:100% */
-    justify-content: unset;  /* 重置移动端居中 */
-    border-radius: 999px;    /* 桌面端圆角胶囊 */
-    padding: 8px 16px;
-    font-size: 14px;
+    height: 38px;
+    box-sizing: border-box;
+    padding: 0 16px;
+    border-radius: 10px;
+    font-size: 13.5px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.2s var(--spring-smooth);
+    border: 1px solid var(--apple-glass-border);
+    background: var(--component-bg);
+    backdrop-filter: var(--apple-glass-blur);
+    -webkit-backdrop-filter: var(--apple-glass-blur);
+    color: var(--text-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    user-select: none;
 }
 
-/* 搜索结果列表留出顶部空间，避免第一条结果被按钮遮挡 */
+html.desktop-view .search-results-toolbar .import-selected-btn:hover:not(:disabled) {
+    background: var(--apple-glass-hover);
+    border-color: var(--apple-glass-border-top);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+}
+
+html.desktop-view .search-results-toolbar .import-selected-btn:active:not(:disabled) {
+    transform: scale(0.96);
+}
+
+/* 激活态（已选择歌曲）高亮主题色 */
+html.desktop-view .search-results-toolbar .import-selected-btn:not(:disabled) {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+html.desktop-view .dark-mode .search-results-toolbar .import-selected-btn:not(:disabled) {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    box-shadow: 0 0 12px var(--palette-glow);
+}
+
+html.desktop-view .search-results-toolbar .import-selected-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* 搜索结果列表自然顶格排布，彻底移除突兀的52px空洞，彻底消除列表与按钮遮挡冲突 */
 html.desktop-view .search-results-list {
-    padding-top: 52px;
+    padding-top: 6px;
 }
 
 html.desktop-view .search-results {
     gap: 0;
 }
+
+/* 默认未搜索时隐藏关闭按钮 */
+html.desktop-view .close-search-btn {
+    display: none;
+}
+
+/* 搜索模式下优雅融入搜索栏单行流中，Apple 拟态材质 */
+html.desktop-view .container.search-mode .close-search-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    box-sizing: border-box;
+    border-radius: 10px;
+    border: 1px solid var(--apple-glass-border);
+    background: var(--component-bg);
+    backdrop-filter: var(--apple-glass-blur);
+    -webkit-backdrop-filter: var(--apple-glass-blur);
+    color: var(--text-secondary-color);
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    transition: all 0.2s var(--spring-smooth);
+    flex-shrink: 0;
+}
+
+html.desktop-view .container.search-mode .close-search-btn:hover {
+    background: var(--item-hover-bg);
+    border-color: var(--apple-glass-border-top);
+    color: var(--text-color);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+}
+
+html.desktop-view .container.search-mode .close-search-btn:active {
+    transform: scale(0.92);
+}
+
+html.desktop-view .container.search-mode .close-search-btn .apple-svg-icon {
+    width: 16px;
+    height: 16px;
+}
+

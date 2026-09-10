@@ -1,0 +1,272 @@
+/* --- Apple 风格设置模态框 --- */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.38);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: -1;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.3s var(--spring-smooth), visibility 0.3s, z-index 0s 0.3s;
+}
+
+.modal-overlay.show {
+    z-index: 100000;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition: opacity 0.3s var(--spring-smooth), visibility 0.3s, z-index 0s 0s;
+}
+
+.modal-content.settings-content {
+    background: rgba(255, 255, 255, 0.86);
+    backdrop-filter: blur(36px) saturate(190%);
+    -webkit-backdrop-filter: blur(36px) saturate(190%);
+    border: 1px solid var(--apple-glass-border);
+    border-top: 1px solid var(--apple-glass-border-top);
+    border-radius: 22px;
+    width: min(480px, 92%);
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 24px 64px -12px rgba(0, 0, 0, 0.22), 0 0 1px 1px rgba(255, 255, 255, 0.4) inset;
+    transform: scale(0.95) translateY(12px);
+    transition: transform 0.35s var(--spring-snappy), opacity 0.3s ease;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.dark-mode .modal-content.settings-content {
+    background: rgba(30, 34, 42, 0.88);
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 32px 72px -16px rgba(0, 0, 0, 0.7), 0 0 1px 1px rgba(255, 255, 255, 0.08) inset;
+}
+
+.modal-overlay.show .modal-content.settings-content {
+    transform: scale(1) translateY(0);
+}
+
+.modal-header {
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--apple-glass-border);
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-color);
+    letter-spacing: -0.02em;
+    user-select: none;
+}
+
+.close-modal-btn {
+    background: rgba(0, 0, 0, 0.05);
+    border: none;
+    color: var(--text-secondary-color);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    padding: 0;
+    transition: all 0.2s var(--spring-smooth);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dark-mode .close-modal-btn {
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(235, 235, 245, 0.8);
+}
+
+.close-modal-btn:hover {
+    background: rgba(0, 0, 0, 0.1);
+    color: var(--text-color);
+    transform: scale(1.06);
+}
+
+.dark-mode .close-modal-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+}
+
+.close-modal-btn:active {
+    transform: scale(0.92);
+}
+
+.close-modal-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.modal-body {
+    padding: 20px 24px;
+    overflow-y: auto;
+    flex: 1;
+    scrollbar-width: none;
+}
+
+.modal-body::-webkit-scrollbar {
+    display: none;
+}
+
+.settings-section h3 {
+    margin: 0 0 6px 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-color);
+    letter-spacing: -0.01em;
+}
+
+.settings-hint {
+    font-size: 13px;
+    color: var(--text-secondary-color);
+    margin-bottom: 16px;
+    line-height: 1.45;
+}
+
+.genre-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+    gap: 10px;
+}
+
+.genre-item {
+    position: relative;
+}
+
+.genre-item input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    height: 0;
+    width: 0;
+}
+
+.genre-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 9px 12px;
+    background: rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--apple-glass-border);
+    border-radius: 10px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: all 0.2s var(--spring-smooth);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    user-select: none;
+}
+
+.dark-mode .genre-label {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #f5f5f7;
+}
+
+.genre-label:hover {
+    background: rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+}
+
+.dark-mode .genre-label:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.genre-item input[type="checkbox"]:checked + .genre-label {
+    background: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: #ffffff !important;
+    font-weight: 600;
+    box-shadow: 0 4px 14px -2px var(--palette-glow);
+    transform: translateY(-1px);
+}
+
+.genre-label:active {
+    transform: scale(0.96);
+}
+
+.modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--apple-glass-border);
+    display: flex;
+    justify-content: flex-end;
+}
+
+.save-settings-btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 11px;
+    font-weight: 600;
+    font-size: 13.5px;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: all 0.22s var(--spring-smooth);
+    box-shadow: 0 4px 14px -2px var(--palette-glow);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.save-settings-btn:hover {
+    background: var(--primary-color-dark);
+    box-shadow: 0 8px 20px -2px var(--palette-glow);
+    transform: translateY(-1px);
+}
+
+.save-settings-btn:active {
+    transform: scale(0.96);
+}
+
+/* 适配移动端 */
+@media (max-width: 820px) {
+    body.layout-compact .container {
+        width: 100%;
+        height: auto;
+        min-height: 100vh;
+        max-height: none;
+        border-radius: 0;
+        padding: 12px;
+        box-shadow: none;
+    }
+    .modal-content.settings-content {
+        width: 100%;
+        height: 100%;
+        max-height: 100vh;
+        border-radius: 0;
+    }
+    .modal-header {
+        padding: 20px;
+    }
+    .modal-body {
+        padding: 20px;
+    }
+    .modal-footer {
+        padding: 15px 20px;
+        padding-bottom: max(15px, env(safe-area-inset-bottom));
+    }
+    .genre-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}

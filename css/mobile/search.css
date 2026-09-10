@@ -1,0 +1,1096 @@
+/* ==========================================================================
+   Solara Mobile UI - 5. Spotlight 沉浸聚焦搜索面板与搜索结果
+   设计规范：Apple Design (WWDC Fluid Interfaces) & UI-UX Pro Max
+   ========================================================================== */
+
+/* ─── 1. iOS 沉浸聚焦搜索全屏舞台 (Spotlight Stage) ─────────────────────── */
+
+body.mobile-view .search-area {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: var(--mobile-vh, 100dvh);
+    z-index: 500 !important; /* 超高层级，彻底阻断底层一切元素 */
+    display: flex !important;
+    flex-direction: column !important;
+    /* 顶部对齐，告别居中下坠 */
+    justify-content: flex-start !important;
+    align-items: stretch !important;
+    box-sizing: border-box;
+    padding-top: calc(env(safe-area-inset-top, 0px) + 12px);
+    padding-left: clamp(14px, 4.2vw, 20px);
+    padding-right: clamp(14px, 4.2vw, 20px);
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+    gap: 12px;
+    margin: 0 !important;
+    border-radius: 0 0 clamp(24px, 6vw, 32px) clamp(24px, 6vw, 32px) !important;
+    border: none !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+
+    /* 浅色模式：100% 不透明纯净浅灰背景与沉浸底边缘柔光投影 */
+    background: #f2f2f7 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: 0 18px 48px -10px rgba(0, 0, 0, 0.22) !important;
+
+    /* 流体阻尼展开与退出 */
+    transform: translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.34s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease;
+    overflow: hidden;
+}
+
+/* 深色模式：100% 不透明 OLED 极黑背景，彻底杜绝底层幽灵残影透出 */
+body.mobile-view.dark-mode .search-area {
+    background: #000000 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 20px 52px -10px rgba(0, 0, 0, 0.85) !important;
+}
+
+/* 打开状态 */
+body.mobile-view.mobile-search-open .search-area {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* ─── 2. 搜索顶栏 (标题 + 触控关闭按钮) ────────────────────────────────── */
+
+body.mobile-view .search-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 4px 2px 0;
+    flex-shrink: 0;
+    box-sizing: border-box;
+}
+
+body.mobile-view .search-title-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+body.mobile-view .search-title {
+    font-size: 1.55rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    color: #000000 !important;
+    margin: 0;
+    line-height: 1.2;
+}
+
+body.mobile-view.dark-mode .search-title {
+    color: #ffffff !important; /* 纯白高亮，极其清晰 */
+}
+
+body.mobile-view .search-subtitle {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: #636366 !important;
+    letter-spacing: -0.01em;
+}
+
+body.mobile-view.dark-mode .search-subtitle {
+    color: #aeaeb2 !important; /* 清晰高反差灰 */
+}
+
+body.mobile-view .mobile-close-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: none;
+    background: #e5e5ea !important;
+    color: #1d1d1f !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), background 0.15s ease;
+    box-shadow: none !important;
+    flex-shrink: 0;
+}
+
+body.mobile-view.dark-mode .mobile-close-btn {
+    background: #2c2c2e !important;
+    color: #ffffff !important;
+}
+
+body.mobile-view .mobile-close-btn:active {
+    transform: scale(0.9);
+}
+
+body.mobile-view .mobile-close-btn svg {
+    width: 17px;
+    height: 17px;
+}
+
+/* ─── 3. 彻底告别“大框套小框”：iOS 纯粹单一胶囊搜索条 ───────────────── */
+
+body.mobile-view .search-controls-wrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex-shrink: 0;
+    position: relative;
+}
+
+/* 外层唯一搜索输入胶囊 */
+body.mobile-view .search-bar-unified {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 44px;
+    /* 浅色模式：iOS 标准浅灰输入胶囊 */
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    border-radius: 12px !important;
+    padding: 0 8px 0 12px !important;
+    box-sizing: border-box;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    gap: 8px;
+}
+
+body.mobile-view.dark-mode .search-bar-unified {
+    /* 深色模式：iOS 标准卡片深灰胶囊，边界清晰高对比 */
+    background: #1c1c1e !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    box-shadow: none !important;
+}
+
+/* 获得焦点时的柔和微高光，不放大额外边框 */
+body.mobile-view .search-bar-unified:focus-within {
+    border-color: var(--primary-color, #10a37f) !important;
+    box-shadow: 0 0 0 3px rgba(16, 163, 127, 0.18) !important;
+}
+
+body.mobile-view.dark-mode .search-bar-unified:focus-within {
+    border-color: var(--primary-color, #10a37f) !important;
+    background: #242426 !important;
+    box-shadow: 0 0 0 3px rgba(16, 163, 127, 0.25) !important;
+}
+
+/* 彻底剥除内层 input-wrapper 的一切边框、背景、阴影，杜绝大框套小框！ */
+body.mobile-view .search-input-wrapper,
+body.mobile-view.dark-mode .search-input-wrapper,
+body.mobile-view .search-input-wrapper:focus-within,
+body.mobile-view.dark-mode .search-input-wrapper:focus-within {
+    flex: 1 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    min-width: 0 !important;
+    height: 100% !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+
+body.mobile-view .search-icon {
+    width: 18px;
+    height: 18px;
+    color: #8e8e93 !important;
+    flex-shrink: 0;
+    transition: color 0.2s ease;
+}
+
+body.mobile-view .search-bar-unified:focus-within .search-icon {
+    color: var(--primary-color, #10a37f) !important;
+}
+
+/* 输入框文字：深色模式纯白、浅色模式纯黑，绝对清晰！ */
+body.mobile-view .search-input {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    color: #000000 !important;
+    font-size: 16px !important; /* 16px 防 iOS Safari 缩放 */
+    font-family: inherit;
+    font-weight: 500;
+    padding: 0 !important;
+}
+
+body.mobile-view.dark-mode .search-input {
+    color: #ffffff !important; /* 强制纯白，绝无发暗！ */
+}
+
+body.mobile-view .search-input::placeholder {
+    color: #8e8e93 !important;
+    font-weight: 400;
+}
+
+body.mobile-view.dark-mode .search-input::placeholder {
+    color: #636366 !important;
+}
+
+/* 一键清空按钮 (Apple Clear Button) */
+body.mobile-view .search-clear-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: #8e8e93 !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
+    transition: transform 0.15s ease, color 0.15s ease;
+}
+
+body.mobile-view .search-clear-btn:active {
+    transform: scale(0.9);
+    color: #1d1d1f !important;
+}
+
+body.mobile-view.dark-mode .search-clear-btn:active {
+    color: #ffffff !important;
+}
+
+body.mobile-view .search-clear-btn svg {
+    width: 17px;
+    height: 17px;
+}
+
+/* 音源选择器：不再画第二个框，通过右侧极细分割线整合为一体 */
+body.mobile-view .source-select-wrapper {
+    position: relative;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+}
+
+body.mobile-view .source-select-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 28px;
+    padding: 0 4px 0 10px;
+    border-radius: 6px;
+    border: none !important;
+    border-left: 1px solid rgba(0, 0, 0, 0.1) !important;
+    background: transparent !important;
+    color: #1d1d1f !important;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s ease;
+}
+
+body.mobile-view.dark-mode .source-select-btn {
+    border-left: 1px solid rgba(255, 255, 255, 0.15) !important;
+    color: #ffffff !important; /* 强制纯白 */
+}
+
+body.mobile-view .source-select-btn:active {
+    background: rgba(0, 0, 0, 0.05) !important;
+}
+
+body.mobile-view.dark-mode .source-select-btn:active {
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+body.mobile-view .source-select-btn .caret-icon {
+    width: 12px;
+    height: 12px;
+    color: #8e8e93 !important;
+    transition: transform 0.2s ease;
+}
+
+body.mobile-view .source-select-btn[aria-expanded="true"] .caret-icon {
+    transform: rotate(180deg);
+}
+
+/* 来源下拉菜单浮层 */
+body.mobile-view .source-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 140px;
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    border-radius: 14px !important;
+    padding: 6px;
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.15) !important;
+    z-index: 550;
+    display: none;
+    animation: mobileMenuFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body.mobile-view.dark-mode .source-menu {
+    background: #1c1c1e !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6) !important;
+}
+
+body.mobile-view .source-menu.show {
+    display: block;
+}
+
+@keyframes mobileMenuFadeIn {
+    from { opacity: 0; transform: translateY(-6px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+body.mobile-view .source-menu-item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 9px 12px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: #1d1d1f !important;
+    font-size: 0.88rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+    text-align: left;
+}
+
+body.mobile-view.dark-mode .source-menu-item {
+    color: #ffffff !important;
+}
+
+body.mobile-view .source-menu-item:active,
+body.mobile-view .source-menu-item.active {
+    background: var(--primary-color, #10a37f) !important;
+    color: #ffffff !important;
+}
+
+/* 彻底隐藏桌面端遗留搜索按钮与关闭按钮 */
+body.mobile-view #closeSearchBtn,
+body.mobile-view #searchBtn {
+    display: none !important;
+}
+
+/* ─── 4. 搜索结果滚动列表 (左右对称 Apple Music 卡片) ───────────────────── */
+
+/* ─── 4. 搜索结果滚动列表 (左右对称 Apple Music 卡片) ───────────────────── */
+
+body.mobile-view .search-results,
+body.mobile-view.search-mode .search-results,
+body.mobile-view .container.search-mode .search-results {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    /* 彻底解除桌面端 max-height: 0 导致的塌陷灰色遮挡 */
+    max-height: none !important;
+    min-height: 0;
+    /* 移除旧的滚动条外扩补偿，保证左右留白完全对称居中 */
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    margin-top: 6px !important;
+    margin-bottom: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    padding-top: 4px !important;
+    padding-bottom: 24px !important;
+    box-sizing: border-box !important;
+    border-top: none !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+
+body.mobile-view.dark-mode .search-results {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+
+/* ─── 隐藏滚动条但保留平滑触摸与物理动量滚动 ────────────────────────────── */
+body.mobile-view .search-results::-webkit-scrollbar,
+body.mobile-view .search-results-list::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
+body.mobile-view .search-results-list {
+    display: flex;
+    flex-direction: column;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    padding-top: 2px;
+    padding-bottom: 20px;
+    gap: 8px;
+    box-sizing: border-box !important;
+}
+
+body.mobile-view .search-results-list:empty {
+    padding-bottom: 0 !important;
+}
+
+/* 搜索界面呈空白时（未搜索或已清空）展示优雅引导框 */
+body.mobile-view .search-results-list:empty::before {
+    content: "输入歌曲、歌手或专辑\A跨平台畅搜高品质音乐";
+    white-space: pre-line;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    margin: 36px auto 16px;
+    padding: 18px 24px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    line-height: 1.65;
+    letter-spacing: -0.01em;
+    color: #8e8e93 !important;
+    max-width: 250px;
+    border-radius: 16px;
+    background: rgba(0, 0, 0, 0.03) !important;
+    border: 1px dashed rgba(0, 0, 0, 0.12) !important;
+    box-sizing: border-box;
+}
+
+body.mobile-view.dark-mode .search-results-list:empty::before {
+    background: #1c1c1e !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    color: #aeaeb2 !important;
+}
+
+/* 单首歌曲卡片：极高对比度，字体与背景分明 */
+body.mobile-view .search-result-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 14px;
+    border-radius: 14px;
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03) !important;
+    gap: 12px;
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1), background 0.15s ease;
+}
+
+body.mobile-view.dark-mode .search-result-item {
+    background: #1c1c1e !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: none !important;
+}
+
+body.mobile-view .search-result-item:active {
+    transform: scale(0.985);
+    background: #f2f2f7 !important;
+}
+
+body.mobile-view.dark-mode .search-result-item:active {
+    background: #2c2c2e !important;
+}
+
+/* 选中高亮状态 */
+body.mobile-view .search-result-item.selected {
+    border-color: var(--primary-color, #10a37f) !important;
+    background: rgba(16, 163, 127, 0.09) !important;
+    box-shadow: 0 2px 10px var(--palette-glow, rgba(16, 163, 127, 0.2)) !important;
+}
+
+body.mobile-view.dark-mode .search-result-item.selected {
+    background: rgba(16, 163, 127, 0.18) !important;
+}
+
+/* 左侧选择圆圈指示器 */
+body.mobile-view .search-result-select {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 1.5px solid #8e8e93 !important;
+    background: transparent !important;
+    color: transparent !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    cursor: pointer;
+    padding: 0;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body.mobile-view .search-result-select svg,
+body.mobile-view .search-result-select i {
+    font-size: 11px;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body.mobile-view .search-result-item.selected .search-result-select {
+    background: var(--primary-color, #10a37f) !important;
+    border-color: var(--primary-color, #10a37f) !important;
+    color: #ffffff !important;
+}
+
+body.mobile-view .search-result-item.selected .search-result-select svg,
+body.mobile-view .search-result-item.selected .search-result-select i {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* 歌曲元信息区域 */
+body.mobile-view .search-result-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+body.mobile-view .search-result-title {
+    font-size: 0.96rem;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    color: #000000 !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+}
+
+body.mobile-view.dark-mode .search-result-title {
+    color: #ffffff !important; /* 深色模式纯白无瑕 */
+}
+
+body.mobile-view .search-result-artist {
+    font-size: 0.81rem;
+    font-weight: 400;
+    color: #636366 !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.25;
+}
+
+body.mobile-view.dark-mode .search-result-artist {
+    color: #aeaeb2 !important; /* 纯正高反差浅灰 */
+}
+
+/* 右侧操作按钮组 (收藏 / 播放 / 下载) */
+body.mobile-view .search-result-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+body.mobile-view .search-result-actions .action-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: #f2f2f7 !important;
+    color: #1d1d1f !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    touch-action: manipulation;
+    padding: 0;
+    transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1), background 0.15s ease;
+}
+
+body.mobile-view.dark-mode .search-result-actions .action-btn {
+    background: #2c2c2e !important;
+    color: #ffffff !important;
+}
+
+body.mobile-view .search-result-actions .action-btn:active {
+    transform: scale(0.86);
+}
+
+body.mobile-view .search-result-actions .action-btn.play {
+    color: var(--primary-color, #10a37f) !important;
+}
+
+body.mobile-view .search-result-actions .action-btn.favorite.active {
+    color: #ff3b30 !important;
+}
+
+/* 更多加载按钮 */
+body.mobile-view .load-more-btn {
+    width: 100%;
+    height: 44px;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    background: #ffffff !important;
+    color: #1d1d1f !important;
+    font-size: 0.9rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    margin-top: 4px;
+    margin-bottom: 8px;
+    transition: transform 0.15s ease;
+}
+
+body.mobile-view.dark-mode .load-more-btn {
+    background: #1c1c1e !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+}
+
+body.mobile-view .load-more-btn:active {
+    transform: scale(0.98);
+}
+
+/* ─── 5. 顶部流体操作胶囊 (Top Action Dock — 遵照原版设计) ───────────── */
+
+body.mobile-view .search-results-toolbar {
+    position: relative !important;
+    left: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    z-index: 40;
+    pointer-events: none;
+    opacity: 0;
+    display: none !important;
+    box-sizing: border-box;
+}
+
+/* 选中项大于 0 时，在搜索框正下方顺滑展开 */
+body.mobile-view .search-results-toolbar.has-selected {
+    display: flex !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    margin-top: 8px !important;
+    animation: mobileToolbarExpand 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes mobileToolbarExpand {
+    from {
+        opacity: 0;
+        transform: translateY(-8px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+body.mobile-view .import-dropdown {
+    position: relative;
+    width: 100%;
+}
+
+/* 仿原版精致橙红/强调色渐变胶囊按钮 */
+body.mobile-view .import-selected-btn {
+    width: 100%;
+    height: 44px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #fa5252 0%, #fd7e14 100%) !important;
+    color: #ffffff !important;
+    font-weight: 600;
+    font-size: 0.95rem;
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: none !important;
+    box-shadow: 0 6px 20px rgba(253, 126, 20, 0.35), 0 2px 6px rgba(0, 0, 0, 0.08) !important;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
+}
+
+body.mobile-view .import-selected-btn:active {
+    transform: scale(0.98);
+    box-shadow: 0 3px 10px rgba(253, 126, 20, 0.25) !important;
+}
+
+body.mobile-view .import-dropdown-caret {
+    width: 14px;
+    height: 14px;
+    transition: transform 0.22s ease;
+}
+
+body.mobile-view .import-selected-btn[aria-expanded="true"] .import-dropdown-caret {
+    transform: rotate(180deg);
+}
+
+/* 顶部按钮的下拉菜单向下方展开 */
+body.mobile-view .import-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 8px) !important;
+    bottom: auto !important;
+    left: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.96) !important;
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    border-radius: 18px !important;
+    padding: 8px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18) !important;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    animation: mobileMenuFadeDown 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 530;
+}
+
+@keyframes mobileMenuFadeDown {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+body.mobile-view .import-dropdown-menu[hidden],
+body.mobile-view [hidden] {
+    display: none !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+}
+
+body.mobile-view.dark-mode .import-dropdown-menu {
+    background: #1c1c1e !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.6) !important;
+}
+
+body.mobile-view .import-dropdown-item {
+    width: 100%;
+    height: 44px;
+    border-radius: 12px;
+    border: none !important;
+    background: transparent !important;
+    color: #1d1d1f !important;
+    font-size: 0.92rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+body.mobile-view.dark-mode .import-dropdown-item {
+    color: #ffffff !important;
+}
+
+body.mobile-view .import-dropdown-item:active {
+    background: var(--primary-color, #10a37f) !important;
+    color: #ffffff !important;
+}
+
+
+
+/* 单首歌曲卡片 */
+body.mobile-view .search-result-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+    gap: 12px;
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+body.mobile-view.dark-mode .search-result-item {
+    background: rgba(255, 255, 255, 0.055);
+    border-color: rgba(255, 255, 255, 0.07);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+}
+
+body.mobile-view .search-result-item:active {
+    transform: scale(0.982);
+    background: rgba(0, 0, 0, 0.05);
+}
+
+body.mobile-view.dark-mode .search-result-item:active {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* 选中高亮状态 */
+body.mobile-view .search-result-item.selected {
+    border-color: var(--primary-color, #10a37f) !important;
+    background: rgba(16, 163, 127, 0.09) !important;
+    box-shadow: 0 4px 16px var(--palette-glow, rgba(16, 163, 127, 0.2));
+}
+
+body.mobile-view.dark-mode .search-result-item.selected {
+    background: rgba(16, 163, 127, 0.16) !important;
+}
+
+/* 左侧选择圆圈指示器 */
+body.mobile-view .search-result-select {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 1.5px solid var(--text-tertiary-color, #aeaeb2);
+    background: transparent;
+    color: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    cursor: pointer;
+    padding: 0;
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body.mobile-view .search-result-select svg,
+body.mobile-view .search-result-select i {
+    font-size: 11px;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body.mobile-view .search-result-item.selected .search-result-select {
+    background: var(--primary-color, #10a37f);
+    border-color: var(--primary-color, #10a37f);
+    color: #ffffff;
+}
+
+body.mobile-view .search-result-item.selected .search-result-select svg,
+body.mobile-view .search-result-item.selected .search-result-select i {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* 歌曲元信息区域 */
+body.mobile-view .search-result-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+body.mobile-view .search-result-title {
+    font-size: 0.96rem;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    color: var(--text-color, #1d1d1f);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+}
+
+body.mobile-view.dark-mode .search-result-title {
+    color: #ffffff;
+}
+
+body.mobile-view .search-result-artist {
+    font-size: 0.81rem;
+    font-weight: 400;
+    color: var(--text-secondary-color, #6e6e73);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.25;
+}
+
+body.mobile-view.dark-mode .search-result-artist {
+    color: #a1a1a6;
+}
+
+/* 右侧操作按钮组 (收藏 / 播放 / 下载) */
+body.mobile-view .search-result-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+body.mobile-view .search-result-actions .action-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0, 0, 0, 0.035);
+    color: var(--text-secondary-color, #6e6e73);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    touch-action: manipulation;
+    padding: 0;
+    transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1), background 0.15s ease, color 0.15s ease;
+}
+
+body.mobile-view.dark-mode .search-result-actions .action-btn {
+    background: rgba(255, 255, 255, 0.08);
+    color: #d1d1d6;
+}
+
+body.mobile-view .search-result-actions .action-btn:active {
+    transform: scale(0.85);
+    background: rgba(0, 0, 0, 0.08);
+}
+
+body.mobile-view.dark-mode .search-result-actions .action-btn:active {
+    background: rgba(255, 255, 255, 0.16);
+}
+
+body.mobile-view .search-result-actions .action-btn.play {
+    color: var(--primary-color, #10a37f);
+}
+
+body.mobile-view .search-result-actions .action-btn.favorite.active {
+    color: #ff3b30;
+}
+
+/* 更多加载按钮 */
+body.mobile-view .load-more-btn {
+    width: 100%;
+    height: 44px;
+    border-radius: 14px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: rgba(0, 0, 0, 0.035);
+    color: var(--text-secondary-color, #6e6e73);
+    font-size: 0.9rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    margin-top: 4px;
+    /* 底部留直确保可被滚动到导入按鈕上方 */
+    margin-bottom: 8px;
+    transition: transform 0.15s ease, background 0.15s ease;
+}
+
+body.mobile-view.dark-mode .load-more-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #f5f5f7;
+}
+
+body.mobile-view .load-more-btn:active {
+    transform: scale(0.98);
+}
+
+/* ─── 5. 底部浮动流体操作胶囊 (Floating Action Dock) ─────────────────────── */
+
+/* ─── 导入已选下拉菜单选项交互 ────────────────────────── */
+body.mobile-view .import-dropdown-item {
+    width: 100%;
+    height: 44px;
+    border-radius: 12px;
+    border: none;
+    background: transparent;
+    color: var(--text-color, #1d1d1f);
+    font-size: 0.92rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+body.mobile-view.dark-mode .import-dropdown-item {
+    color: #f5f5f7;
+}
+
+body.mobile-view .import-dropdown-item:active {
+    background: var(--primary-color, #10a37f);
+    color: #ffffff;
+}
+
+
+/* ─── 搜索面板底部原生 Apple 药丸抓手 (Bottom Dismiss Handle) ───────────── */
+
+.mobile-search-handle {
+    display: none;
+}
+
+body.mobile-view.mobile-search-open .search-results {
+    display: flex !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
+body.mobile-view .mobile-search-handle {
+    flex-shrink: 0;
+    width: 100%;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    cursor: pointer;
+    margin-top: auto; /* 关键：强力推至搜索全屏面板最底端安全区 */
+    margin-bottom: 0;
+    padding: 4px 0 env(safe-area-inset-bottom, 6px);
+    touch-action: none;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+    z-index: 10;
+}
+
+body.mobile-view .mobile-search-handle::after {
+    content: "";
+    display: block;
+    width: 36px;
+    height: 4.5px;
+    border-radius: 999px;
+    background: rgba(120, 120, 128, 0.35);
+    transition: width 0.22s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease, opacity 0.2s ease;
+}
+
+body.mobile-view.dark-mode .mobile-search-handle::after {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+body.mobile-view .mobile-search-handle:hover::after,
+body.mobile-view .mobile-search-handle:active::after {
+    width: 44px;
+    background: rgba(120, 120, 128, 0.6);
+}
+
+body.mobile-view.dark-mode .mobile-search-handle:hover::after,
+body.mobile-view.dark-mode .mobile-search-handle:active::after {
+    background: rgba(255, 255, 255, 0.6);
+}

@@ -1,0 +1,534 @@
+/* ==========================================================================
+   Solara Mobile UI - 2. 主舞台核心内容区、封面卡片、动感歌词与信息
+   ========================================================================== */
+
+/* ─── 1. 主舞台核心容器 ─────────────────────────────────────────────────── */
+
+body.mobile-view .main-content,
+body.mobile-view .container.search-mode .main-content {
+    display: flex !important;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    z-index: 2;
+    position: relative;
+    justify-content: center;
+    align-items: center;
+    gap: clamp(12px, 3.5vw, 20px);
+    padding: 4px 0 10px;
+}
+
+/* 抽屉展开时将舞台主容器层叠上下文提升至 200，确保 Bottom Sheet 居于所有控制栏之上 */
+body.mobile-view.mobile-panel-open .main-content {
+    z-index: 200;
+}
+
+body.mobile-view .cover-area {
+    width: 100%;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(14px, 4vw, 22px);
+    overflow: visible;
+    position: relative;
+}
+
+/* 包装层重置：彻底消除老旧黑胶唱片，蜕变为纯净现代 Squircle 容器 */
+body.mobile-view .mobile-turntable {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 100%;
+    margin: 0 auto;
+}
+
+body.mobile-view .mobile-turntable__platter {
+    width: min(72vw, 300px);
+    aspect-ratio: 1 / 1;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
+    animation: none;
+}
+
+body.mobile-view .mobile-turntable__platter::before {
+    display: none;
+}
+
+/* ─── 2. Apple Music Squircle 沉浸大封面 ────────────────────────────────── */
+
+body.mobile-view .album-cover {
+    position: relative;
+    width: min(72vw, 300px);
+    height: min(72vw, 300px);
+    aspect-ratio: 1 / 1;
+    transform: none;
+    top: auto;
+    left: auto;
+    border-radius: clamp(22px, 6vw, 30px);
+    overflow: hidden;
+    box-sizing: border-box;
+    border: 1px solid var(--apple-glass-border);
+    border-top: 1px solid var(--apple-glass-border-top);
+    background: var(--component-bg);
+    backdrop-filter: var(--apple-glass-blur);
+    -webkit-backdrop-filter: var(--apple-glass-blur);
+    box-shadow: 
+        0 20px 48px -10px rgba(0, 0, 0, 0.22),
+        0 4px 16px rgba(0, 0, 0, 0.08);
+    transition: transform 0.4s var(--spring-snappy), box-shadow 0.5s ease;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+body.mobile-view.dark-mode .album-cover {
+    box-shadow: 
+        0 24px 54px -10px rgba(0, 0, 0, 0.65),
+        0 6px 18px rgba(0, 0, 0, 0.35);
+}
+
+/* 播放态：精致优雅的微浮与调色板外发光 */
+body.mobile-view.is-playing .album-cover {
+    animation: cover-drift 7s ease-in-out infinite alternate;
+    box-shadow: 
+        0 0 32px -4px var(--palette-glow),
+        0 22px 52px -8px rgba(0, 0, 0, 0.28);
+}
+
+body.mobile-view.dark-mode.is-playing .album-cover {
+    box-shadow: 
+        0 0 36px -4px var(--palette-glow),
+        0 26px 60px -8px rgba(0, 0, 0, 0.75);
+}
+
+body.mobile-view .album-cover:active {
+    transform: scale(0.97);
+}
+
+/* 封面右下角轻触查看歌词提示胶囊 */
+body.mobile-view .album-cover::after {
+    content: "歌词";
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #ffffff;
+    background: rgba(0, 0, 0, 0.48);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 3px 9px;
+    border-radius: 999px;
+    letter-spacing: 0.04em;
+    pointer-events: none;
+    opacity: 0.85;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+body.mobile-view .album-cover:active::after {
+    transform: scale(0.92);
+}
+
+body.mobile-view .album-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: clamp(21px, 6vw, 29px);
+    display: block;
+}
+
+body.mobile-view .album-cover .placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    color: var(--text-tertiary-color);
+}
+
+body.mobile-view .album-cover .placeholder .apple-svg-icon {
+    width: 48px;
+    height: 48px;
+    opacity: 0.65;
+}
+
+/* ─── 3. 沉浸式全景极光歌词舞台 (Apple Music Immersive Stage) ──────────── */
+
+body.mobile-view.mobile-inline-lyrics-open .main-content {
+    gap: 0;
+    padding: 0 0 6px;
+    justify-content: stretch;
+}
+
+body.mobile-view.mobile-inline-lyrics-open .cover-area {
+    flex: 1 1 0%;
+    min-height: 0;
+    height: 100%;
+    width: 100%;
+    gap: 4px;
+}
+
+body.mobile-view.mobile-inline-lyrics-open .mobile-turntable {
+    display: none;
+}
+
+body.mobile-view.mobile-inline-lyrics-open .current-song-info {
+    padding: 4px 16px 0;
+    opacity: 0.92;
+    transform: scale(0.97);
+    transition: all 0.35s ease;
+    flex-shrink: 0;
+}
+
+body.mobile-view .mobile-inline-lyrics {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    max-width: 440px;
+    flex: 1 1 0%;
+    min-height: 0;
+    height: 100%;
+    border-radius: 0;
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: none;
+    box-shadow: none;
+    padding: 2px 12px 6px;
+    box-sizing: border-box;
+    gap: 6px;
+    overflow: hidden;
+    cursor: default;
+    touch-action: pan-y;
+    animation: lyrics-immersive-enter 0.45s var(--spring-snappy) both;
+}
+
+@keyframes lyrics-immersive-enter {
+    from {
+        opacity: 0;
+        transform: translateY(16px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+body.mobile-view.mobile-inline-lyrics-open .mobile-inline-lyrics {
+    display: flex;
+}
+
+body.mobile-view .mobile-inline-lyrics__header {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 0 10px;
+    flex-shrink: 0;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+}
+
+body.mobile-view .mobile-inline-lyrics__handle {
+    width: 38px;
+    height: 4.5px;
+    border-radius: 999px;
+    background: var(--apple-glass-border);
+    opacity: 0.65;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+body.mobile-view.dark-mode .mobile-inline-lyrics__handle {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+body.mobile-view .mobile-inline-lyrics__header:active .mobile-inline-lyrics__handle {
+    transform: scaleX(1.15);
+    opacity: 0.95;
+}
+
+body.mobile-view .mobile-inline-lyrics__hint {
+    font-size: 0.74rem;
+    font-weight: 500;
+    color: var(--text-tertiary-color);
+    letter-spacing: 0.02em;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 12px;
+    border-radius: 999px;
+    background: rgba(125, 125, 125, 0.08);
+    border: 1px solid var(--apple-glass-border);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition: all 0.2s ease;
+}
+
+body.mobile-view.dark-mode .mobile-inline-lyrics__hint {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+body.mobile-view .mobile-inline-lyrics__hint:active {
+    transform: scale(0.94);
+    background: rgba(125, 125, 125, 0.16);
+}
+
+body.mobile-view .mobile-inline-lyrics__hint .apple-svg-icon {
+    width: 12px;
+    height: 12px;
+}
+
+body.mobile-view .mobile-inline-lyrics__scroll {
+    width: 100%;
+    flex: 1 1 0%;
+    min-height: 0;
+    height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    /* 苹果级双向晨雾消隐渐变蒙版 */
+    mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 1) 12%, rgba(0, 0, 0, 1) 86%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 1) 12%, rgba(0, 0, 0, 1) 86%, transparent 100%);
+}
+
+body.mobile-view .mobile-inline-lyrics__scroll::-webkit-scrollbar {
+    display: none;
+}
+
+body.mobile-view .mobile-inline-lyrics__content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    padding: clamp(60px, 14vh, 110px) 16px;
+    box-sizing: border-box;
+}
+
+body.mobile-view .mobile-inline-lyrics__content > div {
+    text-align: center;
+    font-size: clamp(1.08rem, 4.4vw, 1.25rem);
+    font-weight: 600;
+    line-height: 1.48;
+    color: var(--text-color);
+    padding: 6px 14px;
+    border-radius: 14px;
+    transition: all 0.35s var(--spring-smooth);
+    word-break: break-word;
+    opacity: 0.30;
+    filter: blur(0.45px);
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+}
+
+body.mobile-view .mobile-inline-lyrics__content > div:hover {
+    opacity: 0.62;
+    filter: none;
+}
+
+body.mobile-view .mobile-inline-lyrics__content > div:active {
+    transform: scale(0.96);
+    opacity: 0.85;
+}
+
+/* 当前高亮焦点行（Apple Music 级自发光与大字重） */
+body.mobile-view .mobile-inline-lyrics__content .current {
+    color: var(--primary-color-dark, #0d9488) !important;
+    font-weight: 800 !important;
+    opacity: 1 !important;
+    filter: none !important;
+    font-size: clamp(1.32rem, 5.6vw, 1.62rem) !important;
+    letter-spacing: -0.02em !important;
+    background: radial-gradient(ellipse at center, rgba(13, 148, 136, 0.12) 0%, rgba(13, 148, 136, 0.02) 70%, transparent 100%) !important;
+    border: none !important;
+    transform: scale(1.05) !important;
+    transform-origin: center center;
+    border-radius: 16px !important;
+    box-shadow: none !important;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    padding: 8px 18px !important;
+}
+
+body.mobile-view.dark-mode .mobile-inline-lyrics__content .current {
+    color: #ffffff !important;
+    background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.02) 65%, transparent 100%) !important;
+    border: none !important;
+    box-shadow: none !important;
+    text-shadow: 
+        0 0 22px var(--palette-glow, rgba(46, 204, 113, 0.5)),
+        0 0 45px var(--palette-glow, rgba(46, 204, 113, 0.25)),
+        0 2px 8px rgba(0, 0, 0, 0.7);
+}
+
+/* ─── 4. 歌曲元信息与音浪 (Song Metadata & Visualizer) ──────────────────── */
+
+body.mobile-view .current-song-info {
+    width: 100%;
+    max-width: 360px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 0 8px;
+    box-sizing: border-box;
+}
+
+body.mobile-view .current-song-title-row {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    position: relative;
+    padding: 0 8px;
+    box-sizing: border-box;
+}
+
+body.mobile-view .current-song-title {
+    font-size: clamp(1.15rem, 5.2vw, 1.38rem);
+    font-weight: 700;
+    color: var(--text-color);
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+    max-width: calc(100% - 40px);
+}
+
+/* 收藏红心按钮紧跟标题右侧并居中协同，遵循 Apple Design 触感交互 */
+body.mobile-view .current-favorite-btn {
+    position: static;
+    transform: none;
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--text-tertiary-color);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    transition: transform 0.25s var(--spring-bounce), color 0.2s ease;
+}
+
+body.mobile-view .current-favorite-btn:active {
+    transform: scale(0.82);
+}
+
+body.mobile-view .current-favorite-btn.is-active {
+    color: #ff375f !important;
+}
+
+body.mobile-view .current-favorite-btn .apple-svg-icon {
+    width: 20px;
+    height: 20px;
+}
+
+body.mobile-view .current-song-meta-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 1px;
+}
+
+body.mobile-view .current-song-artist {
+    font-size: clamp(0.92rem, 3.8vw, 1.02rem);
+    font-weight: 500;
+    color: var(--text-secondary-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.25;
+}
+
+body.mobile-view .audio-visualizer {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 2.8px;
+    height: 14px;
+    padding: 0 1px;
+    vertical-align: middle;
+    flex-shrink: 0;
+    margin-bottom: 2px;
+}
+
+body.mobile-view .audio-visualizer span {
+    width: 3px;
+    min-height: 3px;
+    background: #1d1d1f !important; /* 浅色模式采用纯黑高对比度，确保在任何极光或亮底上绝对清晰 */
+    border-radius: 999px;
+    opacity: 0.88 !important;
+    transition: height 0.15s ease;
+}
+
+body.mobile-view.dark-mode .audio-visualizer span {
+    background: var(--primary-color) !important; /* 深色模式使用主题亮色并辅以霓虹呼吸 */
+    opacity: 1 !important;
+    filter: drop-shadow(0 0 4px var(--palette-glow));
+}
+
+/* 音质药丸胶囊 */
+body.mobile-view .mobile-quality-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: var(--component-bg);
+    border: 1px solid var(--apple-glass-border);
+    border-top: 1px solid var(--apple-glass-border-top);
+    color: var(--text-secondary-color);
+    font-size: 0.76rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    margin-top: 4px;
+    backdrop-filter: var(--apple-glass-blur);
+    -webkit-backdrop-filter: var(--apple-glass-blur);
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: transform 0.15s var(--spring-snappy), color 0.2s ease, border-color 0.2s ease;
+}
+
+body.mobile-view .mobile-quality-chip .apple-svg-icon {
+    width: 10px;
+    height: 10px;
+    opacity: 0.7;
+}
+
+body.mobile-view .mobile-quality-chip:active {
+    transform: scale(0.94);
+}
+
+body.mobile-view .mobile-quality-chip.active {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}

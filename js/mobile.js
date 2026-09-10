@@ -1,5 +1,23 @@
+/**
+ * Solara Mobile UI & Fluid Gestures Engine (总入口编排层)
+ * 依据 Apple Design (WWDC Fluid Interfaces) 准则构建的高性能手势与交互引擎
+ */
+
+import { $, updateMobileOverlayScrim } from "./mobile/core.js";
+import { openMobileSearch, closeMobileSearch, toggleMobileSearch } from "./mobile/search.js";
+import { openMobilePanel, closeMobilePanel, toggleMobilePanel, switchMobilePanelTab, closeAllMobileOverlays } from "./mobile/sheet.js";
+import { toggleMobileLyrics, initMobileLyricsInteractions } from "./mobile/stage.js";
+import { initBottomSheetGestures, initSearchPanelGestures } from "./mobile/gestures.js";
+import { bindMobileToolbar } from "./mobile/toolbar.js";
+
 (function () {
-    if (!window.__SOLARA_IS_MOBILE) {
+    // 检查是否为移动端
+    const ua = navigator.userAgent || "";
+    const isMobileUA = /android|iphone|ipad|ipod|mobile|blackberry|phone|opera mini|windows phone/i.test(ua);
+    const isSmallScreen = typeof window.matchMedia === "function" && window.matchMedia("(max-width: 820px)").matches;
+    const isMobile = window.__SOLARA_IS_MOBILE || isMobileUA || isSmallScreen;
+
+    if (!isMobile) {
         return;
     }
 
@@ -8,202 +26,120 @@
     bridge.queue = Array.isArray(bridge.queue) ? bridge.queue : [];
     window.SolaraMobileBridge = bridge;
 
-    const dom = window.SolaraDom || {};
     let initialized = false;
 
-    function updateMobileToolbarTitleImpl() {
-        if (!dom.mobileToolbarTitle) {
-            return;
-        }
-        dom.mobileToolbarTitle.textContent = "Solara";
-    }
-
-    function updateMobileOverlayScrim() {
-        if (!dom.mobileOverlayScrim || !document.body) {
-            return;
-        }
-        const hasOverlay = document.body.classList.contains("mobile-search-open") ||
-            document.body.classList.contains("mobile-panel-open");
-        dom.mobileOverlayScrim.setAttribute("aria-hidden", hasOverlay ? "false" : "true");
-    }
-
-    function openMobileSearchImpl() {
-        if (!document.body) {
-            return;
-        }
-        document.body.classList.add("mobile-search-open");
-        document.body.classList.remove("mobile-panel-open");
-        if (dom.searchArea) {
-            dom.searchArea.setAttribute("aria-hidden", "false");
-        }
-        updateMobileOverlayScrim();
-        if (dom.searchInput) {
-            window.requestAnimationFrame(() => {
-                try {
-                    dom.searchInput.focus({ preventScroll: true });
-                } catch (error) {
-                    dom.searchInput.focus();
-                }
-            });
-        }
-    }
-
-    function closeMobileSearchImpl() {
-        if (!document.body) {
-            return;
-        }
-        document.body.classList.remove("mobile-search-open");
-        const toggleSearchMode = window.toggleSearchMode;
-        if (typeof toggleSearchMode === "function") {
-            toggleSearchMode(false);
-        } else if (typeof window.hideSearchResults === "function") {
-            window.hideSearchResults();
-        }
-        if (dom.searchArea) {
-            dom.searchArea.setAttribute("aria-hidden", "true");
-        }
-        if (dom.searchInput) {
-            dom.searchInput.blur();
-        }
-        updateMobileOverlayScrim();
-    }
-
-    function toggleMobileSearchImpl() {
-        if (!document.body) {
-            return;
-        }
-        if (document.body.classList.contains("mobile-search-open")) {
-            closeMobileSearchImpl();
-        } else {
-            openMobileSearchImpl();
-        }
-    }
-
-    function normalizePanelView(view) {
-        return view === "lyrics" ? "playlist" : (view || "playlist");
-    }
-
-    function openMobilePanelImpl(view = "playlist") {
-        if (!document.body) {
-            return;
-        }
-        const targetView = normalizePanelView(view);
-        if (typeof window.switchMobileView === "function") {
-            window.switchMobileView(targetView);
-        }
-        closeMobileSearchImpl();
-        document.body.classList.add("mobile-panel-open");
-        document.body.setAttribute("data-mobile-panel-view", targetView);
-        updateMobileOverlayScrim();
-    }
-
-    function closeMobilePanelImpl() {
-        if (!document.body) {
-            return;
-        }
-        document.body.classList.remove("mobile-panel-open");
-        updateMobileOverlayScrim();
-    }
-
-    function toggleMobilePanelImpl(view = "playlist") {
-        if (!document.body) {
-            return;
-        }
-        const isOpen = document.body.classList.contains("mobile-panel-open");
-        const currentView = document.body.getAttribute("data-mobile-panel-view") || "playlist";
-        const targetView = normalizePanelView(view);
-        if (isOpen && (!targetView || currentView === targetView)) {
-            closeMobilePanelImpl();
-        } else {
-            openMobilePanelImpl(targetView || currentView || "playlist");
-        }
-    }
-
-    function closeAllMobileOverlaysImpl() {
-        closeMobileSearchImpl();
-        closeMobilePanelImpl();
-    }
-
-    function initializeMobileUIImpl() {
+    // 移动端初始化总装
+    function initializeMobileUI() {
         if (initialized || !document.body) {
             return;
         }
         initialized = true;
 
         document.body.classList.add("mobile-view");
-        const initialView = "playlist";
-        document.body.setAttribute("data-mobile-panel-view", initialView);
-        if (dom.mobilePanelTitle) {
-            dom.mobilePanelTitle.textContent = "播放列表";
+        document.body.setAttribute("data-mobile-panel-view", "playlist");
+
+        // 1. 搜索按钮绑定
+        const mobileSearchToggle = $("mobileSearchToggle");
+        if (mobileSearchToggle) {
+            mobileSearchToggle.addEventListener("click", toggleMobileSearch);
         }
-        if (dom.lyrics) {
-            dom.lyrics.classList.remove("active");
-        }
-        if (dom.playlist) {
-            dom.playlist.classList.add("active");
+        const mobileSearchClose = $("mobileSearchClose");
+        if (mobileSearchClose) {
+            mobileSearchClose.addEventListener("click", closeMobileSearch);
         }
 
-        updateMobileToolbarTitleImpl();
+        // 2. 抽屉开关与切换绑定
+        const mobileQueueToggle = $("mobileQueueToggle");
+        if (mobileQueueToggle) {
+            mobileQueueToggle.addEventListener("click", () => toggleMobilePanel("playlist"));
+        }
+        const mobilePanelClose = $("mobilePanelClose");
+        if (mobilePanelClose) {
+            mobilePanelClose.addEventListener("click", closeMobilePanel);
+        }
 
-        if (dom.mobileSearchToggle) {
-            dom.mobileSearchToggle.addEventListener("click", toggleMobileSearchImpl);
+        const plTab = $("mobilePlaylistTab");
+        if (plTab) {
+            plTab.addEventListener("click", (e) => {
+                e.stopPropagation();
+                switchMobilePanelTab("playlist");
+            });
         }
-        if (dom.mobileSearchClose) {
-            dom.mobileSearchClose.addEventListener("click", closeMobileSearchImpl);
+        const favTab = $("mobileFavoritesTab");
+        if (favTab) {
+            favTab.addEventListener("click", (e) => {
+                e.stopPropagation();
+                switchMobilePanelTab("favorites");
+            });
         }
-        if (dom.mobilePanelClose) {
-            dom.mobilePanelClose.addEventListener("click", closeMobilePanelImpl);
+
+        // 3. 顶部 Toolbar 工具栏交互绑定 (深浅主题、探索雷达)
+        bindMobileToolbar();
+
+        // 4. 点击封面显示歌词 / 初始化沉浸式歌词手势与点词即播
+        const albumCover = $("albumCover");
+        if (albumCover) {
+            albumCover.addEventListener("click", () => toggleMobileLyrics(true));
         }
-        if (dom.mobileQueueToggle) {
-            dom.mobileQueueToggle.addEventListener("click", () => openMobilePanelImpl("playlist"));
+        initMobileLyricsInteractions();
+
+        // 5. 初始化手势系统（底部播放列表抽屉 + 顶部搜索下拉面板）
+        initBottomSheetGestures();
+        initSearchPanelGestures();
+
+        // 6. 遮罩层直接捕获抽屉外围空白区域轻触收起
+        const scrim = $("mobileOverlayScrim");
+        if (scrim) {
+            scrim.addEventListener("click", (e) => {
+                if (document.body.classList.contains("mobile-panel-open")) {
+                    e.stopPropagation();
+                    closeMobilePanel();
+                }
+            });
         }
-        const handleGlobalPointerDown = (event) => {
-            if (!document.body) {
-                return;
-            }
-            const hasOverlay = document.body.classList.contains("mobile-search-open") ||
-                document.body.classList.contains("mobile-panel-open");
-            if (!hasOverlay) {
-                return;
-            }
+
+        // 7. 全局点击顶部空白区域收起列表抽屉（包括工具栏、标题、遮罩与顶部留白）
+        const handleGlobalClickOutside = (event) => {
+            // 搜索面板打开时不处理（搜索由自身 X 按钮和独立层级关闭）
+            if (document.body.classList.contains("mobile-search-open")) return;
+
+            const isPanelOpen = document.body.classList.contains("mobile-panel-open");
+            if (!isPanelOpen) return;
 
             const target = event.target;
-            if (dom.mobilePanel && (dom.mobilePanel === target || dom.mobilePanel.contains(target))) {
-                return;
-            }
-            if (dom.searchArea && (dom.searchArea === target || dom.searchArea.contains(target))) {
-                return;
-            }
-            if (dom.playerQualityMenu && dom.playerQualityMenu.contains(target)) {
-                return;
-            }
-            if (target && typeof target.closest === "function" && target.closest(".quality-menu")) {
+            const panel = $("mobilePanel");
+            if (!panel) return;
+
+            // 点击在抽屉面板内部时，保持展开，不予关闭（内部交互由歌曲列表、标签等处理）
+            if (panel.contains(target)) {
                 return;
             }
 
-            closeAllMobileOverlaysImpl();
+            // 点击了队列切换按钮本身，由自身的 toggle 逻辑处理
+            if (target && typeof target.closest === "function" && 
+                (target.closest("#mobileQueueToggle") || target.closest(".transport-button--queue"))) {
+                return;
+            }
+
+            // 点击了抽屉上方的顶部空白处、工具栏、标题等外围区域：拦截并收起抽屉
+            event.stopPropagation();
+            closeMobilePanel();
         };
 
-        document.addEventListener("pointerdown", handleGlobalPointerDown, true);
-        if (dom.searchArea) {
-            dom.searchArea.setAttribute("aria-hidden", "true");
-        }
-        if (dom.mobileOverlayScrim) {
-            dom.mobileOverlayScrim.setAttribute("aria-hidden", "true");
-        }
-
+        document.addEventListener("click", handleGlobalClickOutside, true);
         updateMobileOverlayScrim();
     }
 
-    bridge.handlers.updateToolbarTitle = updateMobileToolbarTitleImpl;
-    bridge.handlers.openSearch = openMobileSearchImpl;
-    bridge.handlers.closeSearch = closeMobileSearchImpl;
-    bridge.handlers.toggleSearch = toggleMobileSearchImpl;
-    bridge.handlers.openPanel = openMobilePanelImpl;
-    bridge.handlers.closePanel = closeMobilePanelImpl;
-    bridge.handlers.togglePanel = toggleMobilePanelImpl;
-    bridge.handlers.closeAllOverlays = closeAllMobileOverlaysImpl;
-    bridge.handlers.initialize = initializeMobileUIImpl;
+    // 暴露桥接接口供全局或桌面端联动
+    bridge.handlers.openSearch = openMobileSearch;
+    bridge.handlers.closeSearch = closeMobileSearch;
+    bridge.handlers.toggleSearch = toggleMobileSearch;
+    bridge.handlers.openPanel = openMobilePanel;
+    bridge.handlers.closePanel = closeMobilePanel;
+    bridge.handlers.togglePanel = toggleMobilePanel;
+    bridge.handlers.toggleLyrics = toggleMobileLyrics;
+    bridge.handlers.closeAllOverlays = closeAllMobileOverlays;
+    bridge.handlers.initialize = initializeMobileUI;
 
     if (bridge.queue.length) {
         const pending = bridge.queue.splice(0, bridge.queue.length);
@@ -213,5 +149,11 @@
                 handler(...(entry.args || []));
             }
         }
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initializeMobileUI, { once: true });
+    } else {
+        initializeMobileUI();
     }
 })();

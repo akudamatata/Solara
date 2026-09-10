@@ -1,0 +1,455 @@
+/* ==========================================================================
+   Solara Mobile UI - 4. 沉浸遮罩层、iOS 原生 Bottom Sheet 抽屉与列表项
+   ========================================================================== */
+
+/* ─── 1. 沉浸遮罩层 (Apple Modal Scrim) ─────────────────────────────────── */
+
+body.mobile-view .mobile-overlay-scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: none !important; /* 彻底去除遮罩模糊，杜绝与浮层双重毛玻璃互相穿透产生混沌重影 */
+    -webkit-backdrop-filter: none !important;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 100;
+}
+
+/* 面板打开时：显示遮罩，捕获外围空白处轻触收起
+   搜索打开时：不显示遮罩（搜索是全屏面板，不需要背景遮罩） */
+body.mobile-view.mobile-panel-open .mobile-overlay-scrim {
+    opacity: 1;
+    pointer-events: auto;
+    cursor: pointer;
+}
+body.mobile-view.mobile-search-open .mobile-overlay-scrim {
+    opacity: 0;
+    pointer-events: none;
+    /* 搜索面板是全屏覆盖，不需要背景遮罩 */
+}
+
+/* ─── 2. iOS 原生可拖拽 Bottom Sheet 抽屉 (Playlist & Favorites) ──────── */
+
+body.mobile-view .mobile-panel {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-width: 540px;
+    margin: 0 auto;
+    height: calc(var(--mobile-vh, 100dvh) - clamp(75px, 18vw, 115px));
+    /* 浅色模式使用 95% 超高不透明度，彻底阻断底层巨大黑白封面穿透 */
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(32px) saturate(180%);
+    -webkit-backdrop-filter: blur(32px) saturate(180%);
+    border-radius: 32px 32px 0 0;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.95);
+    box-shadow: 0 -16px 56px rgba(0, 0, 0, 0.16);
+    padding: 10px clamp(16px, 5vw, 24px) calc(env(safe-area-inset-bottom, 0px) + 20px);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    z-index: 200;
+    transform: translateY(105%);
+    transition: transform 0.42s var(--spring-snappy);
+    touch-action: pan-y;
+    overscroll-behavior: contain;
+    will-change: transform;
+}
+
+body.mobile-view.dark-mode .mobile-panel {
+    background: rgba(22, 24, 30, 0.96);
+    backdrop-filter: blur(32px) saturate(180%);
+    -webkit-backdrop-filter: blur(32px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.65);
+}
+
+body.mobile-view.mobile-panel-open .mobile-panel {
+    transform: translateY(0);
+}
+
+/* 抽屉顶部把手与导航条 — Apple HIG: 把手独占一行，标签/操作共行 */
+body.mobile-view .mobile-panel-header {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    row-gap: 8px;
+    column-gap: 6px;
+    width: 100%;
+    position: relative;
+    flex-shrink: 0;
+    cursor: grab;
+    padding-bottom: 2px;
+}
+
+/* 标准 iOS 顶部抓手 Handle — Apple HIG 原生居中药丸抓手规范 */
+body.mobile-view .mobile-panel-handle {
+    flex: 0 0 100%;
+    width: 100%;
+    height: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    cursor: grab;
+    margin: 2px 0 6px;
+    padding: 2px 0;
+}
+
+body.mobile-view .mobile-panel-handle::after {
+    content: "";
+    display: block;
+    width: 36px;
+    height: 4.5px;
+    border-radius: 999px;
+    background: rgba(120, 120, 128, 0.35);
+    transition: width 0.22s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease, opacity 0.2s ease;
+}
+
+body.mobile-view.dark-mode .mobile-panel-handle::after {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+body.mobile-view .mobile-panel-handle:active::after {
+    width: 44px;
+    background: rgba(120, 120, 128, 0.55);
+}
+
+body.mobile-view.dark-mode .mobile-panel-handle:active::after {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+/* Apple HIG 分段控件 — 与操作按鈕共行，安于左侧 */
+body.mobile-view .mobile-panel-header .playlist-tabs {
+    position: relative;
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    background: rgba(120, 120, 128, 0.14);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: none;
+    border-radius: 999px;
+    padding: 3px;
+    gap: 0;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    isolation: isolate;
+}
+
+body.mobile-view.dark-mode .mobile-panel-header .playlist-tabs {
+    background: rgba(120, 120, 128, 0.26);
+}
+
+/* 移动端 Apple 物理滑动胶囊滑块 */
+body.mobile-view .mobile-panel-header .playlist-tabs-indicator {
+    position: absolute;
+    top: 3px;
+    bottom: 3px;
+    left: 0;
+    border-radius: 999px;
+    background: #ffffff;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.16), 0 1px 3px rgba(0, 0, 0, 0.08);
+    pointer-events: none;
+    z-index: 1;
+    transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), width 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform, width;
+}
+
+body.mobile-view.dark-mode .mobile-panel-header .playlist-tabs-indicator {
+    background: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 3px 14px rgba(0, 0, 0, 0.45);
+}
+
+body.mobile-view .mobile-panel-header .playlist-tab {
+    position: relative;
+    z-index: 2;
+    padding: 6px 16px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    border-radius: 999px;
+    border: none;
+    background: transparent !important;
+    color: var(--text-secondary-color);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color 0.22s ease, transform 0.12s ease;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    box-shadow: none !important;
+}
+
+body.mobile-view .mobile-panel-header .playlist-tab:active {
+    transform: scale(0.95);
+}
+
+body.mobile-view .mobile-panel-header .playlist-tab.active {
+    background: transparent !important;
+    color: #1d1d1f !important;
+    box-shadow: none !important;
+}
+
+body.mobile-view.dark-mode .mobile-panel-header .playlist-tab.active {
+    color: #ffffff !important;
+}
+
+/* 操作按鈕组 — margin-left:auto 推到最右侧，与 tabs 共行 */
+body.mobile-view .mobile-panel-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto; /* 自动推至右侧， Apple HIG 操作属于导航条右丰拥局 */
+    flex-shrink: 0;
+}
+
+body.mobile-view .mobile-panel-action-btn,
+body.mobile-view .mobile-close-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.07);
+    background: rgba(0, 0, 0, 0.04);
+    color: var(--text-color);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: transform 0.15s var(--spring-snappy), background 0.2s ease;
+}
+
+/* 关闭按鈕细微区分 — 更小光锐，用于收起抽屉 */
+body.mobile-view .mobile-close-btn {
+    border-color: rgba(0, 0, 0, 0.1);
+    background: rgba(0, 0, 0, 0.06);
+}
+
+body.mobile-view.dark-mode .mobile-panel-action-btn,
+body.mobile-view.dark-mode .mobile-close-btn {
+    border-color: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+body.mobile-view .mobile-panel-action-btn .apple-svg-icon,
+body.mobile-view .mobile-close-btn .apple-svg-icon {
+    width: 16px;
+    height: 16px;
+}
+
+body.mobile-view .mobile-panel-action-btn:active,
+body.mobile-view .mobile-close-btn:active {
+    transform: scale(0.9);
+}
+
+/* ─── 3. 抽屉内部列表区域 ───────────────────────────────────────────────── */
+
+/* 彻底隐藏桌面端遗留残留在抽屉容器内的歌词组件，杜绝割裂抽屉 */
+body.mobile-view #lyrics {
+    display: none !important;
+}
+
+body.mobile-view .playlist,
+body.mobile-view #favorites {
+    display: none;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+}
+
+body.mobile-view .playlist.active:not([hidden]),
+body.mobile-view #favorites.active:not([hidden]) {
+    display: flex !important;
+}
+
+body.mobile-view .playlist[hidden],
+body.mobile-view #favorites[hidden],
+body.mobile-view .playlist:not(.active),
+body.mobile-view #favorites:not(.active) {
+    display: none !important;
+}
+
+body.mobile-view .playlist-header {
+    display: none !important;
+}
+
+body.mobile-view .mobile-panel,
+body.mobile-view .playlist,
+body.mobile-view #favorites,
+body.mobile-view .playlist-scroll,
+body.mobile-view .playlist-items {
+    overflow-x: hidden !important;
+    max-width: 100%;
+}
+
+body.mobile-view .playlist-scroll {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    padding-right: 2px;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+
+body.mobile-view .playlist-scroll::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
+/* 消除移动端抽屉中悬停导致的 4px 水平位移，彻底根除底部水平滚动条色带 */
+body.mobile-view .playlist-items .playlist-item:hover,
+body.mobile-view .playlist-item:hover {
+    transform: none !important;
+}
+
+body.mobile-view .playlist-items {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-bottom: 20px;
+}
+
+body.mobile-view .playlist-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 14px;
+    border-radius: 16px;
+    background: rgba(0, 0, 0, 0.035);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    color: #1d1d1f;
+    transition: transform 0.15s var(--spring-snappy), background 0.2s ease;
+    cursor: pointer;
+    position: relative;
+    touch-action: manipulation;
+}
+
+body.mobile-view.dark-mode .playlist-item {
+    background: rgba(255, 255, 255, 0.055);
+    border-color: rgba(255, 255, 255, 0.08);
+    color: #f5f5f7;
+}
+
+body.mobile-view .playlist-item:active {
+    transform: scale(0.98);
+}
+
+body.mobile-view .playlist-item.current {
+    background: rgba(var(--primary-color-rgb, 255, 107, 107), 0.12) !important;
+    border-color: var(--primary-color) !important;
+}
+
+body.mobile-view .playlist-item.current .playlist-item-title {
+    color: var(--primary-color) !important;
+    font-weight: 700;
+}
+
+body.mobile-view .playlist-item-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+body.mobile-view .playlist-item-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+body.mobile-view .playlist-item-artist {
+    font-size: 0.82rem;
+    color: var(--text-secondary-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+body.mobile-view .playlist-item-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: 8px;
+}
+
+body.mobile-view .playlist-item-action {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--text-tertiary-color);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.15s var(--spring-snappy), color 0.2s ease;
+}
+
+body.mobile-view .playlist-item-action:active {
+    transform: scale(0.85);
+    color: var(--primary-color);
+}
+
+/* 正在播放项 Apple Music 经典动态音浪 (Equalizer) */
+body.mobile-view .playlist-item.current::before {
+    content: "";
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin-right: 10px;
+    flex-shrink: 0;
+    background-color: var(--primary-color);
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='2' y='8' width='3.5' height='12' rx='1.5'/%3E%3Crect x='8.5' y='3' width='3.5' height='17' rx='1.5'/%3E%3Crect x='15' y='10' width='3.5' height='10' rx='1.5'/%3E%3C/svg%3E") no-repeat center / contain;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='2' y='8' width='3.5' height='12' rx='1.5'/%3E%3Crect x='8.5' y='3' width='3.5' height='17' rx='1.5'/%3E%3Crect x='15' y='10' width='3.5' height='10' rx='1.5'/%3E%3C/svg%3E") no-repeat center / contain;
+    animation: mobileEqWave 1.1s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite alternate;
+}
+
+@keyframes mobileEqWave {
+    0% { transform: scaleY(0.4); opacity: 0.7; }
+    100% { transform: scaleY(1); opacity: 1; }
+}
+
+/* ─── 4. 列表空状态提示 ─────────────────────────────────────────────────── */
+
+body.mobile-view .playlist.empty .playlist-scroll::before,
+body.mobile-view .favorites.empty .playlist-scroll::before {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--text-tertiary-color);
+    text-align: center;
+    line-height: 1.6;
+}
+
+body.mobile-view #playlist.empty .playlist-scroll::before {
+    content: "播放列表为空\A轻触右上角搜索添加喜欢的音乐";
+    white-space: pre-line;
+}
+
+body.mobile-view #favorites.empty .playlist-scroll::before {
+    content: "收藏列表暂无歌曲\A轻触主界面或列表中的爱心即可收藏";
+    white-space: pre-line;
+}

@@ -129,7 +129,7 @@ async function proxyApiRequest(url: URL, request: Request, waitUntil?: (promise:
 
   const upstream = await fetch(apiUrl.toString(), {
     headers: {
-      "User-Agent": request.headers.get("User-Agent") ?? "Mozilla/5.0",
+      "User-Agent": "Meting/1.5.0",
       "Accept": "application/json",
     },
   });

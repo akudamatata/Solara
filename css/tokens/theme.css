@@ -1,0 +1,263 @@
+:root {
+    --font-main: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+    
+    /* 极光流体多色源（封面调色板动态覆盖） */
+    --palette-c1: #4a90e2;
+    --palette-c2: #50e3c2;
+    --palette-c3: #b8e986;
+    --palette-c4: #7b92b2;
+    --palette-accent: #1abc9c;
+    --palette-glow: rgba(26, 188, 156, 0.45);
+    
+    --bg-gradient: radial-gradient(circle at 20% 20%, #e2eae7 0%, #cbd9d4 40%, #b7cac4 100%);
+    --bg-gradient-next: var(--bg-gradient);
+
+    /* Apple 拟态材质系统 - 深度通透与发光描边 */
+    --container-bg: rgba(255, 255, 255, 0.28);
+    --component-bg: rgba(255, 255, 255, 0.18);
+    --apple-glass-border: rgba(255, 255, 255, 0.45);
+    --apple-glass-border-top: rgba(255, 255, 255, 0.82);
+    --apple-glass-blur: blur(28px) saturate(200%);
+    --container-shadow: 0 24px 64px -12px rgba(0, 0, 0, 0.14), 0 0 1px 1px rgba(255, 255, 255, 0.45) inset;
+    --backdrop-blur: 24px;
+
+    --text-color: #1d1d1f;
+    --text-secondary-color: rgba(60, 60, 67, 0.75);
+    --text-tertiary-color: rgba(60, 60, 67, 0.45);
+
+    --primary-color: #10a37f;
+    --primary-color-dark: #0d8467;
+    --warning-color: #ff3b30;
+    --success-color: #34c759;
+    --success-color-hover: #2db34e;
+
+    --item-hover-bg: rgba(16, 163, 127, 0.09);
+    --item-current-bg: rgba(16, 163, 127, 0.18);
+    --item-current-text: var(--text-color);
+    --border-color: rgba(255, 255, 255, 0.35);
+
+    --lyrics-highlight-bg: rgba(16, 163, 127, 0.12);
+    --lyrics-highlight-text: #0d8467;
+    --lyrics-highlight-shadow: rgba(16, 163, 127, 0.35);
+
+    --scrollbar-thumb-bg: rgba(0, 0, 0, 0.18);
+    --scrollbar-track-bg: transparent;
+
+    --spring-snappy: cubic-bezier(0.16, 1, 0.3, 1);
+    --spring-smooth: cubic-bezier(0.25, 1, 0.5, 1);
+    --spring-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.dark-mode {
+    --palette-c1: #0e3029;
+    --palette-c2: #164e43;
+    --palette-c3: #1a6b5c;
+    --palette-c4: #0b1d19;
+    --palette-accent: #34d1b6;
+    --palette-glow: rgba(52, 209, 182, 0.4);
+
+    --bg-gradient: radial-gradient(circle at 20% 20%, #0d1e1c 0%, #071312 60%, #020606 100%);
+
+    --container-bg: rgba(18, 22, 28, 0.62);
+    --component-bg: rgba(255, 255, 255, 0.05);
+    --apple-glass-border: rgba(255, 255, 255, 0.12);
+    --apple-glass-border-top: rgba(255, 255, 255, 0.28);
+    --container-shadow: 0 36px 88px -18px rgba(0, 0, 0, 0.72), 0 0 1px 1px rgba(255, 255, 255, 0.1) inset;
+
+    --text-color: #f5f5f7;
+    --text-secondary-color: rgba(235, 235, 245, 0.72);
+    --text-tertiary-color: rgba(235, 235, 245, 0.42);
+
+    --primary-color: #34d1b6;
+    --primary-color-dark: #28a992;
+    --item-hover-bg: rgba(52, 209, 182, 0.12);
+    --item-current-bg: rgba(52, 209, 182, 0.24);
+    --border-color: rgba(255, 255, 255, 0.1);
+
+    --lyrics-highlight-bg: rgba(52, 209, 182, 0.15);
+    --lyrics-highlight-text: #ffffff;
+    --lyrics-highlight-shadow: rgba(52, 209, 182, 0.5);
+
+    --scrollbar-thumb-bg: rgba(255, 255, 255, 0.2);
+    --success-color-hover: #1f8a4f;
+}
+
+.dark-mode .source-menu {
+    background: rgba(30, 36, 42, 0.95);
+    backdrop-filter: blur(20px);
+    border-color: var(--primary-color);
+}
+
+.dark-mode .source-option {
+    color: #ecf0f1;
+}
+
+.dark-mode .source-option:hover,
+.dark-mode .source-option.active {
+    color: #ffffff;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--scrollbar-track-bg); }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb-bg); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--primary-color); }
+
+body {
+    font-family: var(--font-main);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100dvh;
+    margin: 0;
+    padding: clamp(12px, 2vw, 24px);
+    box-sizing: border-box;
+    color: var(--text-color);
+    transition: color 0.5s;
+    background-color: #06070a;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Apple Music 沉浸式极光流体舞台 ──────────────────────────── */
+.background-stage {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    box-sizing: border-box;
+    pointer-events: none;
+    z-index: -2;
+    overflow: hidden;
+    background: #080a0f;
+}
+
+.background-stage__layer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.background-stage__layer--base {
+    opacity: 1;
+    background-image: var(--bg-gradient);
+    background-size: cover;
+}
+
+.background-stage__layer--transition {
+    opacity: 0;
+    background-image: var(--bg-gradient-next);
+    background-size: cover;
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+    will-change: opacity;
+}
+
+body.background-transitioning .background-stage__layer--transition {
+    opacity: 1;
+}
+
+.aurora-mesh {
+    position: absolute;
+    inset: -30%;
+    width: 160%;
+    height: 160%;
+    overflow: hidden;
+    filter: blur(95px) saturate(170%);
+    pointer-events: none;
+    opacity: 0.9;
+}
+
+.aurora-orb {
+    position: absolute;
+    border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%;
+    will-change: transform;
+}
+
+.aurora-orb--1 {
+    width: 70vw;
+    height: 70vw;
+    top: -15vw;
+    left: -12vw;
+    background: radial-gradient(circle at 40% 40%, var(--palette-c1) 0%, transparent 68%);
+    animation: aurora-flow-1 28s var(--spring-smooth) infinite alternate;
+}
+
+.aurora-orb--2 {
+    width: 75vw;
+    height: 75vw;
+    top: -20vw;
+    right: -15vw;
+    background: radial-gradient(circle at 50% 50%, var(--palette-c2) 0%, transparent 68%);
+    animation: aurora-flow-2 34s var(--spring-smooth) infinite alternate;
+}
+
+.aurora-orb--3 {
+    width: 65vw;
+    height: 65vw;
+    bottom: -18vw;
+    right: 0vw;
+    background: radial-gradient(circle at 50% 50%, var(--palette-c3) 0%, transparent 68%);
+    animation: aurora-flow-3 24s var(--spring-smooth) infinite alternate;
+}
+
+.aurora-orb--4 {
+    width: 62vw;
+    height: 62vw;
+    bottom: -15vw;
+    left: 2vw;
+    background: radial-gradient(circle at 40% 50%, var(--palette-c4) 0%, transparent 68%);
+    animation: aurora-flow-4 30s var(--spring-smooth) infinite alternate;
+}
+
+@keyframes aurora-flow-1 {
+    0%   { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); }
+    50%  { transform: translate3d(10vw, 8vh, 0) scale(1.15) rotate(110deg); }
+    100% { transform: translate3d(-6vw, 14vh, 0) scale(0.96) rotate(220deg); }
+}
+
+@keyframes aurora-flow-2 {
+    0%   { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); }
+    50%  { transform: translate3d(-12vw, 10vh, 0) scale(1.12) rotate(-90deg); }
+    100% { transform: translate3d(6vw, -6vh, 0) scale(1.05) rotate(-190deg); }
+}
+
+@keyframes aurora-flow-3 {
+    0%   { transform: translate3d(0, 0, 0) scale(1.04); }
+    50%  { transform: translate3d(-10vw, -8vh, 0) scale(0.92); }
+    100% { transform: translate3d(8vw, -10vh, 0) scale(1.16); }
+}
+
+@keyframes aurora-flow-4 {
+    0%   { transform: translate3d(0, 0, 0) scale(0.94); }
+    50%  { transform: translate3d(12vw, -6vh, 0) scale(1.1); }
+    100% { transform: translate3d(-6vw, 8vh, 0) scale(1.02); }
+}
+
+.aurora-noise {
+    position: absolute;
+    inset: 0;
+    opacity: 0.035;
+    pointer-events: none;
+    background-image: radial-gradient(rgba(255,255,255,0.7) 1px, transparent 0);
+    background-size: 28px 28px;
+}
+
+.background-stage__glass-scrim {
+    position: absolute;
+    inset: 0;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    background: radial-gradient(circle at 50% 40%, rgba(0,0,0,0.01) 0%, rgba(0,0,0,0.18) 100%);
+}
+
+.dark-mode .background-stage__glass-scrim {
+    background: radial-gradient(circle at 50% 40%, rgba(0,0,0,0.22) 0%, rgba(0,0,0,0.6) 100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .aurora-orb {
+        animation: none !important;
+    }
+}
+

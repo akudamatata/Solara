@@ -1,0 +1,842 @@
+/* ─── Apple 灵动悬浮控制底栏 (Floating Island Dock) ─────────────── */
+/* ─── Apple 灵动悬浮控制底栏 (Floating Island Dock) ─────────────── */
+.controls {
+    grid-area: controls;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    width: 100%;
+    background: var(--component-bg);
+    backdrop-filter: var(--apple-glass-blur);
+    -webkit-backdrop-filter: var(--apple-glass-blur);
+    border: 1px solid var(--apple-glass-border);
+    border-top: 1px solid var(--apple-glass-border-top);
+    border-radius: 24px;
+    padding: 10px 18px;
+    box-shadow: 0 14px 36px -8px rgba(0, 0, 0, 0.14), 0 0 1px 1px rgba(255, 255, 255, 0.2) inset;
+    transition: all 0.4s var(--spring-smooth);
+    box-sizing: border-box;
+    overflow: visible !important;
+}
+
+/* ─── Apple 精致幽灵玻璃图标按键 (Ghost Glass Buttons) ────────── */
+.controls button {
+    background: transparent;
+    color: var(--text-color);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.1em; 
+    width: 42px; 
+    height: 42px; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    transition: transform 0.2s var(--spring-snappy), background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease; 
+    box-shadow: none; 
+}
+
+.controls button:hover { 
+    background: rgba(255, 255, 255, 0.32); 
+    color: var(--primary-color);
+    transform: scale(1.08); 
+}
+
+.dark-mode .controls button:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.controls button:active { 
+    transform: scale(0.92); 
+}
+
+/* 主角播放 / 暂停按钮 (Hero Transport Button) */
+#playPauseBtn,
+.transport-button--play {
+    width: 52px !important;
+    height: 52px !important;
+    background: var(--primary-color) !important;
+    color: #ffffff !important;
+    box-shadow: 0 8px 24px var(--palette-glow), 0 2px 6px rgba(0,0,0,0.12) !important;
+    transition: transform 0.25s var(--spring-bounce), box-shadow 0.25s ease, background 0.2s ease !important;
+}
+
+#playPauseBtn:hover,
+.transport-button--play:hover {
+    background: var(--primary-color-dark) !important;
+    transform: scale(1.08) translateY(-1px) !important;
+    box-shadow: 0 12px 30px var(--palette-glow), 0 4px 10px rgba(0,0,0,0.18) !important;
+}
+
+#playPauseBtn:active,
+.transport-button--play:active {
+    transform: scale(0.92) !important;
+}
+
+/* 播放图标光学对齐微调 */
+#playPauseBtn .icon-play {
+    margin-left: 2px;
+}
+
+/* 探索雷达按钮 (Radar Pulse Capsule) */
+.controls button#loadOnlineBtn {
+    width: auto;
+    border-radius: 999px;
+    padding: 0 16px;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    height: 36px;
+    background: var(--component-bg);
+    color: var(--text-color);
+    border: 1px solid var(--apple-glass-border);
+    border-top: 1px solid var(--apple-glass-border-top);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    position: relative;
+    overflow: visible;
+    backdrop-filter: var(--apple-glass-blur);
+    -webkit-backdrop-filter: var(--apple-glass-blur);
+    transition: all 0.22s var(--spring-smooth);
+}
+
+.controls button#loadOnlineBtn:hover {
+    background: var(--primary-color) !important;
+    color: #ffffff !important;
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 8px 22px var(--palette-glow);
+    transform: translateY(-1px);
+}
+
+.dark-mode .controls button#loadOnlineBtn {
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.14);
+}
+
+.radar-ping-ring {
+    position: absolute;
+    inset: -3px;
+    border-radius: inherit;
+    border: 2px solid var(--primary-color);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.controls button#loadOnlineBtn:hover .radar-ping-ring {
+    animation: radar-pulse 1.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes radar-pulse {
+    0% { transform: scale(1); opacity: 0.8; }
+    75%, 100% { transform: scale(1.18); opacity: 0; }
+}
+
+.controls button#loadOnlineBtn .btn-text {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    line-height: 1;
+}
+
+.controls button:disabled { 
+    opacity: 0.45;
+    cursor: not-allowed; 
+    transform: none !important; 
+    box-shadow: none !important; 
+}
+
+.transport-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 0 0 auto;
+}
+
+html:not(.mobile-view) .transport-controls {
+    width: auto;
+    gap: 8px;
+}
+
+#mobileQueueToggle {
+    display: none;
+}
+
+/* ─── 播放模式 (循环) 与随机播放按钮 - 纯净 Apple 幽灵按键 ─── */
+.transport-button--mode,
+.transport-button--shuffle,
+#shuffleToggleBtn,
+#playModeBtn {
+    position: relative;
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 50% !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-color);
+    opacity: 0.42;
+    transition: opacity 0.2s ease, color 0.2s ease, transform 0.2s var(--spring-snappy);
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.transport-button--mode:hover,
+.transport-button--shuffle:hover,
+#shuffleToggleBtn:hover,
+#playModeBtn:hover {
+    opacity: 0.85;
+    background: rgba(0, 0, 0, 0.04) !important;
+    transform: scale(1.06);
+}
+
+.dark-mode .transport-button--mode:hover,
+.dark-mode .transport-button--shuffle:hover,
+.dark-mode #shuffleToggleBtn:hover,
+.dark-mode #playModeBtn:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* 纯净激活态：单曲循环、随机播放开启时，纯净图标高亮，无底色框、无发光胶囊、无多余圆点 */
+.transport-button--mode.active,
+.transport-button--mode.is-single,
+.transport-button--shuffle.active,
+.transport-button--shuffle[aria-pressed="true"],
+#shuffleToggleBtn.active,
+#playModeBtn.is-single {
+    opacity: 1 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: var(--primary-color-dark, #0d9488) !important;
+    transform: scale(1.05);
+}
+
+.dark-mode .transport-button--mode.active,
+.dark-mode .transport-button--mode.is-single,
+.dark-mode .transport-button--shuffle.active,
+.dark-mode .transport-button--shuffle[aria-pressed="true"],
+.dark-mode #shuffleToggleBtn.active,
+.dark-mode #playModeBtn.is-single {
+    color: var(--primary-color) !important;
+}
+
+.icon-repeat-single text {
+    font-weight: 900;
+    user-select: none;
+    letter-spacing: -0.05em;
+}
+.transport-button--prev .fa-backward-step {
+    margin-right: 2px;
+}
+.transport-button--next .fa-forward-step {
+    margin-left: 2px;
+}
+
+.progress-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1 1 auto;
+    min-width: 140px;
+}
+
+.control-trailing {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
+}
+
+.progress-container span {
+    font-variant-numeric: tabular-nums;
+    font-size: 0.82em;
+    color: var(--text-secondary-color);
+    white-space: nowrap;
+}
+
+.progress-container input[type="range"] {
+    flex: 1;
+    height: 6px;
+    border-radius: 999px;
+    background: linear-gradient(to right, var(--primary-color) 0%, var(--primary-color) var(--progress, 0%), rgba(255, 255, 255, 0.4) var(--progress, 0%), rgba(255, 255, 255, 0.15) 100%);
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.audio-tools {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: nowrap;
+    flex: 0 0 auto;
+}
+
+.control-trailing #loadOnlineBtn {
+    margin-left: 0;
+    flex-shrink: 0;
+}
+
+.volume-container {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.volume-container input[type="range"] {
+    width: 76px;
+    height: 5px;
+    border-radius: 999px;
+    background: linear-gradient(to right, var(--primary-color) 0%, var(--primary-color) var(--volume-progress, 100%), rgba(255, 255, 255, 0.2) var(--volume-progress, 100%), rgba(255, 255, 255, 0.1) 100%);
+    cursor: pointer;
+}
+
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 2px solid var(--primary-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    transition: transform 0.18s var(--spring-snappy), box-shadow 0.18s ease;
+    cursor: pointer;
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 2px solid var(--primary-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    transition: transform 0.18s var(--spring-snappy), box-shadow 0.18s ease;
+    cursor: pointer;
+}
+
+input[type="range"]:hover::-webkit-slider-thumb,
+input[type="range"]:hover::-moz-range-thumb {
+    transform: scale(1.25);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+input[type="range"]:active::-webkit-slider-thumb,
+input[type="range"]:active::-moz-range-thumb {
+    transform: scale(1.4);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45);
+}
+
+.player-quality {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.controls button.player-quality-btn,
+.controls .player-quality-btn,
+#qualityToggle {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: auto !important;
+    min-width: 74px !important;
+    height: 32px !important;
+    box-sizing: border-box !important;
+    padding: 0 10px !important;
+    border-radius: 8px !important;
+    border: 1px solid var(--apple-glass-border) !important;
+    border-top: 1px solid var(--apple-glass-border-top) !important;
+    background: var(--component-bg) !important;
+    color: var(--text-color) !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    white-space: nowrap !important;
+    cursor: pointer !important;
+    backdrop-filter: var(--apple-glass-blur);
+    -webkit-backdrop-filter: var(--apple-glass-blur);
+    transition: all 0.2s var(--spring-smooth);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.controls button.player-quality-btn span,
+.controls .player-quality-btn span,
+#qualityToggle #qualityLabel {
+    white-space: nowrap !important;
+    display: inline-block !important;
+    line-height: 1 !important;
+}
+
+.controls .player-quality-btn:hover,
+.controls .player-quality-btn.active {
+    border-color: var(--primary-color) !important;
+    color: var(--primary-color) !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12) !important;
+    transform: translateY(-1px);
+}
+
+.controls .player-quality-btn:active {
+    transform: scale(0.94);
+}
+
+.player-quality-menu {
+    position: absolute;
+    bottom: calc(100% + 10px);
+    top: auto;
+    right: 0;
+    background: rgba(255, 255, 255, 0.82);
+    border-radius: 14px;
+    box-shadow: 0 18px 44px -6px rgba(0, 0, 0, 0.16), 0 0 1px 1px rgba(255, 255, 255, 0.45) inset;
+    border: 1px solid var(--apple-glass-border);
+    border-top: 1px solid var(--apple-glass-border-top);
+    backdrop-filter: blur(28px) saturate(190%);
+    -webkit-backdrop-filter: blur(28px) saturate(190%);
+    min-width: 176px;
+    padding: 6px;
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(8px) scale(0.98);
+    transition: opacity 0.22s var(--spring-smooth), transform 0.22s var(--spring-smooth);
+    z-index: 999999 !important;
+    pointer-events: none;
+    box-sizing: border-box;
+}
+
+.dark-mode .player-quality-menu {
+    background: rgba(30, 34, 42, 0.85);
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 22px 54px -8px rgba(0, 0, 0, 0.65), 0 0 1px 1px rgba(255, 255, 255, 0.08) inset;
+}
+
+.player-quality-menu.show {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateY(0) scale(1) !important;
+    pointer-events: auto !important;
+    z-index: 999999 !important;
+    display: block !important;
+}
+
+.player-quality-menu.floating {
+    position: fixed !important;
+    right: auto !important;
+    bottom: auto !important;
+    z-index: 999999 !important;
+    will-change: opacity, transform;
+}
+
+.player-quality-menu.floating:not(.show) {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+.player-quality-menu.open-upwards {
+    transform-origin: bottom center;
+}
+
+.player-quality-menu.open-downwards {
+    transform-origin: top center;
+}
+
+.player-quality-option,
+.quality-option {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    border-radius: 9px;
+    margin: 2px 0;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: all 0.18s var(--spring-smooth);
+    background: transparent;
+    user-select: none;
+}
+
+.player-quality-option:hover,
+.quality-option:hover {
+    background: rgba(0, 0, 0, 0.06);
+    color: var(--text-color);
+}
+
+.dark-mode .player-quality-option:hover,
+.dark-mode .quality-option:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+}
+
+.player-quality-option.active,
+.quality-option.active {
+    background: var(--primary-color) !important;
+    color: #ffffff !important;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14);
+}
+
+.player-quality-option:active,
+.quality-option:active {
+    transform: scale(0.98);
+}
+
+.player-quality-option small,
+.quality-option small {
+    font-size: 11px;
+    opacity: 0.6;
+    letter-spacing: 0.02em;
+}
+
+.player-quality-option.active small,
+.quality-option.active small {
+    opacity: 0.9;
+    color: rgba(255, 255, 255, 0.95);
+}
+
+#audioPlayer {
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* 播放模式控制按钮已被统一由 transport-button--mode 规范接管 */
+
+/* 下载质量选择菜单 - 修复层级和显示问题 */
+.quality-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+    z-index: 100000;
+    min-width: 180px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.2s ease;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.dark-mode .quality-menu {
+    background: #1c1c1c;
+    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 12px 34px rgba(0, 0, 0, 0.6);
+}
+
+/* 确保搜索结果项在质量菜单显示时不会遮挡 */
+.search-result-item {
+    position: relative;
+    z-index: 1;
+}
+
+.search-result-item:has(.quality-menu.show) {
+    z-index: 1000000;
+}
+
+/* 为不支持 :has() 的浏览器提供备用方案 */
+.search-result-item.menu-active {
+    z-index: 1000000;
+}
+
+.quality-menu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+/* 加载更多按钮 - 增强样式 */
+.load-more-btn {
+    width: 100%;
+    background: var(--component-bg);
+    color: var(--primary-color);
+    border: 2px solid var(--primary-color);
+    border-radius: 12px;
+    padding: 15px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    margin-top: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    position: relative;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.load-more-btn:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(26, 188, 156, 0.35);
+}
+
+.load-more-btn:disabled {
+    background: var(--text-secondary-color);
+    border-color: var(--text-secondary-color);
+    color: white;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* 调试信息样式 */
+.debug-info {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    z-index: 10000;
+    max-width: 300px;
+    max-height: 40vh;
+    overflow-y: auto;
+    display: none;
+}
+
+.debug-info.show {
+    display: block;
+}
+
+.loader { 
+    width: 20px; 
+    height: 20px; 
+    border: 3px solid var(--primary-color); 
+    border-bottom-color: transparent; 
+    border-radius: 50%; 
+    display: inline-block; 
+    box-sizing: border-box; 
+    animation: rotation 1s linear infinite; 
+}
+@keyframes rotation { 
+    0% { transform: rotate(0deg); } 
+    100% { transform: rotate(360deg); } 
+}
+
+/* 保持空置或已被顶栏 header-actions 统一接管 */
+
+.theme-toggle-button.is-dark {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.16);
+}
+
+.theme-toggle-button .theme-icon {
+    position: absolute;
+    width: 19px;
+    height: 19px;
+    transition: opacity 0.3s var(--spring-smooth), transform 0.45s var(--spring-snappy), color 0.25s ease;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.theme-toggle-button .theme-icon--sun {
+    color: #d97706;
+    transform: scale(0.4) rotate(-90deg);
+}
+
+.dark-mode .theme-toggle-button .theme-icon--sun {
+    color: #fbbf24;
+}
+
+.theme-toggle-button .theme-icon--moon {
+    color: #818cf8;
+    transform: scale(0.4) rotate(90deg);
+}
+
+.theme-toggle-button:not(.is-dark) .theme-icon--sun {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+}
+
+.theme-toggle-button.is-dark .theme-icon--moon {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+}
+
+.theme-toggle-button:hover .theme-icon--sun {
+    transform: scale(1.08) rotate(15deg);
+}
+
+.theme-toggle-button:hover .theme-icon--moon {
+    transform: scale(1.08) rotate(-15deg);
+}
+
+/* ─── Apple Design 灵动悬浮胶囊通知 (Dynamic Island HUD) ─────────────── */
+.notification {
+    position: fixed;
+    top: 28px;
+    left: 50%;
+    transform: translate(-50%, -130%) scale(0.92);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    min-width: 140px;
+    max-width: min(90vw, 460px);
+    width: auto;
+    padding: 9px 20px;
+    box-sizing: border-box;
+    border-radius: 999px;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+    font-size: 13.5px;
+    font-weight: 590;
+    line-height: 1.42;
+    letter-spacing: -0.012em;
+    text-align: center;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    user-select: none;
+    cursor: pointer;
+    z-index: 9999;
+    
+    /* 极致 Apple 超薄透微质感毛玻璃 */
+    background: rgba(255, 255, 255, 0.86);
+    backdrop-filter: blur(30px) saturate(190%);
+    -webkit-backdrop-filter: blur(30px) saturate(190%);
+    color: #1d1d1f;
+    border: 1px solid rgba(255, 255, 255, 0.85);
+    border-top: 1px solid rgba(255, 255, 255, 1);
+    box-shadow: 
+        0 18px 42px -6px rgba(0, 0, 0, 0.12),
+        0 6px 14px -2px rgba(0, 0, 0, 0.05),
+        inset 0 1px 1px rgba(255, 255, 255, 0.95);
+
+    opacity: 0;
+    pointer-events: none;
+    transition: 
+        transform 0.42s cubic-bezier(0.34, 1.56, 0.64, 1),
+        opacity 0.28s ease,
+        box-shadow 0.25s ease;
+}
+
+/* 显示状态：Apple 弹簧从顶部滑下展开 */
+.notification.show {
+    transform: translate(-50%, 0) scale(1);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.notification:hover {
+    transform: translate(-50%, 0) scale(1.02);
+    box-shadow: 
+        0 24px 50px -6px rgba(0, 0, 0, 0.16),
+        0 8px 18px -2px rgba(0, 0, 0, 0.07),
+        inset 0 1px 1px rgba(255, 255, 255, 0.95);
+}
+
+.notification:active {
+    transform: translate(-50%, 0) scale(0.97);
+    transition: transform 0.1s ease-out;
+}
+
+/* 暗色模式适配 */
+.dark-mode .notification {
+    background: rgba(30, 30, 34, 0.88);
+    color: #f5f5f7;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-top: 1px solid rgba(255, 255, 255, 0.24);
+    box-shadow: 
+        0 24px 56px -8px rgba(0, 0, 0, 0.65),
+        0 10px 24px -2px rgba(0, 0, 0, 0.4),
+        inset 0 1px 1px rgba(255, 255, 255, 0.2);
+}
+
+.dark-mode .notification:hover {
+    box-shadow: 
+        0 28px 64px -8px rgba(0, 0, 0, 0.75),
+        0 12px 28px -2px rgba(0, 0, 0, 0.45),
+        inset 0 1px 1px rgba(255, 255, 255, 0.25);
+}
+
+/* 图标容器与微动效 */
+.notification-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 17px;
+    height: 17px;
+}
+
+.notification-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+/* 状态微光与色调 (iOS HIG 色板) */
+.notification-icon--success,
+.notification.success .notification-icon {
+    color: #34c759; /* iOS System Green */
+}
+.notification-icon--error,
+.notification.error .notification-icon {
+    color: #ff3b30; /* iOS System Red */
+}
+.notification-icon--warning,
+.notification.warning .notification-icon {
+    color: #ff9500; /* iOS System Orange */
+}
+.notification-icon--info,
+.notification.info .notification-icon {
+    color: #007aff; /* iOS System Blue */
+}
+
+/* 文本居中排版 */
+.notification-message {
+    display: inline-block;
+    text-align: center;
+    max-width: 100%;
+}
+
+/* 视图切换按钮 - 桌面端隐藏 */
+.view-toggle {
+    display: none;
+}
+
+.mobile-panel {
+    display: contents;
+}
+
+.mobile-turntable {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-bottom: 0;
+}
+
+.mobile-turntable__platter {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    max-width: 100%;
+}
+

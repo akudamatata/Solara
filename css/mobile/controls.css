@@ -1,0 +1,263 @@
+/* ==========================================================================
+   Solara Mobile UI - 3. 悬浮底栏控制台、进度条与等距正圆播放控件
+   ========================================================================== */
+
+/* ─── 1. 悬浮控制卡片底栏 (Floating Dock) ───────────────────────────────── */
+
+body.mobile-view .controls {
+    width: 100%;
+    margin-top: auto;
+    background: var(--container-bg);
+    backdrop-filter: var(--apple-glass-blur);
+    -webkit-backdrop-filter: var(--apple-glass-blur);
+    border-radius: 26px;
+    border: 1px solid var(--apple-glass-border);
+    border-top: 1px solid var(--apple-glass-border-top);
+    box-shadow: 
+        0 14px 40px -10px rgba(0, 0, 0, 0.15),
+        0 0 1px 1px rgba(255, 255, 255, 0.2) inset;
+    padding: 14px 18px 16px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 10;
+    flex-shrink: 0;
+    transition: opacity 0.26s cubic-bezier(0.16, 1, 0.3, 1), transform 0.26s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* 当播放列表抽屉或全屏搜索展开时，底栏控制台优雅沉退并禁用点击，杜绝误触与层级遮挡 */
+body.mobile-view.mobile-panel-open .controls,
+body.mobile-view.mobile-search-open .controls {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(12px);
+}
+
+body.mobile-view.dark-mode .controls {
+    box-shadow: 
+        0 18px 48px -10px rgba(0, 0, 0, 0.65),
+        0 0 1px 1px rgba(255, 255, 255, 0.08) inset;
+}
+
+/* ─── 2. 进度条区域 ─────────────────────────────────────────────────────── */
+
+body.mobile-view .progress-container {
+    width: 100%;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    column-gap: 10px;
+    row-gap: 4px;
+}
+
+body.mobile-view .progress-container input[type="range"] {
+    grid-column: 1 / span 3;
+    grid-row: 1;
+    width: 100%;
+    height: 5px;
+    border-radius: 999px;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    background: rgba(120, 120, 128, 0.22);
+    cursor: pointer;
+    touch-action: none;
+}
+
+body.mobile-view .progress-container input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    border: 1.5px solid var(--primary-color);
+    transition: transform 0.1s ease;
+}
+
+body.mobile-view .progress-container input[type="range"]:active::-webkit-slider-thumb {
+    transform: scale(1.35);
+}
+
+body.mobile-view .progress-container span {
+    font-size: 0.74rem;
+    font-weight: 500;
+    color: var(--text-tertiary-color);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+}
+
+body.mobile-view .progress-container span:first-of-type {
+    grid-column: 1;
+    grid-row: 2;
+    justify-self: start;
+}
+
+body.mobile-view .progress-container span:last-of-type {
+    grid-column: 3;
+    grid-row: 2;
+    justify-self: end;
+}
+
+/* ─── 3. Apple Music 经典等距黄金对称排布 (彻底锁定 1:1 正圆) ────────── */
+
+body.mobile-view .transport-controls {
+    width: 100%;
+    max-width: 360px; /* 黄金操控热区，防止大屏扯裂 */
+    display: flex;
+    justify-content: space-between; /* 5 键均等呼吸分布 */
+    align-items: center;
+    padding: 0 clamp(4px, 3vw, 14px);
+    box-sizing: border-box;
+    margin: 0 auto;
+}
+
+/* 5 键严格对称黄金规格：全部显式设定 1:1 正圆与 ID 级高权重覆盖，杜绝被压扁为横向椭圆 */
+body.mobile-view #playModeBtn,
+body.mobile-view .transport-button--mode { 
+    order: 1; 
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    min-height: 42px !important;
+    max-width: 42px !important;
+    max-height: 42px !important;
+    flex: 0 0 42px !important;
+    aspect-ratio: 1 / 1 !important;
+    border-radius: 50% !important;
+    margin: 0 !important;
+}
+
+body.mobile-view .transport-button--prev { 
+    order: 2; 
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    max-width: 44px !important;
+    max-height: 44px !important;
+    flex: 0 0 44px !important;
+    aspect-ratio: 1 / 1 !important;
+    border-radius: 50% !important;
+    margin: 0 !important;
+}
+
+/* 核心播放大按钮：使用 #playPauseBtn 保证最高特异性权重，严格 56x56 1:1 纯正圆 */
+body.mobile-view #playPauseBtn,
+body.mobile-view .transport-button--play { 
+    order: 3; 
+    width: 56px !important;
+    height: 56px !important;
+    min-width: 56px !important;
+    min-height: 56px !important;
+    max-width: 56px !important;
+    max-height: 56px !important;
+    flex: 0 0 56px !important;
+    aspect-ratio: 1 / 1 !important;
+    border-radius: 50% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    background: var(--primary-color) !important;
+    color: #ffffff !important;
+    box-shadow: 
+        0 8px 24px -2px var(--palette-glow),
+        0 4px 12px rgba(0, 0, 0, 0.18) !important;
+    transition: transform 0.15s var(--spring-bounce), box-shadow 0.25s ease !important;
+}
+
+body.mobile-view #playPauseBtn .apple-svg-icon,
+body.mobile-view .transport-button--play .apple-svg-icon {
+    width: 26px !important;
+    height: 26px !important;
+    aspect-ratio: 1 / 1 !important;
+}
+
+body.mobile-view #playPauseBtn:active,
+body.mobile-view .transport-button--play:active {
+    transform: scale(0.92) !important;
+}
+
+body.mobile-view .transport-button--next { 
+    order: 4; 
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    max-width: 44px !important;
+    max-height: 44px !important;
+    flex: 0 0 44px !important;
+    aspect-ratio: 1 / 1 !important;
+    border-radius: 50% !important;
+    margin: 0 !important;
+}
+
+body.mobile-view #mobileQueueToggle,
+body.mobile-view .transport-button--queue { 
+    order: 5; 
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    min-height: 42px !important;
+    max-width: 42px !important;
+    max-height: 42px !important;
+    flex: 0 0 42px !important;
+    aspect-ratio: 1 / 1 !important;
+    border-radius: 50% !important;
+    margin: 0 !important;
+}
+
+body.mobile-view .transport-button {
+    border-radius: 50% !important;
+    border: none;
+    background: transparent;
+    color: var(--text-color);
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    box-shadow: none;
+    transition: transform 0.15s var(--spring-snappy), color 0.2s ease, opacity 0.2s ease;
+    flex-shrink: 0 !important;
+    aspect-ratio: 1 / 1 !important;
+}
+
+body.mobile-view .transport-button .apple-svg-icon {
+    width: 22px;
+    height: 22px;
+}
+
+body.mobile-view .transport-button:active {
+    transform: scale(0.88);
+}
+
+/* 模式与列表展开辅助按钮 */
+body.mobile-view .transport-button--mode,
+body.mobile-view .transport-button--queue {
+    color: var(--text-secondary-color);
+}
+
+body.mobile-view #mobileQueueToggle {
+    display: inline-flex !important;
+}
+
+/* 移动端播放模式按钮具备三种形态高亮：单曲循环或随机播放均激活高亮 */
+body.mobile-view .play-mode-btn.is-single,
+body.mobile-view .play-mode-btn.is-random,
+body.mobile-view .play-mode-btn.active {
+    color: var(--primary-color) !important;
+    opacity: 1 !important;
+}
+
+/* 隐藏移动端底栏冗余模块与独立随机按钮（移动端已由模式按钮一体化轮转） */
+body.mobile-view #shuffleToggleBtn,
+body.mobile-view #loadOnlineBtn,
+body.mobile-view .audio-tools,
+body.mobile-view .control-trailing,
+body.mobile-view .volume-container {
+    display: none !important;
+}

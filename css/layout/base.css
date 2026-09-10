@@ -1,0 +1,47 @@
+/* ─── Apple 全局零延迟按压反馈 (Kill Latency) ──────────────────── */
+button:active:not(:disabled),
+.transport-button:active:not(:disabled),
+.playlist-tab:active,
+.action-btn:active,
+.source-select-btn:active,
+.import-selected-btn:active {
+    transform: scale(0.94) !important;
+    transition: transform 80ms var(--spring-snappy) !important;
+}
+
+/* ─── Apple SF Symbols SVG 矢量图标标准 ──────────────────────── */
+.apple-svg-icon {
+    width: 1.2em;
+    height: 1.2em;
+    display: inline-block;
+    vertical-align: middle;
+    flex-shrink: 0;
+    transition: transform 0.2s var(--spring-smooth), fill 0.2s ease, stroke 0.2s ease;
+}
+
+/* ─── Spotlight 鼠标跟随聚光灯动效 (React-Bits / Impeccable) ───── */
+.spotlight-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.spotlight-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(350px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.16), transparent 75%);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 2;
+}
+
+.dark-mode .spotlight-card::before {
+    background: radial-gradient(350px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.08), transparent 75%);
+}
+
+.spotlight-card:hover::before {
+    opacity: 1;
+}
+

@@ -1,0 +1,794 @@
+/* ─── 搜索区域样式 (精巧紧凑玻璃条) ───────────────────────────── */
+.search-area,
+.search-area.spotlight-card {
+    grid-area: search;
+    background: var(--component-bg);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border-radius: 16px;
+    padding: 8px 14px;
+    border: 1px solid var(--apple-glass-border);
+    border-top: 1px solid var(--apple-glass-border-top);
+    position: relative;
+    transition: all 0.35s var(--spring-smooth);
+    z-index: 100 !important;
+    overflow: visible !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+.search-area *,
+.search-area *::before,
+.search-area *::after {
+    box-sizing: border-box;
+}
+
+/* 搜索模式下的搜索区域 */
+.container.search-mode .search-area {
+    background: var(--component-bg);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    box-shadow: 0 16px 48px rgba(0,0,0,0.18);
+    border: 1.5px solid var(--primary-color);
+}
+
+.search-header {
+    display: none;
+}
+
+.search-controls-wrapper {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 0;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.search-bar-unified {
+    flex: 1;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.search-input-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    height: 38px;
+    box-sizing: border-box;
+    padding: 0 12px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.3);
+    transition: all 0.25s ease;
+}
+
+.dark-mode .search-input-wrapper {
+    background: rgba(0, 0, 0, 0.25);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+.search-input-wrapper:focus-within {
+    border-color: var(--primary-color);
+    background: rgba(255, 255, 255, 0.55);
+    box-shadow: 0 0 0 3px rgba(16, 163, 127, 0.16);
+}
+
+.dark-mode .search-input-wrapper:focus-within {
+    background: rgba(0, 0, 0, 0.45);
+    box-shadow: 0 0 0 3px rgba(52, 209, 182, 0.2);
+}
+
+.search-icon {
+    color: var(--text-secondary-color);
+    margin-right: 8px;
+    font-size: 14px;
+}
+
+.search-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: var(--text-color);
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    padding: 0;
+}
+
+/* 一键清空搜索内容按钮 (Apple Clear Button) */
+.search-clear-btn {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: none !important;
+    background: transparent !important;
+    color: var(--text-secondary-color, #8e8e93);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 6px;
+    flex-shrink: 0;
+    transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.15s ease, opacity 0.15s ease;
+    outline: none;
+    box-shadow: none !important;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.search-clear-btn:hover {
+    color: var(--text-color, #1d1d1f);
+    transform: scale(1.12);
+}
+
+.search-clear-btn:active {
+    transform: scale(0.9);
+}
+
+.dark-mode .search-clear-btn:hover {
+    color: #ffffff;
+}
+
+.search-clear-btn svg {
+    width: 16px;
+    height: 16px;
+    display: block;
+    pointer-events: none;
+}
+
+.search-controls-wrapper,
+.search-bar-unified {
+    overflow: visible !important;
+}
+
+.source-select-wrapper {
+    position: relative;
+    flex-shrink: 0;
+    z-index: 1000 !important;
+    overflow: visible !important;
+}
+
+.source-select-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    height: 38px;
+    box-sizing: border-box;
+    padding: 0 12px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.3);
+    color: var(--text-color);
+    font-size: 13px;
+    font-family: inherit;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    min-width: 110px;
+    position: relative;
+    box-shadow: none;
+}
+
+.dark-mode .source-select-btn {
+    background: rgba(0, 0, 0, 0.25);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+.source-select-btn:hover,
+.source-select-btn.active {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    box-shadow: 0 6px 18px rgba(16, 163, 127, 0.18);
+}
+
+.source-select-btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(16, 163, 127, 0.18);
+}
+
+.source-select-btn .caret-icon {
+    font-size: 0.8em;
+    transition: transform 0.25s ease;
+}
+
+.source-select-btn.active .caret-icon {
+    transform: rotate(-180deg);
+}
+
+.source-select-btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(26, 188, 156, 0.18);
+}
+
+.source-select-btn .caret-icon {
+    font-size: 0.8em;
+    transition: transform 0.25s ease;
+}
+
+.source-select-btn.active .caret-icon {
+    transform: rotate(-180deg);
+}
+
+.source-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: auto;
+    bottom: auto;
+    background: rgba(255, 255, 255, 0.82);
+    border-radius: 14px;
+    box-shadow: 0 18px 42px -6px rgba(0, 0, 0, 0.16), 0 0 1px 1px rgba(255, 255, 255, 0.45) inset;
+    border: 1px solid var(--apple-glass-border);
+    border-top: 1px solid var(--apple-glass-border-top);
+    box-sizing: border-box;
+    min-width: 140px;
+    max-height: 320px;
+    padding: 6px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px) scale(0.98);
+    transition: opacity 0.22s var(--spring-smooth), transform 0.22s var(--spring-smooth);
+    backdrop-filter: blur(28px) saturate(190%);
+    -webkit-backdrop-filter: blur(28px) saturate(190%);
+    z-index: 100000;
+    pointer-events: none;
+}
+
+.dark-mode .source-menu {
+    background: rgba(30, 34, 42, 0.85);
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 22px 54px -8px rgba(0, 0, 0, 0.65), 0 0 1px 1px rgba(255, 255, 255, 0.08) inset;
+}
+
+.source-menu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+.source-menu.open-upwards {
+    top: auto;
+    bottom: calc(100% + 8px);
+    transform-origin: bottom center;
+}
+
+.source-menu.open-downwards {
+    top: calc(100% + 8px);
+    bottom: auto;
+    transform-origin: top center;
+}
+
+.source-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 12px;
+    border-radius: 9px;
+    margin: 2px 0;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: all 0.18s var(--spring-smooth);
+    background: transparent;
+    user-select: none;
+}
+
+.source-option:hover {
+    background: rgba(0, 0, 0, 0.06);
+    color: var(--text-color);
+}
+
+.dark-mode .source-option:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+}
+
+.source-option.active {
+    background: var(--primary-color) !important;
+    color: #ffffff !important;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.14);
+}
+
+.source-option:active {
+    transform: scale(0.98);
+}
+
+.source-option i {
+    font-size: 0.85em;
+    opacity: 0.8;
+}
+
+.source-option.active i {
+    opacity: 1;
+    color: #ffffff;
+}
+
+.search-btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    height: 38px;
+    box-sizing: border-box;
+    padding: 0 18px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    transition: all 0.2s var(--spring-smooth);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.search-btn .apple-svg-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.search-btn:hover:not(:disabled) {
+    background: var(--primary-color-dark);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
+
+.search-btn:active:not(:disabled) {
+    transform: scale(0.95);
+}
+
+.search-btn:disabled {
+    background: var(--text-secondary-color);
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* 搜索结果区域 - 默认非搜索模式下不占位，彻底消除上下不等高留白 */
+.search-results {
+    display: none !important;
+    max-height: 0;
+    overflow: hidden;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    opacity: 0;
+    pointer-events: none;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.search-results-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    position: relative;
+    z-index: 2;
+    background: none;
+}
+
+.import-dropdown {
+    position: relative;
+    display: inline-flex;
+    align-items: stretch;
+    z-index: 20000;
+}
+
+.import-selected-btn {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    writing-mode: horizontal-tb;
+    white-space: nowrap;
+}
+
+.import-dropdown-caret {
+    font-size: 12px;
+}
+
+.import-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(28px) saturate(190%);
+    -webkit-backdrop-filter: blur(28px) saturate(190%);
+    border: 1px solid var(--apple-glass-border);
+    border-top: 1px solid var(--apple-glass-border-top);
+    border-radius: 14px;
+    box-shadow: 0 18px 44px -6px rgba(0, 0, 0, 0.16), 0 0 1px 1px rgba(255, 255, 255, 0.5) inset;
+    padding: 6px;
+    min-width: 176px;
+    z-index: 20000;
+    pointer-events: auto;
+    box-sizing: border-box;
+}
+
+.dark-mode .import-dropdown-menu {
+    background: rgba(30, 34, 42, 0.88);
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 24px 60px -10px rgba(0, 0, 0, 0.7), 0 0 1px 1px rgba(255, 255, 255, 0.08) inset;
+}
+
+.import-dropdown-menu[hidden] {
+    display: none;
+}
+
+.import-dropdown-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 9px;
+    margin: 2px 0;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-color);
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    transition: all 0.18s var(--spring-smooth);
+    text-align: left;
+    box-sizing: border-box;
+    user-select: none;
+}
+
+.import-dropdown-item:hover {
+    background: rgba(0, 0, 0, 0.06);
+    color: var(--text-color);
+}
+
+.dark-mode .import-dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+}
+
+.search-results-list {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+}
+
+/* 搜索模式下的搜索结果 */
+.container.search-mode .search-results {
+    display: flex !important;
+    max-height: none;
+    height: 100%;
+    border-top: 1px solid var(--apple-glass-border);
+    margin-top: 12px !important;
+    margin-left: -14px !important;
+    margin-right: -14px !important;
+    margin-bottom: -8px !important;
+    padding: 14px 14px 20px 14px !important;
+    opacity: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    pointer-events: auto;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+
+.search-results::-webkit-scrollbar,
+.search-results-list::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
+/* 搜索模式下列表为空时展示优雅引导框 */
+.container.search-mode .search-results-list:empty::before {
+    content: "输入歌曲、歌手或专辑\A跨平台畅搜高品质音乐";
+    white-space: pre-line;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    margin: 48px auto 16px;
+    padding: 20px 28px;
+    font-size: 0.92rem;
+    font-weight: 500;
+    line-height: 1.65;
+    letter-spacing: -0.01em;
+    color: var(--text-secondary-color, #8e8e93);
+    max-width: 260px;
+    border-radius: 16px;
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px dashed rgba(0, 0, 0, 0.12);
+    box-sizing: border-box;
+}
+
+body.dark-mode .container.search-mode .search-results-list:empty::before {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: #aeaeb2;
+}
+
+.search-result-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 8px;
+    background: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transform: translateY(20px);
+    opacity: 0;
+    animation: slideInUp 0.4s ease forwards;
+    gap: 14px;
+}
+
+.search-result-item:nth-child(1) { animation-delay: 0.1s; }
+.search-result-item:nth-child(2) { animation-delay: 0.15s; }
+.search-result-item:nth-child(3) { animation-delay: 0.2s; }
+.search-result-item:nth-child(4) { animation-delay: 0.25s; }
+.search-result-item:nth-child(5) { animation-delay: 0.3s; }
+
+@keyframes slideInUp {
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.search-result-item:hover:not(.selected) {
+    background: var(--item-hover-bg);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.search-result-item.selected {
+    background: var(--item-current-bg);
+    border-color: var(--primary-color);
+    box-shadow: 0 12px 28px rgba(26, 188, 156, 0.25);
+    transform: translateY(0);
+}
+
+.search-result-item.selected .search-result-title {
+    color: var(--primary-color);
+}
+
+.search-result-item.selected .search-result-select {
+    border-color: var(--primary-color);
+    background: var(--primary-color);
+    color: #ffffff;
+    box-shadow: 0 6px 16px rgba(26, 188, 156, 0.35);
+}
+
+.search-result-item.selected .search-result-select i {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.search-result-select {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.65);
+    color: transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.search-result-select i {
+    opacity: 0;
+    transform: scale(0.6);
+    transition: all 0.2s ease;
+    pointer-events: none;
+}
+
+.search-result-select:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(26, 188, 156, 0.35);
+}
+
+.search-result-item .search-result-select:hover {
+    border-color: var(--primary-color);
+}
+
+.search-result-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.search-result-title {
+    font-weight: 600;
+    color: var(--text-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 15px;
+    margin-bottom: 4px;
+}
+
+.search-result-artist {
+    font-size: 13px;
+    color: var(--text-secondary-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.search-result-actions {
+    display: flex;
+    gap: 4px;
+    margin-left: 12px;
+    flex-shrink: 0;
+}
+
+.search-result-actions .action-btn {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border-radius: 8px;
+    justify-content: center;
+    font-size: 13px;
+    gap: 0;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-secondary-color);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    z-index: auto;
+    font-weight: normal;
+    box-shadow: none;
+    transition: color 0.18s ease, transform 0.18s ease;
+}
+
+.search-result-actions .action-btn i {
+    margin: 0;
+}
+
+/* 搜索按钮 hover 重置基础类的彩色背景 */
+.search-result-actions .action-btn:hover {
+    background: transparent;
+    transform: scale(1.1);
+    box-shadow: none;
+}
+
+/* 收藏按钮 - 悬停变红心 */
+.search-result-actions .action-btn.favorite:hover {
+    color: #ff4d67;
+    transform: scale(1.1);
+}
+
+/* 收藏激活（已收藏）状态 - 红心 */
+.search-result-actions .action-btn.favorite.is-active {
+    color: #ff4d67;
+}
+
+.search-result-actions .action-btn.favorite.is-active:hover {
+    color: #ff4d67;
+    transform: scale(1.1);
+}
+
+/* 播放按钮 - 悬停变主题色 */
+.search-result-actions .action-btn.play:hover {
+    color: var(--primary-color);
+    transform: scale(1.1);
+}
+
+/* 下载按钮 - 悬停变绿色 */
+.search-result-actions .action-btn.download {
+    position: relative;
+    background: transparent;
+    padding: 0;
+    font-size: 13px;
+}
+
+.search-result-actions .action-btn.download:hover {
+    color: #2ecc71;
+    background: transparent;
+    transform: scale(1.1);
+    box-shadow: none;
+}
+
+
+.import-selected-btn {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    writing-mode: horizontal-tb;
+    white-space: nowrap;
+    border: none;
+    border-radius: 999px;
+    padding: 8px 16px;
+    background: var(--primary-color);
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+    box-shadow: 0 10px 24px rgba(26, 188, 156, 0.25);
+}
+
+.import-selected-btn:disabled {
+    cursor: not-allowed;
+    background: rgba(127, 140, 141, 0.5);
+    box-shadow: none;
+    filter: none;
+}
+
+.import-selected-btn:not(:disabled):hover,
+.import-selected-btn:not(:disabled):focus-visible {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 30px rgba(26, 188, 156, 0.32);
+    filter: brightness(1.05);
+}
+
+.import-selected-btn:focus-visible {
+    outline: none;
+}
+
+.import-selected-count {
+    font-weight: 500;
+}
+
+.action-btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    position: relative;
+    z-index: 10000;
+    font-weight: 500;
+}
+
+.action-btn:hover {
+    background: var(--primary-color-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(26, 188, 156, 0.3);
+}
+
+.action-btn.download {
+    background: var(--success-color);
+    padding: 4px 8px;
+    font-size: 10px;
+}
+
+.action-btn.download:hover {
+    background: #27ae60;
+    box-shadow: 0 4px 12px rgba(46, 204, 113, 0.3);
+}
+
+
+
