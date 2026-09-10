@@ -3,19 +3,9 @@
  */
 
 export const EXPLORE_RADAR_GENRES = [
-    "流行",
-    "摇滚",
-    "古典音乐",
-    "民谣",
-    "电子",
-    "爵士",
-    "说唱",
-    "乡村",
-    "蓝调",
-    "R&B",
-    "金属",
-    "嘻哈",
-    "轻音乐",
+    "热歌榜",
+    "新歌榜",
+    "飙升榜",
 ];
 
 export const SOURCE_OPTIONS = [

@@ -99,12 +99,15 @@ export function closeSettingsModal(dom) {
 export function renderGenreList(dom) {
     if (!dom || !dom.radarGenreList) return;
     
-    dom.radarGenreList.innerHTML = EXPLORE_RADAR_GENRES.map(genre => `
+    dom.radarGenreList.innerHTML = EXPLORE_RADAR_GENRES.map(genre => {
+        const label = (typeof window !== "undefined" && typeof window.t === "function") ? window.t(genre) : genre;
+        return `
         <div class="genre-item">
             <input type="checkbox" id="genre-${genre}" value="${genre}" checked>
-            <label for="genre-${genre}" class="genre-label">${genre}</label>
+            <label for="genre-${genre}" class="genre-label">${label}</label>
         </div>
-    `).join("");
+        `;
+    }).join("");
 }
 
 export function applySettingsToUI(dom, state) {
@@ -121,10 +124,22 @@ export async function loadSettings(dom, state) {
     if (localSettings) {
         try {
             state.radarSettings = JSON.parse(localSettings);
+            // 兼容迁移：如果旧数据中全是旧曲风（如“流行”、“摇滚”），自动重置为三大官方榜单
+            if (Array.isArray(state.radarSettings?.genres)) {
+                const validGenres = state.radarSettings.genres.filter(g => EXPLORE_RADAR_GENRES.includes(g));
+                state.radarSettings.genres = validGenres.length > 0 ? validGenres : [...EXPLORE_RADAR_GENRES];
+            } else {
+                state.radarSettings = { genres: [...EXPLORE_RADAR_GENRES] };
+            }
             applySettingsToUI(dom, state);
         } catch (e) {
             console.error("解析本地设置失败:", e);
+            state.radarSettings = { genres: [...EXPLORE_RADAR_GENRES] };
+            applySettingsToUI(dom, state);
         }
+    } else {
+        state.radarSettings = { genres: [...EXPLORE_RADAR_GENRES] };
+        applySettingsToUI(dom, state);
     }
 }
 
@@ -133,7 +148,10 @@ export async function saveSettings(dom, state) {
     const selectedGenres = Array.from(dom.radarGenreList.querySelectorAll("input:checked")).map(cb => cb.value);
     
     if (selectedGenres.length === 0) {
-        showNotification("请至少选择一个风格", "warning", dom);
+        const tip = (typeof window !== "undefined" && typeof window.t === "function") 
+            ? window.t("请至少选择一个榜单") 
+            : "请至少选择一个榜单";
+        showNotification(tip, "warning", dom);
         return;
     }
 
@@ -149,7 +167,10 @@ export async function saveSettings(dom, state) {
         });
     }
 
-    showNotification("设置已保存", "success", dom);
+    const successTip = (typeof window !== "undefined" && typeof window.t === "function") 
+        ? window.t("设置已保存") 
+        : "设置已保存";
+    showNotification(successTip, "success", dom);
     closeSettingsModal(dom);
 }
 

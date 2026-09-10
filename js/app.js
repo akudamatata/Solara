@@ -526,12 +526,20 @@ export async function exploreOnlineMusic() {
     try {
         setLoadingState(true);
 
-        // 从三大官方榜单（热歌榜、飙升榜、新歌榜）中随机选择一个
-        const targetPlaylist = (Array.isArray(RADAR_PLAYLISTS) && RADAR_PLAYLISTS.length > 0)
-            ? RADAR_PLAYLISTS[Math.floor(Math.random() * RADAR_PLAYLISTS.length)]
+        // 获取用户在设置中勾选的榜单（若未配置或空则默认全选）
+        const selectedGenres = Array.isArray(state?.radarSettings?.genres) && state.radarSettings.genres.length > 0
+            ? state.radarSettings.genres
+            : EXPLORE_RADAR_GENRES;
+
+        const availablePlaylists = (Array.isArray(RADAR_PLAYLISTS) ? RADAR_PLAYLISTS : [])
+            .filter(p => selectedGenres.includes(p.name) || selectedGenres.includes(p.id));
+
+        const pool = availablePlaylists.length > 0 ? availablePlaylists : RADAR_PLAYLISTS;
+        const targetPlaylist = (pool.length > 0)
+            ? pool[Math.floor(Math.random() * pool.length)]
             : { id: "3778678", name: "热歌榜" };
 
-        debugLog(`[音乐雷达] 正在从【${targetPlaylist.name}】(ID: ${targetPlaylist.id}) 抓取官方 Top 20...`);
+        debugLog(`[音乐雷达] 从设置榜单 [${selectedGenres.join(" / ")}] 随机抽选【${targetPlaylist.name}】(ID: ${targetPlaylist.id})，正在抓取 Top 20...`);
 
         const results = await API.getRadarPlaylist(targetPlaylist.id, { limit: 20 });
         if (!Array.isArray(results) || results.length === 0) {

@@ -81,9 +81,15 @@
         "复制失败": "Copy failed",
         "设置": "Settings",
         "探索雷达风格": "Radar Styles",
+        "探索雷达榜单": "Radar Charts",
+        "热歌榜": "Hot Songs",
+        "新歌榜": "New Songs",
+        "飙升榜": "Soaring Songs",
         "保存设置": "Save Settings",
         "已保存设置": "Settings saved",
+        "设置已保存": "Settings saved",
         "请至少选择一个风格": "Please select at least one genre",
+        "请至少选择一个榜单": "Please select at least one chart",
         "云端加载设置失败": "Failed to load settings from cloud"
     };
 

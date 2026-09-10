@@ -6,7 +6,8 @@ import {
     normalizeQuality,
     normalizeSource,
     LAST_SEARCH_STATE_STORAGE_KEY,
-    SOURCE_OPTIONS
+    SOURCE_OPTIONS,
+    EXPLORE_RADAR_GENRES
 } from "./constants.js";
 import {
     safeGetLocalStorage,
@@ -105,8 +106,19 @@ const savedCurrentPlaylist = (() => {
     return playlists.includes(stored) ? stored : "playlist";
 })();
 
+const savedRadarSettings = (() => {
+    const stored = safeGetLocalStorage("radarSettings");
+    const parsed = parseJSON(stored, null);
+    if (parsed && Array.isArray(parsed.genres)) {
+        const valid = parsed.genres.filter(g => EXPLORE_RADAR_GENRES.includes(g));
+        if (valid.length > 0) return { genres: valid };
+    }
+    return { genres: [...EXPLORE_RADAR_GENRES] };
+})();
+
 // 2. 构建状态单例
 export const state = {
+    radarSettings: savedRadarSettings,
     onlineSongs: [],
     searchResults: cloneSearchResults(savedLastSearchState?.results) || [],
     renderedSearchCount: 0,
