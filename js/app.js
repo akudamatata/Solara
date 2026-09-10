@@ -60,7 +60,8 @@ import {
     openSourceMenu,
     closeSourceMenu,
     toggleSourceMenu,
-    handlePlayerQualitySelection
+    handlePlayerQualitySelection,
+    handleSourceSelection
 } from "./core/quality.js";
 import {
     getSongKey,
@@ -1070,6 +1071,17 @@ function setupEventHandlers() {
     // 浮动菜单
     if (dom.sourceSelectButton) {
         dom.sourceSelectButton.addEventListener("click", (e) => toggleSourceMenu(e, state, dom, isMobileView));
+    }
+    if (dom.sourceMenu) {
+        dom.sourceMenu.addEventListener("click", (e) => handleSourceSelection(e, state, dom, {
+            showNotification,
+            onSourceChange: () => {
+                const query = dom.searchInput ? dom.searchInput.value.trim() : "";
+                if (query) {
+                    performSearch(false, state, dom, getSearchCallbacks(), debugLog);
+                }
+            }
+        }));
     }
     if (dom.qualityToggle) {
         dom.qualityToggle.addEventListener("click", (e) => togglePlayerQualityMenu(e, state, dom, isMobileView));

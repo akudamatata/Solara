@@ -39,9 +39,29 @@
             link.href = "css/mobile.css";
             link.id = "mobileStylesheet";
             document.head.appendChild(link);
+            let stableViewportHeight = window.innerHeight;
             const setViewportUnit = () => {
-                const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-                document.documentElement.style.setProperty("--mobile-vh", `${viewportHeight}px`);
+                const vv = window.visualViewport;
+                const winH = window.innerHeight;
+                const currentH = vv ? vv.height : winH;
+
+                const isInputActive = Boolean(
+                    document.activeElement && 
+                    (document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "TEXTAREA")
+                );
+                const keyboardHeight = Math.max(0, winH - currentH);
+                const isKeyboardOpen = isInputActive && keyboardHeight > 120;
+
+                if (document.body) {
+                    document.body.classList.toggle("keyboard-open", isKeyboardOpen);
+                }
+                document.documentElement.style.setProperty("--keyboard-height", `${keyboardHeight}px`);
+
+                // 只有在没有键盘弹起（真实改变屏幕大小/旋转）时才更新稳定视口高度
+                if (!isKeyboardOpen || !stableViewportHeight) {
+                    stableViewportHeight = currentH;
+                    document.documentElement.style.setProperty("--mobile-vh", `${currentH}px`);
+                }
             };
 
             const applyBodyClass = () => {
@@ -57,11 +77,22 @@
             }
 
             window.addEventListener("resize", setViewportUnit);
-            window.addEventListener("orientationchange", setViewportUnit);
+            window.addEventListener("orientationchange", () => {
+                stableViewportHeight = window.innerHeight;
+                setViewportUnit();
+            });
             if (window.visualViewport) {
                 window.visualViewport.addEventListener("resize", setViewportUnit);
                 window.visualViewport.addEventListener("scroll", setViewportUnit);
             }
+            window.addEventListener("focusin", () => setTimeout(setViewportUnit, 100));
+            window.addEventListener("focusout", () => {
+                setTimeout(() => {
+                    if (document.body) document.body.classList.remove("keyboard-open");
+                    document.documentElement.style.setProperty("--keyboard-height", "0px");
+                    setViewportUnit();
+                }, 150);
+            });
 
             setViewportUnit();
         })();

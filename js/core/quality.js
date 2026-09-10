@@ -79,9 +79,9 @@ export function buildSourceMenu(state, dom) {
     const optionsHtml = SOURCE_OPTIONS.map(option => {
         const isActive = option.value === state.searchSource;
         return `
-            <div class="source-option${isActive ? " active" : ""}" data-source="${option.value}">
+            <button type="button" class="source-option source-menu-item${isActive ? " active" : ""}" data-source="${option.value}" role="option" aria-selected="${isActive}">
                 ${option.label}
-            </div>
+            </button>
         `;
     }).join("");
     dom.sourceMenu.innerHTML = optionsHtml;
@@ -441,5 +441,34 @@ export function handlePlayerQualitySelection(event, state, dom, callbacks = {}) 
     const { quality } = option.dataset;
     if (quality) {
         selectPlaybackQuality(quality, state, dom, callbacks);
+    }
+}
+
+export function selectSearchSource(source, state, dom, callbacks = {}) {
+    const normalized = normalizeSource(source);
+    state.searchSource = normalized;
+    safeSetLocalStorage("searchSource", normalized);
+    updateSourceLabel(state, dom);
+    buildSourceMenu(state, dom);
+    closeSourceMenu(state, dom);
+
+    const option = SOURCE_OPTIONS.find(item => item.value === normalized);
+    if (option && typeof callbacks.showNotification === "function") {
+        callbacks.showNotification(`已切换音源为 ${option.label}`, "info", dom);
+    }
+
+    if (typeof callbacks.onSourceChange === "function") {
+        callbacks.onSourceChange(normalized);
+    }
+}
+
+export function handleSourceSelection(event, state, dom, callbacks = {}) {
+    const option = event.target.closest(".source-option, .source-menu-item");
+    if (!option) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const { source } = option.dataset;
+    if (source) {
+        selectSearchSource(source, state, dom, callbacks);
     }
 }
