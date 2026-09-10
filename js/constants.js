@@ -25,6 +25,12 @@ export const SOURCE_OPTIONS = [
     { value: "bilibili", label: "哔哩哔哩" }
 ];
 
+export const RADAR_PLAYLISTS = [
+    { id: "3778678", name: "热歌榜", description: "网易云音乐官方热歌榜" },
+    { id: "19723756", name: "飙升榜", description: "网易云音乐官方飙升榜" },
+    { id: "3779629", name: "新歌榜", description: "网易云音乐官方新歌榜" }
+];
+
 export function normalizeSource(value) {
     const allowed = SOURCE_OPTIONS.map(option => option.value);
     return allowed.includes(value) ? value : SOURCE_OPTIONS[0].value;
@@ -164,7 +170,7 @@ export const API = {
     getRadarPlaylist: async (playlistId = "3778678", options = {}) => {
         const signature = API.generateSignature();
 
-        let limit = 50;
+        let limit = 20;
         let offset = 0;
 
         if (typeof options === "number") {
@@ -180,7 +186,7 @@ export const API = {
             }
         }
 
-        limit = Math.max(1, Math.min(200, Math.trunc(limit)) || 50);
+        limit = Math.max(1, Math.min(200, Math.trunc(limit)) || 20);
         offset = Math.max(0, Math.trunc(offset) || 0);
 
         const params = new URLSearchParams({
@@ -203,10 +209,12 @@ export const API = {
             return tracks.map(track => ({
                 id: track.id,
                 name: track.name,
-                artist: Array.isArray(track.ar) ? track.ar.map(artist => artist.name).join(" / ") : "",
+                artist: Array.isArray(track.ar) ? track.ar.map(artist => artist.name).join(" / ") : (track.ar?.name || "未知艺术家"),
+                album: track.al?.name || "",
                 source: "netease",
                 lyric_id: track.id,
                 pic_id: track.al?.pic_str || track.al?.pic || track.al?.picUrl || "",
+                url_id: track.id,
             }));
         } catch (error) {
             console.error("API request failed:", error);

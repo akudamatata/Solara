@@ -5,6 +5,7 @@
 import {
     API,
     EXPLORE_RADAR_GENRES,
+    RADAR_PLAYLISTS,
     LAST_SEARCH_STATE_STORAGE_KEY,
     STORAGE_KEYS_TO_SYNC,
     normalizeQuality,
@@ -445,16 +446,14 @@ export async function exploreOnlineMusic() {
     try {
         setLoadingState(true);
 
-        const genres = (state.radarSettings && state.radarSettings.genres && state.radarSettings.genres.length > 0)
-            ? state.radarSettings.genres
-            : EXPLORE_RADAR_GENRES;
-        const randomGenre = genres[Math.floor(Math.random() * genres.length)];
-        const sources = ["netease", "kuwo"];
-        const source = sources[Math.floor(Math.random() * sources.length)];
+        // 从三大官方榜单（热歌榜、飙升榜、新歌榜）中随机选择一个
+        const targetPlaylist = (Array.isArray(RADAR_PLAYLISTS) && RADAR_PLAYLISTS.length > 0)
+            ? RADAR_PLAYLISTS[Math.floor(Math.random() * RADAR_PLAYLISTS.length)]
+            : { id: "3778678", name: "热歌榜" };
 
-        const results = await API.search(randomGenre, source, 30, 1, debugLog);
+        const results = await API.getRadarPlaylist(targetPlaylist.id, { limit: 20 });
         if (!Array.isArray(results) || results.length === 0) {
-            showNotification("探索雷达：未找到歌曲", "error", dom);
+            showNotification(`探索雷达：未能从【${targetPlaylist.name}】获取到歌曲`, "error", dom);
             return;
         }
 
@@ -463,10 +462,10 @@ export async function exploreOnlineMusic() {
             name: song.name,
             artist: Array.isArray(song.artist) ? song.artist.join(" / ") : (song.artist || "未知艺术家"),
             album: song.album || "",
-            source: song.source || source,
+            source: song.source || "netease",
             lyric_id: song.lyric_id || song.id,
             pic_id: song.pic_id || song.pic || "",
-            url_id: song.url_id,
+            url_id: song.url_id || song.id,
         }));
 
         const existingSongs = Array.isArray(state.playlistSongs) ? state.playlistSongs.slice() : [];
@@ -481,7 +480,7 @@ export async function exploreOnlineMusic() {
         }
 
         if (appendedSongs.length === 0) {
-            showNotification("探索雷达：本次未找到新的歌曲，当前列表已包含这些曲目", "info", dom);
+            showNotification(`探索雷达：已刷新【${targetPlaylist.name}】前20首，当前列表已全部包含`, "info", dom);
             return;
         }
 
@@ -492,7 +491,7 @@ export async function exploreOnlineMusic() {
         renderPlaylist(state, dom, getPlaylistCallbacks());
         updatePlaylistHighlight(state, dom);
 
-        showNotification(`探索雷达：新增${appendedSongs.length}首 ${randomGenre} 歌曲`, "success", dom);
+        showNotification(`探索雷达：已从【${targetPlaylist.name}】精选前20首，新增 ${appendedSongs.length} 首曲目`, "success", dom);
 
         if (existingSongs.length === 0 && state.playlistSongs.length > 0) {
             await playPlaylistSong(0);
