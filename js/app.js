@@ -1129,6 +1129,17 @@ export async function bootstrap() {
     updateAllTabsIndicators();
     window.addEventListener("resize", () => updateAllTabsIndicators(), { passive: true });
 
+    // 初始化音量条状态与填充进度，防止初次加载时滑轨高亮溢出
+    if (dom.volumeSlider) {
+        const vol = Number.isFinite(state.volume) ? state.volume : 0.8;
+        dom.volumeSlider.value = String(vol);
+        if (dom.audioPlayer) {
+            dom.audioPlayer.volume = vol;
+        }
+        updateVolumeSliderBackground(dom, vol);
+        updateVolumeIcon(dom, vol);
+    }
+
     if (state.currentSong) {
         const savedTime = state.currentList === "favorite"
             ? (state.favoritePlaybackTime || 0)

@@ -290,7 +290,7 @@ html:not(.mobile-view) .transport-controls {
     width: 76px;
     height: 5px;
     border-radius: 999px;
-    background: linear-gradient(to right, var(--primary-color) 0%, var(--primary-color) var(--volume-progress, 100%), rgba(255, 255, 255, 0.2) var(--volume-progress, 100%), rgba(255, 255, 255, 0.1) 100%);
+    background: linear-gradient(to right, var(--primary-color) 0%, var(--primary-color) var(--volume-progress, 80%), rgba(255, 255, 255, 0.2) var(--volume-progress, 80%), rgba(255, 255, 255, 0.1) 100%);
     cursor: pointer;
 }
 
