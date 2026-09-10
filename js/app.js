@@ -262,6 +262,7 @@ export async function playSearchResult(index) {
 
     state.currentPlaylist = "playlist";
     state.currentList = "playlist";
+    savePlayerState();
 
     try {
         await playSong(song, {}, state, dom, getAudioCallbacks(), debugLog);
@@ -1182,18 +1183,28 @@ export async function applyPersistentSnapshotFromRemote(data) {
     if (typeof data.playlistSongs === "string") {
         const playlist = parseJSON(data.playlistSongs, null);
         if (Array.isArray(playlist)) {
-            state.playlistSongs = playlist;
-            safeSetLocalStorage("playlistSongs", data.playlistSongs, { skipRemote: true });
-            playlistUpdated = true;
+            // 如果云端是空的，但本地已有歌曲，保留本地已有歌曲并向云端备份，防止误清空本地
+            if (playlist.length === 0 && Array.isArray(state.playlistSongs) && state.playlistSongs.length > 0) {
+                safeSetLocalStorage("playlistSongs", JSON.stringify(state.playlistSongs));
+            } else {
+                state.playlistSongs = playlist;
+                safeSetLocalStorage("playlistSongs", data.playlistSongs, { skipRemote: true });
+                playlistUpdated = true;
+            }
         }
     }
 
     if (typeof data.favoriteSongs === "string") {
         const favorites = parseJSON(data.favoriteSongs, null);
         if (Array.isArray(favorites)) {
-            state.favoriteSongs = favorites;
-            safeSetLocalStorage("favoriteSongs", data.favoriteSongs, { skipRemote: true });
-            favoritesUpdated = true;
+            // 如果云端是空的，但本地已有收藏，保留本地已有收藏并向云端备份
+            if (favorites.length === 0 && Array.isArray(state.favoriteSongs) && state.favoriteSongs.length > 0) {
+                safeSetLocalStorage("favoriteSongs", JSON.stringify(state.favoriteSongs));
+            } else {
+                state.favoriteSongs = favorites;
+                safeSetLocalStorage("favoriteSongs", data.favoriteSongs, { skipRemote: true });
+                favoritesUpdated = true;
+            }
         }
     }
 
@@ -1229,10 +1240,14 @@ export async function applyPersistentSnapshotFromRemote(data) {
             const clamped = Math.min(Math.max(volume, 0), 1);
             state.volume = clamped;
             safeSetLocalStorage("playerVolume", String(clamped), { skipRemote: true });
-            if (dom.audioPlayer) dom.audioPlayer.volume = clamped;
-            if (dom.volumeSlider) dom.volumeSlider.value = String(clamped);
-            updateVolumeSliderBackground(dom, clamped);
-            updateVolumeIcon(dom, clamped);
+            try {
+                if (dom.audioPlayer) dom.audioPlayer.volume = clamped;
+                if (dom.volumeSlider) dom.volumeSlider.value = String(clamped);
+                updateVolumeSliderBackground(dom, clamped);
+                updateVolumeIcon(dom, clamped);
+            } catch (err) {
+                console.warn("更新音量设置失败:", err);
+            }
         }
     }
 
@@ -1400,14 +1415,18 @@ export async function bootstrap() {
     window.addEventListener("resize", () => updateAllTabsIndicators(), { passive: true });
 
     // 初始化音量条状态与填充进度，防止初次加载时滑轨高亮溢出
-    if (dom.volumeSlider) {
-        const vol = Number.isFinite(state.volume) ? state.volume : 0.8;
-        dom.volumeSlider.value = String(vol);
-        if (dom.audioPlayer) {
-            dom.audioPlayer.volume = vol;
+    try {
+        if (dom.volumeSlider) {
+            const vol = Number.isFinite(state.volume) ? state.volume : 0.8;
+            dom.volumeSlider.value = String(vol);
+            if (dom.audioPlayer) {
+                dom.audioPlayer.volume = vol;
+            }
+            updateVolumeSliderBackground(dom, vol);
+            updateVolumeIcon(dom, vol);
         }
-        updateVolumeSliderBackground(dom, vol);
-        updateVolumeIcon(dom, vol);
+    } catch (err) {
+        console.warn("初始化音量条组件失败:", err);
     }
 
     if (state.currentSong) {
@@ -1461,6 +1480,12 @@ export async function bootstrap() {
         }
     } catch (e) {
         console.warn("远程数据漫游检测失败:", e);
+    } finally {
+        if (!isRemoteSyncEnabled()) {
+            persistentStorage.checkAvailability().then((avail) => {
+                if (avail) setRemoteSyncEnabled(true);
+            });
+        }
     }
 }
 

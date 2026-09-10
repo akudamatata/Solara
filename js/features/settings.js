@@ -262,11 +262,14 @@ export function initSettings(dom, state, callbacks = {}) {
                     await callbacks.manualSync();
                     showNotification("云端数据漫游同步成功", "success", dom);
                 } catch (e) {
-                    showNotification("云端同步失败，请检查网络或服务端", "error", dom);
+                    console.error("手动同步失败:", e);
+                    showNotification(e.message ? `同步失败: ${e.message}` : "云端同步失败，请检查网络或服务端", "error", dom);
                 } finally {
                     manualSyncBtn.disabled = false;
                     manualSyncBtn.innerHTML = origHtml;
                 }
+            } else {
+                console.warn("未提供 manualSync 回调函数");
             }
         });
     }

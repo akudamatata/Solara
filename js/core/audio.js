@@ -190,13 +190,30 @@ export function updateVolumeSliderBackground(dom, volume = dom.audioPlayer?.volu
 export function updateVolumeIcon(dom, volume) {
     if (!dom.volumeIcon) return;
     const clamped = Math.min(Math.max(Number.isFinite(volume) ? volume : 0, 0), 1);
+    
+    // 如果是 SVG 图标（Apple 矢量图标），动态更新内部矢量路径
+    if (dom.volumeIcon.tagName && dom.volumeIcon.tagName.toLowerCase() === "svg") {
+        if (clamped === 0) {
+            // 静音状态 (扬声器 + 叉号)
+            dom.volumeIcon.innerHTML = '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor"/><line x1="22" y1="9" x2="16" y2="15"/><line x1="16" y1="9" x2="22" y2="15"/>';
+        } else if (clamped < 0.4) {
+            // 低音量状态 (扬声器 + 单波纹)
+            dom.volumeIcon.innerHTML = '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>';
+        } else {
+            // 高音量状态 (扬声器 + 双波纹)
+            dom.volumeIcon.innerHTML = '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>';
+        }
+        return;
+    }
+
+    // 兼容普通 <i> 标签（FontAwesome）
     let icon = "fa-volume-high";
     if (clamped === 0) {
         icon = "fa-volume-xmark";
     } else if (clamped < 0.4) {
         icon = "fa-volume-low";
     }
-    dom.volumeIcon.className = `fas ${icon}`;
+    dom.volumeIcon.setAttribute("class", `fas ${icon}`);
 }
 
 export function setAudioCurrentTime(time, state, dom) {
