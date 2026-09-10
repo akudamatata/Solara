@@ -240,8 +240,8 @@ body.mobile-view .mobile-inline-lyrics__header {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
-    padding: 6px 0 10px;
+    gap: 0;
+    padding: 4px 0 8px;
     flex-shrink: 0;
     cursor: pointer;
     user-select: none;
@@ -249,22 +249,17 @@ body.mobile-view .mobile-inline-lyrics__header {
     touch-action: none;
 }
 
+/* 隐藏顶部小横条，仅保留精致悬浮的提示胶囊，视觉更纯粹极简 */
 body.mobile-view .mobile-inline-lyrics__handle {
-    width: 38px;
-    height: 4.5px;
-    border-radius: 999px;
-    background: var(--apple-glass-border);
-    opacity: 0.65;
-    transition: opacity 0.2s ease, transform 0.2s ease;
+    display: none !important;
 }
 
 body.mobile-view.dark-mode .mobile-inline-lyrics__handle {
-    background: rgba(255, 255, 255, 0.25);
+    display: none !important;
 }
 
 body.mobile-view .mobile-inline-lyrics__header:active .mobile-inline-lyrics__handle {
-    transform: scaleX(1.15);
-    opacity: 0.95;
+    display: none !important;
 }
 
 body.mobile-view .mobile-inline-lyrics__hint {
@@ -275,7 +270,7 @@ body.mobile-view .mobile-inline-lyrics__hint {
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    padding: 3px 12px;
+    padding: 4px 14px;
     border-radius: 999px;
     background: rgba(125, 125, 125, 0.08);
     border: 1px solid var(--apple-glass-border);
@@ -335,8 +330,11 @@ body.mobile-view .mobile-inline-lyrics__content > div {
     border-radius: 14px;
     transition: all 0.35s var(--spring-smooth);
     word-break: break-word;
-    opacity: 0.30;
-    filter: blur(0.45px);
+    opacity: 0.32;
+    filter: none !important; /* 彻底移除微模糊滤镜，杜绝 WebKit 边缘卷积采样泄漏导致的紫色竖条伪影 */
+    -webkit-font-smoothing: antialiased;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
     cursor: pointer;
     user-select: none;
     -webkit-user-select: none;
@@ -344,7 +342,7 @@ body.mobile-view .mobile-inline-lyrics__content > div {
 }
 
 body.mobile-view .mobile-inline-lyrics__content > div:hover {
-    opacity: 0.62;
+    opacity: 0.65;
     filter: none;
 }
 
