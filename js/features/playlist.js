@@ -254,6 +254,31 @@ export function renderPlaylist(state, dom, callbacks = {}) {
     updatePlaylistActionStates(state, dom);
 }
 
+let tabsResizeObserver = null;
+
+export function observeTabsResize() {
+    if (typeof ResizeObserver === "undefined" || typeof document === "undefined") return;
+    if (!tabsResizeObserver) {
+        tabsResizeObserver = new ResizeObserver((entries) => {
+            for (const entry of entries) {
+                const target = entry.target;
+                const tabsContainer = target.classList?.contains("playlist-tabs")
+                    ? target
+                    : target.closest?.(".playlist-tabs");
+                if (tabsContainer) {
+                    updateTabsIndicator(tabsContainer);
+                }
+            }
+        });
+    }
+    document.querySelectorAll(".playlist-tabs").forEach(tabs => {
+        tabsResizeObserver.observe(tabs);
+        tabs.querySelectorAll(".playlist-tab").forEach(tab => {
+            tabsResizeObserver.observe(tab);
+        });
+    });
+}
+
 export function updateTabsIndicator(tabsContainer) {
     if (!tabsContainer || !(tabsContainer instanceof HTMLElement)) return;
     let indicator = tabsContainer.querySelector(".playlist-tabs-indicator");
@@ -270,6 +295,8 @@ export function updateTabsIndicator(tabsContainer) {
         indicator.style.transform = `translateX(${left}px)`;
         indicator.style.width = `${width}px`;
         indicator.style.opacity = "1";
+    } else if (!activeTab) {
+        indicator.style.opacity = "0";
     }
 }
 
@@ -279,6 +306,7 @@ export function updateAllTabsIndicators() {
             updateTabsIndicator(tabs);
         });
     });
+    observeTabsResize();
 }
 
 export function switchLibraryTab(target, dom, callbacks = {}) {

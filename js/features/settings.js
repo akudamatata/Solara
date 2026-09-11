@@ -5,6 +5,7 @@
 import { EXPLORE_RADAR_GENRES, DEFAULT_RADAR_GENRES } from "../constants.js";
 import { safeGetLocalStorage, safeSetLocalStorage, persistStorageItems } from "../core/storage.js";
 import { toggleDebugMode } from "../visual/spotlight.js";
+import { updateAllTabsIndicators } from "./playlist.js";
 
 const NOTIFICATION_ICONS = {
     success: `<svg class="notification-svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd"/></svg>`,
@@ -201,9 +202,30 @@ export function initLayoutMode(dom) {
             toggleBtn.setAttribute("title", isCompact ? "展开为全景沉浸模式（双击Logo打开设置）" : "收拢为大留白小播放器（双击Logo打开设置）");
         }
         localStorage.setItem(STORAGE_KEY, mode);
+
+        // 布局模式切换时立即与分段重新测量指示器，并在过渡动画（100ms, 300ms, 650ms）结束阶段重新校准
+        if (typeof updateAllTabsIndicators === "function") {
+            updateAllTabsIndicators();
+            setTimeout(updateAllTabsIndicators, 100);
+            setTimeout(updateAllTabsIndicators, 300);
+            setTimeout(updateAllTabsIndicators, 650);
+        }
     };
 
     applyLayoutMode(currentMode);
+
+    // 监听舞台主容器尺寸过渡结束事件，确保在长缓动完成瞬间 100% 精确对齐
+    const stageContainer = document.querySelector(".container");
+    if (stageContainer && !stageContainer.__tabsTransitionBound) {
+        stageContainer.__tabsTransitionBound = true;
+        stageContainer.addEventListener("transitionend", (e) => {
+            if (e.target === stageContainer && (e.propertyName === "width" || e.propertyName === "height" || e.propertyName === "grid-template-columns")) {
+                if (typeof updateAllTabsIndicators === "function") {
+                    updateAllTabsIndicators();
+                }
+            }
+        });
+    }
 
     if (toggleBtn && !toggleBtn.__layoutBound) {
         toggleBtn.__layoutBound = true;
