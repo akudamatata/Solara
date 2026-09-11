@@ -263,34 +263,45 @@ body.mobile-view .mobile-inline-lyrics__header:active .mobile-inline-lyrics__han
 }
 
 body.mobile-view .mobile-inline-lyrics__hint {
-    font-size: 0.74rem;
-    font-weight: 500;
-    color: var(--text-tertiary-color);
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: var(--text-color);
+    opacity: 0.85;
     letter-spacing: 0.02em;
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    padding: 4px 14px;
+    padding: 5px 14px;
     border-radius: 999px;
-    background: rgba(125, 125, 125, 0.08);
-    border: 1px solid var(--apple-glass-border);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.36);
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     transition: all 0.2s ease;
 }
 
 body.mobile-view.dark-mode .mobile-inline-lyrics__hint {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.10);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #f5f5f7;
+    opacity: 0.88;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
 }
 
 body.mobile-view .mobile-inline-lyrics__hint:active {
     transform: scale(0.94);
-    background: rgba(125, 125, 125, 0.16);
+    background: rgba(255, 255, 255, 0.48);
+}
+
+body.mobile-view.dark-mode .mobile-inline-lyrics__hint:active {
+    background: rgba(255, 255, 255, 0.18);
 }
 
 body.mobile-view .mobile-inline-lyrics__hint .apple-svg-icon {
     width: 12px;
     height: 12px;
+    opacity: 0.85;
 }
 
 body.mobile-view .mobile-inline-lyrics__scroll {
@@ -331,7 +342,7 @@ body.mobile-view .mobile-inline-lyrics__content > div {
     border-radius: 14px;
     transition: all 0.35s var(--spring-smooth);
     word-break: break-word;
-    opacity: 0.32;
+    opacity: 0.60;
     filter: none !important; /* 彻底移除微模糊滤镜，杜绝 WebKit 边缘卷积采样泄漏导致的紫色竖条伪影 */
     -webkit-font-smoothing: antialiased;
     backface-visibility: hidden;
@@ -342,14 +353,19 @@ body.mobile-view .mobile-inline-lyrics__content > div {
     touch-action: manipulation;
 }
 
+body.mobile-view.dark-mode .mobile-inline-lyrics__content > div {
+    color: rgba(245, 245, 247, 0.50);
+    opacity: 1;
+}
+
 body.mobile-view .mobile-inline-lyrics__content > div:hover {
-    opacity: 0.65;
+    opacity: 0.85;
     filter: none;
 }
 
 body.mobile-view .mobile-inline-lyrics__content > div:active {
     transform: scale(0.96);
-    opacity: 0.85;
+    opacity: 0.95;
 }
 
 /* 当前高亮焦点行（Apple Music 级自发光与大字重） */
@@ -428,21 +444,29 @@ body.mobile-view .current-favorite-btn {
     border-radius: 50%;
     border: none;
     background: transparent;
-    color: var(--text-tertiary-color);
+    color: var(--text-color);
+    opacity: 0.68;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     padding: 0;
-    transition: transform 0.25s var(--spring-bounce), color 0.2s ease;
+    transition: transform 0.25s var(--spring-bounce), color 0.2s ease, opacity 0.2s ease;
+}
+
+body.mobile-view.dark-mode .current-favorite-btn {
+    color: #f5f5f7;
+    opacity: 0.72;
 }
 
 body.mobile-view .current-favorite-btn:active {
     transform: scale(0.82);
+    opacity: 1;
 }
 
 body.mobile-view .current-favorite-btn.is-active {
     color: #ff375f !important;
+    opacity: 1 !important;
 }
 
 body.mobile-view .current-favorite-btn .apple-svg-icon {
@@ -460,12 +484,18 @@ body.mobile-view .current-song-meta-row {
 
 body.mobile-view .current-song-artist {
     font-size: clamp(0.92rem, 3.8vw, 1.02rem);
-    font-weight: 500;
-    color: var(--text-secondary-color);
+    font-weight: 600;
+    color: var(--text-color);
+    opacity: 0.80;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     line-height: 1.25;
+}
+
+body.mobile-view.dark-mode .current-song-artist {
+    color: #f5f5f7;
+    opacity: 0.75;
 }
 
 body.mobile-view .audio-visualizer {
@@ -499,34 +529,48 @@ body.mobile-view .mobile-quality-chip {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 4px 12px;
+    padding: 5px 13px;
     border-radius: 999px;
-    background: var(--component-bg);
-    border: 1px solid var(--apple-glass-border);
-    border-top: 1px solid var(--apple-glass-border-top);
-    color: var(--text-secondary-color);
+    background: rgba(255, 255, 255, 0.36);
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    color: var(--text-color);
+    opacity: 0.85;
     font-size: 0.76rem;
     font-weight: 600;
     letter-spacing: 0.02em;
     margin-top: 4px;
-    backdrop-filter: var(--apple-glass-blur);
-    -webkit-backdrop-filter: var(--apple-glass-blur);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-    transition: transform 0.15s var(--spring-snappy), color 0.2s ease, border-color 0.2s ease;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+    transition: transform 0.15s var(--spring-snappy), color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+}
+
+body.mobile-view.dark-mode .mobile-quality-chip {
+    background: rgba(255, 255, 255, 0.09);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: #f5f5f7;
+    opacity: 0.88;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.22);
 }
 
 body.mobile-view .mobile-quality-chip .apple-svg-icon {
     width: 10px;
     height: 10px;
-    opacity: 0.7;
+    opacity: 0.85;
 }
 
 body.mobile-view .mobile-quality-chip:active {
     transform: scale(0.94);
+    background: rgba(255, 255, 255, 0.50);
+}
+
+body.mobile-view.dark-mode .mobile-quality-chip:active {
+    background: rgba(255, 255, 255, 0.18);
 }
 
 body.mobile-view .mobile-quality-chip.active {
     border-color: var(--primary-color);
     color: var(--primary-color);
+    opacity: 1;
 }

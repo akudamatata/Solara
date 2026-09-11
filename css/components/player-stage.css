@@ -213,12 +213,13 @@ body.is-playing .audio-visualizer span:nth-child(4) { animation-duration: 1.15s;
     border: none;
     padding: 4px;
     cursor: pointer;
-    color: var(--text-tertiary-color);
+    color: var(--text-secondary-color);
+    opacity: 0.78;
     border-radius: 50%;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    transition: transform 0.3s var(--spring-bounce), color 0.2s ease;
+    transition: transform 0.3s var(--spring-bounce), color 0.2s ease, opacity 0.2s ease;
 }
 
 .current-favorite-btn .heart-solid { display: none; }
