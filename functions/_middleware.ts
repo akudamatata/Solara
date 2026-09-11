@@ -41,6 +41,11 @@ async function authMiddleware(context: any) {
   }
 
   const url = new URL(request.url);
+  // 本地回环发起的内部请求（如 Docker 容器内 Node.js 转发给 Wrangler）直接放行
+  if (url.hostname === "127.0.0.1" || url.hostname === "localhost") {
+    return context.next();
+  }
+
   const pathname = url.pathname;
   if (isPublicPath(pathname)) {
     return context.next();
@@ -62,6 +67,14 @@ async function authMiddleware(context: any) {
 
   if (cookies.auth && cookies.auth === btoa(password)) {
     return context.next();
+  }
+
+  // API 路由未授权时返回 401 JSON，杜绝返回 HTML 重定向导致前端 JSON 解析崩溃
+  if (pathname.startsWith("/proxy") || pathname.startsWith("/api/") || pathname.startsWith("/palette")) {
+    return new Response(JSON.stringify({ error: "Unauthorized", message: "Login required" }), {
+      status: 401,
+      headers: { "Content-Type": "application/json; charset=utf-8" },
+    });
   }
 
   const loginUrl = new URL("/login", url);

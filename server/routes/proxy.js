@@ -120,13 +120,26 @@ async function proxyApiRequest(reqUrl, req, res) {
       wranglerUrl.searchParams.set(key, value);
     });
 
+    const fetchHeaders = {
+      'User-Agent': req.headers['user-agent'] || 'Mozilla/5.0',
+      'Accept': 'application/json',
+    };
+    if (process.env.PASSWORD) {
+      fetchHeaders['Cookie'] = `auth=${Buffer.from(process.env.PASSWORD).toString('base64')}`;
+    } else if (req.headers.cookie) {
+      fetchHeaders['Cookie'] = req.headers.cookie;
+    }
+
     try {
       upstream = await fetch(wranglerUrl.toString(), {
-        headers: {
-          'User-Agent': req.headers['user-agent'] || 'Mozilla/5.0',
-          'Accept': 'application/json',
-        },
+        headers: fetchHeaders,
+        redirect: 'manual',
       });
+      // 若出现重定向（如未授权重定向到登录页），说明认证异常，禁止将 HTML 作为 JSON 返回
+      if (upstream.status >= 300 && upstream.status < 400) {
+        console.error('[Proxy API via Wrangler] Upstream returned redirect status:', upstream.status);
+        return res.status(502).send('Internal auth proxy redirect error');
+      }
       responseText = await upstream.text();
       contentType = upstream.headers.get('content-type') || 'application/json; charset=utf-8';
     } catch (err) {

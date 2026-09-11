@@ -48,7 +48,12 @@ module.exports = function createAuthMiddleware(password) {
     const expected = Buffer.from(password).toString('base64'); // 等价于 btoa(password)
     if (cookieAuth && cookieAuth === expected) return next();
 
-    // 验证失败，重定向到登录页
+    // 验证失败：API 请求返回 401 JSON，杜绝返回 HTML 导致前端 JSON 解析崩溃
+    if (req.path.startsWith('/proxy') || req.path.startsWith('/api/') || req.path.startsWith('/palette')) {
+      return res.status(401).json({ error: 'Unauthorized', message: 'Login required' });
+    }
+
+    // 页面请求重定向到登录页
     return res.redirect(302, '/login');
   };
 };
