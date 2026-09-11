@@ -286,6 +286,28 @@ html:not(.mobile-view) .transport-controls {
     flex-shrink: 0;
 }
 
+.volume-icon-wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 3px;
+    border-radius: 8px;
+    color: var(--text-color);
+    transition: transform 0.16s var(--spring-snappy), opacity 0.16s ease, color 0.16s ease;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.volume-icon-wrap:hover {
+    opacity: 0.8;
+    color: var(--primary-color);
+}
+
+.volume-icon-wrap:active {
+    transform: scale(0.88);
+}
+
 .volume-container input[type="range"] {
     width: 76px;
     height: 5px;

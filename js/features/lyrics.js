@@ -64,25 +64,52 @@ export function clearLyricsIfLibraryEmpty(state, dom, isMobileView = false, clos
     }
 }
 
-export function scrollToCurrentLyric(element, containerOverride, dom) {
+export function scrollToCurrentLyric(element, containerOverride, dom, smooth = true) {
     const container = containerOverride || dom?.lyricsScroll || dom?.lyrics;
     if (!container || !element) {
         return;
     }
     const containerHeight = container.clientHeight;
-    const elementRect = element.getBoundingClientRect();
-    const containerRect = container.getBoundingClientRect();
+    if (containerHeight <= 0) {
+        return;
+    }
 
-    const elementOffsetTop = elementRect.top - containerRect.top + container.scrollTop;
-    const elementHeight = elementRect.height;
+    // 优先使用不受 CSS transform 影响的相对 offsetTop 计算
+    let elementOffsetTop = 0;
+    if (element.offsetParent && (container.contains(element.offsetParent) || container === element.offsetParent)) {
+        let curr = element;
+        let top = 0;
+        while (curr && curr !== container) {
+            top += curr.offsetTop;
+            curr = curr.offsetParent;
+        }
+        elementOffsetTop = top;
+    } else {
+        const elementRect = element.getBoundingClientRect();
+        const containerRect = container.getBoundingClientRect();
+        elementOffsetTop = elementRect.top - containerRect.top + container.scrollTop;
+    }
 
-    const focalRatio = (container.id === "mobileInlineLyricsScroll" || container.classList?.contains("mobile-inline-lyrics__scroll")) ? 0.40 : 0.5;
+    const elementHeight = element.offsetHeight || element.getBoundingClientRect().height;
+    const isMobile = container.id === "mobileInlineLyricsScroll" || container.classList?.contains("mobile-inline-lyrics__scroll");
+    // 视觉焦点比例：移动端 0.48（正中心微上浮黄金点），桌面端 0.5（正中间）
+    const focalRatio = isMobile ? 0.48 : 0.5;
     const targetScrollTop = elementOffsetTop - (containerHeight * focalRatio) + (elementHeight / 2);
-    const maxScrollTop = container.scrollHeight - containerHeight;
+    const maxScrollTop = Math.max(0, container.scrollHeight - containerHeight);
     const finalScrollTop = Math.max(0, Math.min(targetScrollTop, maxScrollTop));
 
     if (Math.abs(container.scrollTop - finalScrollTop) > 1) {
-        if (typeof container.scrollTo === "function") {
+        if (typeof window !== "undefined") {
+            window.__solaraIsProgrammaticScrolling = true;
+            if (window.__solaraProgrammaticTimer) {
+                clearTimeout(window.__solaraProgrammaticTimer);
+            }
+            window.__solaraProgrammaticTimer = setTimeout(() => {
+                window.__solaraIsProgrammaticScrolling = false;
+            }, 600);
+        }
+
+        if (smooth && typeof container.scrollTo === "function") {
             container.scrollTo({
                 top: finalScrollTop,
                 behavior: 'smooth'
@@ -238,7 +265,7 @@ export function initDesktopLyricsInteractions(state, dom) {
         }
     });
 
-    // 2. 滚轮防打扰机制（用户手动翻看歌词时暂停自动居中跟随 3.5 秒）
+    // 2. 滚轮防打扰机制（用户手动翻看歌词时暂停自动居中跟随 5 秒，超时后主动复位）
     const scrollContainer = dom.lyricsScroll || dom.lyrics;
     if (scrollContainer) {
         scrollContainer.addEventListener("wheel", () => {
@@ -248,7 +275,11 @@ export function initDesktopLyricsInteractions(state, dom) {
             }
             state.lyricsScrollTimeout = setTimeout(() => {
                 state.userScrolledLyrics = false;
-            }, 3500);
+                const currentLyric = dom.lyricsContent?.querySelector(".current");
+                if (currentLyric && (!dom.audioPlayer || !dom.audioPlayer.paused)) {
+                    scrollToCurrentLyric(currentLyric, scrollContainer, dom, true);
+                }
+            }, 5000);
         }, { passive: true });
     }
 }

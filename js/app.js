@@ -697,12 +697,50 @@ function setupEventHandlers() {
     }
 
     // 音量与进度条
+    const toggleMute = () => {
+        const currentVolume = Number.isFinite(state.volume) ? state.volume : (dom.audioPlayer ? dom.audioPlayer.volume : 0.8);
+        if (currentVolume > 0) {
+            // 当前非静音 -> 静音并记住当前音量
+            state.previousVolume = currentVolume;
+            const targetVolume = 0;
+            if (dom.audioPlayer) dom.audioPlayer.volume = targetVolume;
+            state.volume = targetVolume;
+            if (dom.volumeSlider) dom.volumeSlider.value = "0";
+            updateVolumeSliderBackground(dom, targetVolume);
+            updateVolumeIcon(dom, targetVolume);
+            safeSetLocalStorage("playerVolume", "0");
+        } else {
+            // 当前静音 -> 恢复之前的音量
+            const restoreVolume = (Number.isFinite(state.previousVolume) && state.previousVolume > 0) ? state.previousVolume : 0.8;
+            if (dom.audioPlayer) dom.audioPlayer.volume = restoreVolume;
+            state.volume = restoreVolume;
+            if (dom.volumeSlider) dom.volumeSlider.value = String(restoreVolume);
+            updateVolumeSliderBackground(dom, restoreVolume);
+            updateVolumeIcon(dom, restoreVolume);
+            safeSetLocalStorage("playerVolume", String(restoreVolume));
+        }
+    };
+
+    const volumeToggleTarget = dom.volumeIconWrap || dom.volumeIcon;
+    if (volumeToggleTarget) {
+        volumeToggleTarget.addEventListener("click", toggleMute);
+        volumeToggleTarget.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                toggleMute();
+            }
+        });
+    }
+
     if (dom.volumeSlider) {
         dom.volumeSlider.addEventListener("input", (e) => {
             const volume = Number.parseFloat(e.target.value);
             const clamped = Number.isFinite(volume) ? Math.min(Math.max(volume, 0), 1) : 0.8;
             dom.audioPlayer.volume = clamped;
             state.volume = clamped;
+            if (clamped > 0) {
+                state.previousVolume = clamped;
+            }
             updateVolumeSliderBackground(dom, clamped);
             updateVolumeIcon(dom, clamped);
             safeSetLocalStorage("playerVolume", String(clamped));

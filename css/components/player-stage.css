@@ -1032,10 +1032,14 @@ html[lang="en"] .lyrics.empty[data-placeholder="default"] .lyrics-scroll::before
 
 .dark-mode .lyrics .current,
 .dark-mode .lyrics-content > div.current {
-    color: var(--primary-color) !important;
-    background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.02) 60%, transparent 100%) !important;
+    color: var(--lyrics-highlight-text, #ffffff) !important;
+    font-weight: 800 !important;
+    background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.03) 65%, transparent 100%) !important;
     border: none !important;
     box-shadow: none !important;
-    text-shadow: 0 0 18px var(--palette-glow, rgba(46, 204, 113, 0.4)), 0 2px 6px rgba(0, 0, 0, 0.5);
+    text-shadow: 
+        0 0 20px var(--palette-glow, rgba(52, 209, 182, 0.45)),
+        0 0 40px var(--palette-glow, rgba(52, 209, 182, 0.25)),
+        0 2px 8px rgba(0, 0, 0, 0.7);
 }
 

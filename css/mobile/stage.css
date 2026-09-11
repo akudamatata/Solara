@@ -312,11 +312,12 @@ body.mobile-view .mobile-inline-lyrics__scroll::-webkit-scrollbar {
 }
 
 body.mobile-view .mobile-inline-lyrics__content {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 12px;
     width: 100%;
-    padding: clamp(60px, 14vh, 110px) 16px;
+    padding: calc(46vh - 60px) 16px;
     box-sizing: border-box;
 }
 

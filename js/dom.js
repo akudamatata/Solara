@@ -54,6 +54,7 @@ export const dom = {
     durationDisplay: document.getElementById("durationDisplay"),
     volumeSlider: document.getElementById("volumeSlider"),
     volumeIcon: document.getElementById("volumeIcon"),
+    volumeIconWrap: document.getElementById("volumeIconWrap"),
     qualityToggle: document.getElementById("qualityToggle"),
     playerQualityMenu: document.getElementById("playerQualityMenu"),
     qualityLabel: document.getElementById("qualityLabel"),

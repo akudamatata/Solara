@@ -3,6 +3,7 @@
  */
 
 import { $, triggerLightHaptic } from "./core.js";
+import { scrollToCurrentLyric } from "../features/lyrics.js";
 
 let userScrollTimeout = null;
 
@@ -18,6 +19,13 @@ export function toggleMobileLyrics(forceState = null) {
     const appState = window.SolaraState;
     if (appState) {
         appState.isMobileInlineLyricsOpen = willOpen;
+        if (willOpen) {
+            appState.userScrolledLyrics = false;
+            if (userScrollTimeout) {
+                clearTimeout(userScrollTimeout);
+                userScrollTimeout = null;
+            }
+        }
     }
 
     const lyricsContainer = $("mobileInlineLyrics");
@@ -27,11 +35,27 @@ export function toggleMobileLyrics(forceState = null) {
     }
 
     if (willOpen) {
-        window.requestAnimationFrame(() => {
-            const currentLyric = $("mobileInlineLyricsContent")?.querySelector(".current");
-            if (currentLyric) {
-                currentLyric.scrollIntoView({ behavior: "smooth", block: "center" });
+        const lyricsScroll = $("mobileInlineLyricsScroll");
+        const lyricsContent = $("mobileInlineLyricsContent");
+        const dom = window.SolaraDOM;
+
+        const alignCurrentLyric = (smooth = false) => {
+            const currentLyric = lyricsContent?.querySelector(".current");
+            if (currentLyric && lyricsScroll) {
+                scrollToCurrentLyric(currentLyric, lyricsScroll, dom, smooth);
             }
+        };
+
+        // 彻底弃用有兼容隐患的 scrollIntoView，改用精准视口居中计算
+        // 首帧先无动画即时居中，待入场动画稳定后再次轻量对齐
+        window.requestAnimationFrame(() => {
+            alignCurrentLyric(false);
+            window.setTimeout(() => {
+                alignCurrentLyric(false);
+            }, 60);
+            window.setTimeout(() => {
+                alignCurrentLyric(true);
+            }, 300);
         });
     }
 }
@@ -64,6 +88,15 @@ export function initMobileLyricsInteractions() {
             const timeStr = targetLine.getAttribute("data-time");
             const targetTime = parseFloat(timeStr);
             if (!isNaN(targetTime)) {
+                const state = window.SolaraState;
+                if (state) {
+                    state.userScrolledLyrics = false;
+                }
+                if (userScrollTimeout) {
+                    clearTimeout(userScrollTimeout);
+                    userScrollTimeout = null;
+                }
+
                 const audioPlayer = window.SolaraDOM?.audioPlayer || $("audioPlayer");
                 if (audioPlayer) {
                     audioPlayer.currentTime = targetTime;
@@ -76,21 +109,67 @@ export function initMobileLyricsInteractions() {
         });
     }
 
-    // 3. 用户手动滑动防打扰机制（用户滚屏时暂停自动跟随，3.5s 无操作后恢复）
+    // 3. 用户手动滑动防打扰机制（用户滚屏时暂停自动跟随，5s 无操作后平滑复位）
     if (lyricsScroll) {
-        lyricsScroll.addEventListener("scroll", () => {
-            const state = window.SolaraState;
-            if (!state) return;
-            state.userScrolledLyrics = true;
+        let isTouching = false;
 
+        const scheduleRecenter = () => {
             if (userScrollTimeout) {
                 clearTimeout(userScrollTimeout);
             }
             userScrollTimeout = setTimeout(() => {
+                const state = window.SolaraState;
                 if (state) {
                     state.userScrolledLyrics = false;
                 }
-            }, 3500);
+                const currentLyric = lyricsContent?.querySelector(".current");
+                if (currentLyric && lyricsScroll) {
+                    scrollToCurrentLyric(currentLyric, lyricsScroll, window.SolaraDOM, true);
+                }
+            }, 5000);
+        };
+
+        lyricsScroll.addEventListener("touchstart", () => {
+            isTouching = true;
+            const state = window.SolaraState;
+            if (state) {
+                state.userScrolledLyrics = true;
+            }
+            if (userScrollTimeout) {
+                clearTimeout(userScrollTimeout);
+                userScrollTimeout = null;
+            }
+        }, { passive: true });
+
+        lyricsScroll.addEventListener("touchend", () => {
+            isTouching = false;
+            scheduleRecenter();
+        }, { passive: true });
+
+        lyricsScroll.addEventListener("touchcancel", () => {
+            isTouching = false;
+            scheduleRecenter();
+        }, { passive: true });
+
+        lyricsScroll.addEventListener("wheel", () => {
+            const state = window.SolaraState;
+            if (state) {
+                state.userScrolledLyrics = true;
+            }
+            scheduleRecenter();
+        }, { passive: true });
+
+        lyricsScroll.addEventListener("scroll", () => {
+            // 忽略程序触发的平滑滚动
+            if (window.__solaraIsProgrammaticScrolling) return;
+
+            const state = window.SolaraState;
+            if (!state) return;
+            state.userScrolledLyrics = true;
+
+            if (!isTouching) {
+                scheduleRecenter();
+            }
         }, { passive: true });
     }
 

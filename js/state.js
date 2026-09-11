@@ -147,6 +147,7 @@ export const state = {
     favoritePlaybackTime: savedFavoritePlaybackTime,
     playbackQuality: savedPlaybackQuality,
     volume: savedVolume,
+    previousVolume: savedVolume > 0 ? savedVolume : 0.8,
     currentPlaybackTime: savedPlaybackTime,
     lastSavedPlaybackTime: savedPlaybackTime,
     favoriteLastSavedPlaybackTime: savedFavoritePlaybackTime,
