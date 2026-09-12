@@ -143,30 +143,52 @@ export function openImportSelectedMenu(dom) {
     });
 }
 
+export function updateSelectAllMenuItem(state, dom) {
+    const item = dom.selectAllResultsItem;
+    if (!item) {
+        return;
+    }
+    const total = Array.isArray(state.searchResults) ? state.searchResults.length : 0;
+    const allSelected = areAllSearchResultsSelected(state);
+
+    item.disabled = total === 0;
+    item.setAttribute("aria-disabled", total === 0 ? "true" : "false");
+    item.classList.toggle("is-active", allSelected);
+
+    const label = dom.selectAllResultsItemLabel;
+    if (label) {
+        label.textContent = allSelected ? "取消全选" : "全选当前结果";
+    }
+
+    const badge = dom.selectAllShortcutBadge;
+    if (badge) {
+        const isMac = typeof navigator !== "undefined" && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform || navigator.userAgent);
+        badge.textContent = isMac ? "⌘A" : "Ctrl+A";
+    }
+}
+
 export function updateImportSelectedButton(state, dom) {
     ensureSelectedSearchResultsSet(state);
     const count = state.selectedSearchResults.size;
     const total = Array.isArray(state.searchResults) ? state.searchResults.length : 0;
 
-    const toolbar = (dom.importSelectedBtn
-        ? dom.importSelectedBtn.closest(".search-results-toolbar")
-        : null) || (dom.selectAllResultsBtn ? dom.selectAllResultsBtn.closest(".search-results-toolbar") : null);
+    const toolbar = dom.importSelectedBtn ? dom.importSelectedBtn.closest(".search-results-toolbar") : null;
     if (toolbar) {
         toolbar.classList.toggle("has-selected", count > 0);
         toolbar.classList.toggle("has-results", total > 0);
     }
 
-    updateSelectAllResultsButton(state, dom);
+    updateSelectAllMenuItem(state, dom);
 
     const button = dom.importSelectedBtn;
     if (!button) {
         return;
     }
-    button.disabled = count === 0;
-    button.setAttribute("aria-disabled", count === 0 ? "true" : "false");
-    if (count === 0) {
-        closeImportSelectedMenu(dom);
-    }
+
+    // 只要当前存在搜索结果，就允许打开批量导入与全选操作菜单
+    button.disabled = total === 0;
+    button.setAttribute("aria-disabled", total === 0 ? "true" : "false");
+
     const countLabel = dom.importSelectedCount;
     if (countLabel) {
         countLabel.textContent = count > 0 ? `(${count})` : "";
@@ -224,31 +246,6 @@ export function syncRenderedSearchResultSelectionUI(state, dom) {
 export function areAllSearchResultsSelected(state) {
     const total = Array.isArray(state.searchResults) ? state.searchResults.length : 0;
     return total > 0 && ensureSelectedSearchResultsSet(state).size >= total;
-}
-
-export function updateSelectAllResultsButton(state, dom) {
-    const button = dom.selectAllResultsBtn;
-    const total = Array.isArray(state.searchResults) ? state.searchResults.length : 0;
-    const count = ensureSelectedSearchResultsSet(state).size;
-    const allSelected = total > 0 && count >= total;
-
-    if (!button) {
-        return;
-    }
-
-    button.disabled = total === 0;
-    button.setAttribute("aria-disabled", total === 0 ? "true" : "false");
-    button.setAttribute("aria-pressed", allSelected ? "true" : "false");
-    button.classList.toggle("is-active", allSelected);
-    button.classList.toggle("is-indeterminate", count > 0 && !allSelected);
-
-    const label = dom.selectAllResultsLabel;
-    if (label) {
-        label.textContent = allSelected ? "取消全选" : "全选";
-    }
-    const title = allSelected ? "取消全选搜索结果" : "全选搜索结果";
-    button.title = title;
-    button.setAttribute("aria-label", title);
 }
 
 export function selectAllSearchResults(state, dom) {
@@ -563,13 +560,12 @@ export async function loadMoreResults(state, dom, callbacks = {}, debugLogger = 
 
 export function importSelectedSearchResults(target = "playlist", state, dom, callbacks = {}) {
     ensureSelectedSearchResultsSet(state);
-    if (state.selectedSearchResults.size === 0) {
-        return;
+    let indices = Array.from(state.selectedSearchResults).filter((val) => Number.isInteger(val) && val >= 0);
+    // 如果未手动勾选单曲，但存在搜索结果，自动视为全选并导入当前全部结果
+    if (indices.length === 0 && Array.isArray(state.searchResults) && state.searchResults.length > 0) {
+        indices = state.searchResults.map((_, i) => i);
     }
-
-    const indices = Array.from(state.selectedSearchResults).filter((val) => Number.isInteger(val) && val >= 0);
     if (indices.length === 0) {
-        resetSelectedSearchResults(state, dom);
         return;
     }
 

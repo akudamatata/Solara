@@ -689,60 +689,13 @@ body.mobile-view .search-results-toolbar {
     box-sizing: border-box;
 }
 
-/* 选中项大于 0 或已有搜索结果时，在搜索框正下方顺滑展开 */
-body.mobile-view .search-results-toolbar.has-selected,
-body.mobile-view .search-results-toolbar.has-results {
+/* 选中项大于 0 时，在搜索框正下方顺滑展开 */
+body.mobile-view .search-results-toolbar.has-selected {
     display: flex !important;
     opacity: 1 !important;
     pointer-events: auto !important;
     margin-top: 8px !important;
-    gap: 10px !important;
-    align-items: stretch;
     animation: mobileToolbarExpand 0.24s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* 全选按钮：移动端胶囊样式 */
-body.mobile-view .select-all-results-btn {
-    flex: 0 0 auto;
-    height: 44px;
-    padding: 0 16px;
-    border-radius: 14px;
-    background: rgba(255, 255, 255, 0.92) !important;
-    border: 1px solid rgba(0, 0, 0, 0.08) !important;
-    color: var(--text-color) !important;
-    font-size: 0.9rem;
-    font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    touch-action: manipulation;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-    transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease, border-color 0.2s ease;
-}
-
-body.mobile-view .select-all-results-btn:active {
-    transform: scale(0.97);
-}
-
-body.mobile-view .select-all-results-btn.is-active {
-    background: var(--primary-color) !important;
-    border-color: var(--primary-color) !important;
-    color: #ffffff !important;
-}
-
-body.mobile-view .select-all-results-btn:disabled {
-    opacity: 0.5;
-}
-
-body.mobile-view.dark-mode .select-all-results-btn {
-    background: rgba(255, 255, 255, 0.1) !important;
-    border-color: rgba(255, 255, 255, 0.14) !important;
-    color: #ffffff !important;
-}
-
-body.mobile-view .select-all-results-box {
-    width: 18px;
-    height: 18px;
 }
 
 @keyframes mobileToolbarExpand {
@@ -758,8 +711,7 @@ body.mobile-view .select-all-results-box {
 
 body.mobile-view .import-dropdown {
     position: relative;
-    width: auto;
-    flex: 1 1 auto;
+    width: 100%;
 }
 
 /* 仿原版精致橙红/强调色渐变胶囊按钮 */
@@ -786,12 +738,6 @@ body.mobile-view .import-selected-btn {
 body.mobile-view .import-selected-btn:active {
     transform: scale(0.98);
     box-shadow: 0 3px 10px rgba(253, 126, 20, 0.25) !important;
-}
-
-body.mobile-view .import-selected-btn:disabled {
-    background: rgba(127, 140, 141, 0.35) !important;
-    box-shadow: none !important;
-    opacity: 0.75;
 }
 
 body.mobile-view .import-dropdown-caret {

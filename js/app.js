@@ -101,6 +101,7 @@ import {
     importSelectedSearchResults,
     updateImportSelectedButton,
     toggleSelectAllSearchResults,
+    resetSelectedSearchResults,
     displaySearchResults,
     restoreLastSearchResults,
     clearSearchResults
@@ -1207,8 +1208,11 @@ function setupEventHandlers() {
     }
 
     // 批量导入
-    if (dom.selectAllResultsBtn) {
-        dom.selectAllResultsBtn.addEventListener("click", () => toggleSelectAllSearchResults(state, dom));
+    if (dom.selectAllResultsItem) {
+        dom.selectAllResultsItem.addEventListener("click", () => {
+            toggleSelectAllSearchResults(state, dom);
+            closeImportSelectedMenu(dom);
+        });
     }
     if (dom.importSelectedBtn) {
         dom.importSelectedBtn.addEventListener("click", () => openImportSelectedMenu(dom));
@@ -1333,9 +1337,34 @@ function setupEventHandlers() {
         }
     });
 
-    // 按 Escape 键退出搜索
+    // 搜索模式快捷键：Ctrl+A / Cmd+A 全选或反选；Escape 优先关闭菜单与清空选择
     document.addEventListener("keydown", (e) => {
+        const activeEl = document.activeElement;
+        const isInputActive = activeEl && (
+            activeEl.tagName === "INPUT" ||
+            activeEl.tagName === "TEXTAREA" ||
+            activeEl.isContentEditable
+        );
+
+        if ((e.ctrlKey || e.metaKey) && (e.key === "a" || e.key === "A")) {
+            if (!isInputActive && state.isSearchMode && Array.isArray(state.searchResults) && state.searchResults.length > 0) {
+                e.preventDefault();
+                toggleSelectAllSearchResults(state, dom);
+                return;
+            }
+        }
+
         if (e.key === "Escape" && state.isSearchMode) {
+            if (dom.importSelectedMenu && !dom.importSelectedMenu.hasAttribute("hidden")) {
+                e.preventDefault();
+                closeImportSelectedMenu(dom);
+                return;
+            }
+            if (state.selectedSearchResults && state.selectedSearchResults.size > 0) {
+                e.preventDefault();
+                resetSelectedSearchResults(state, dom);
+                return;
+            }
             handleCloseSearch();
         }
     });
