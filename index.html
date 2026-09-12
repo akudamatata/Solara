@@ -229,8 +229,20 @@
                             <svg class="apple-svg-icon import-dropdown-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
                         </button>
                         <div class="import-dropdown-menu" id="importSelectedMenu" hidden>
-                            <button class="import-dropdown-item" id="importToPlaylist" data-action="playlist">导入到播放列表</button>
-                            <button class="import-dropdown-item" id="importToFavorites" data-action="favorites">导入到收藏列表</button>
+                            <button class="import-dropdown-item" id="selectAllResultsItem" data-action="toggle-select-all" type="button">
+                                <span class="import-dropdown-icon select-all-icon"><i class="fas fa-check-double"></i></span>
+                                <span class="import-dropdown-label" id="selectAllResultsItemLabel">全选当前结果</span>
+                                <span class="import-shortcut-badge" id="selectAllShortcutBadge">Ctrl+A</span>
+                            </button>
+                            <div class="import-dropdown-divider"></div>
+                            <button class="import-dropdown-item" id="importToPlaylist" data-action="playlist">
+                                <span class="import-dropdown-icon"><i class="fas fa-list-ul"></i></span>
+                                <span>导入到播放列表</span>
+                            </button>
+                            <button class="import-dropdown-item" id="importToFavorites" data-action="favorites">
+                                <span class="import-dropdown-icon"><i class="fas fa-heart"></i></span>
+                                <span>导入到收藏列表</span>
+                            </button>
                         </div>
                     </div>
                 </div>
