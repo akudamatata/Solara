@@ -767,6 +767,96 @@ body.dark-mode .container.search-mode .search-results-list:empty::before {
     font-weight: 500;
 }
 
+/* 全选搜索结果按钮 */
+.select-all-results-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    border: 1px solid var(--apple-glass-border, rgba(0, 0, 0, 0.08));
+    border-radius: 999px;
+    padding: 7px 14px;
+    background: rgba(255, 255, 255, 0.72);
+    color: var(--text-color);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.select-all-results-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.select-all-results-btn:not(:disabled):hover,
+.select-all-results-btn:not(:disabled):focus-visible {
+    background: rgba(255, 255, 255, 0.96);
+    border-color: var(--primary-color);
+    transform: translateY(-1px);
+    outline: none;
+}
+
+.select-all-results-box {
+    position: relative;
+    width: 16px;
+    height: 16px;
+    border-radius: 5px;
+    border: 1.6px solid rgba(127, 140, 141, 0.65);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    color: #ffffff;
+    background: transparent;
+    transition: background 0.18s ease, border-color 0.18s ease;
+    flex: 0 0 auto;
+}
+
+.select-all-results-box i {
+    opacity: 0;
+    transform: scale(0.6);
+    transition: opacity 0.16s ease, transform 0.16s ease;
+}
+
+.select-all-results-btn.is-active .select-all-results-box {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.select-all-results-btn.is-active .select-all-results-box i {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.select-all-results-btn.is-indeterminate .select-all-results-box {
+    border-color: var(--primary-color);
+}
+
+.select-all-results-btn.is-indeterminate .select-all-results-box i {
+    opacity: 0;
+}
+
+.select-all-results-btn.is-indeterminate .select-all-results-box::after {
+    content: "";
+    position: absolute;
+    width: 8px;
+    height: 2px;
+    border-radius: 1px;
+    background: var(--primary-color);
+}
+
+.dark-mode .select-all-results-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+}
+
+.dark-mode .select-all-results-btn:not(:disabled):hover,
+.dark-mode .select-all-results-btn:not(:disabled):focus-visible {
+    background: rgba(255, 255, 255, 0.16);
+}
+
 .action-btn {
     background: var(--primary-color);
     color: white;

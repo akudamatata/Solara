@@ -41,6 +41,8 @@ export const dom = {
     importSelectedMenu: document.getElementById("importSelectedMenu"),
     importToPlaylist: document.getElementById("importToPlaylist"),
     importToFavorites: document.getElementById("importToFavorites"),
+    selectAllResultsBtn: document.getElementById("selectAllResultsBtn"),
+    selectAllResultsLabel: document.getElementById("selectAllResultsLabel"),
     importPlaylistBtn: document.getElementById("importPlaylistBtn"),
     exportPlaylistBtn: document.getElementById("exportPlaylistBtn"),
     importPlaylistInput: document.getElementById("importPlaylistInput"),

@@ -144,12 +144,24 @@ export function openImportSelectedMenu(dom) {
 }
 
 export function updateImportSelectedButton(state, dom) {
+    ensureSelectedSearchResultsSet(state);
+    const count = state.selectedSearchResults.size;
+    const total = Array.isArray(state.searchResults) ? state.searchResults.length : 0;
+
+    const toolbar = (dom.importSelectedBtn
+        ? dom.importSelectedBtn.closest(".search-results-toolbar")
+        : null) || (dom.selectAllResultsBtn ? dom.selectAllResultsBtn.closest(".search-results-toolbar") : null);
+    if (toolbar) {
+        toolbar.classList.toggle("has-selected", count > 0);
+        toolbar.classList.toggle("has-results", total > 0);
+    }
+
+    updateSelectAllResultsButton(state, dom);
+
     const button = dom.importSelectedBtn;
     if (!button) {
         return;
     }
-    ensureSelectedSearchResultsSet(state);
-    const count = state.selectedSearchResults.size;
     button.disabled = count === 0;
     button.setAttribute("aria-disabled", count === 0 ? "true" : "false");
     if (count === 0) {
@@ -162,11 +174,6 @@ export function updateImportSelectedButton(state, dom) {
     const label = count > 0 ? `导入已选 (${count})` : "导入已选";
     button.title = label;
     button.setAttribute("aria-label", count > 0 ? `导入已选 ${count} 首歌曲` : "导入已选");
-
-    const toolbar = button.closest(".search-results-toolbar");
-    if (toolbar) {
-        toolbar.classList.toggle("has-selected", count > 0);
-    }
 }
 
 export function toggleSearchResultSelection(index, state, dom) {
@@ -194,6 +201,75 @@ export function resetSelectedSearchResults(state, dom) {
     state.selectedSearchResults.clear();
     indices.forEach(idx => updateSearchResultSelectionUI(idx, state, dom));
     updateImportSelectedButton(state, dom);
+}
+
+/**
+ * 将当前已渲染搜索结果项的选中态与 selectedSearchResults 集合对齐
+ */
+export function syncRenderedSearchResultSelectionUI(state, dom) {
+    const container = dom.searchResultsList || dom.searchResults;
+    if (!container) {
+        return;
+    }
+    ensureSelectedSearchResultsSet(state);
+    container.querySelectorAll(".search-result-item").forEach((item) => {
+        const index = Number(item.dataset.index);
+        if (!Number.isInteger(index) || index < 0) {
+            return;
+        }
+        applySelectionStateToElement(item, state.selectedSearchResults.has(index));
+    });
+}
+
+export function areAllSearchResultsSelected(state) {
+    const total = Array.isArray(state.searchResults) ? state.searchResults.length : 0;
+    return total > 0 && ensureSelectedSearchResultsSet(state).size >= total;
+}
+
+export function updateSelectAllResultsButton(state, dom) {
+    const button = dom.selectAllResultsBtn;
+    const total = Array.isArray(state.searchResults) ? state.searchResults.length : 0;
+    const count = ensureSelectedSearchResultsSet(state).size;
+    const allSelected = total > 0 && count >= total;
+
+    if (!button) {
+        return;
+    }
+
+    button.disabled = total === 0;
+    button.setAttribute("aria-disabled", total === 0 ? "true" : "false");
+    button.setAttribute("aria-pressed", allSelected ? "true" : "false");
+    button.classList.toggle("is-active", allSelected);
+    button.classList.toggle("is-indeterminate", count > 0 && !allSelected);
+
+    const label = dom.selectAllResultsLabel;
+    if (label) {
+        label.textContent = allSelected ? "取消全选" : "全选";
+    }
+    const title = allSelected ? "取消全选搜索结果" : "全选搜索结果";
+    button.title = title;
+    button.setAttribute("aria-label", title);
+}
+
+export function selectAllSearchResults(state, dom) {
+    if (!Array.isArray(state.searchResults) || state.searchResults.length === 0) {
+        return;
+    }
+    const selected = ensureSelectedSearchResultsSet(state);
+    selected.clear();
+    for (let i = 0; i < state.searchResults.length; i++) {
+        selected.add(i);
+    }
+    syncRenderedSearchResultSelectionUI(state, dom);
+    updateImportSelectedButton(state, dom);
+}
+
+export function toggleSelectAllSearchResults(state, dom) {
+    if (areAllSearchResultsSelected(state)) {
+        resetSelectedSearchResults(state, dom);
+    } else {
+        selectAllSearchResults(state, dom);
+    }
 }
 
 export function persistLastSearchState(state) {
@@ -343,6 +419,9 @@ export function displaySearchResults(results, options = {}, state, dom, callback
     if (typeof callbacks.updateFavoriteIcons === "function") {
         callbacks.updateFavoriteIcons();
     }
+
+    // 结果数量变化后刷新批量操作栏（全选按钮可用性 / 导入已选计数）
+    updateImportSelectedButton(state, dom);
 }
 
 export async function performSearch(isLiveSearch = false, state, dom, callbacks = {}, debugLogger = null) {

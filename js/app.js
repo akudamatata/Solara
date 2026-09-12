@@ -100,6 +100,7 @@ import {
     closeImportSelectedMenu,
     importSelectedSearchResults,
     updateImportSelectedButton,
+    toggleSelectAllSearchResults,
     displaySearchResults,
     restoreLastSearchResults,
     clearSearchResults
@@ -1206,6 +1207,9 @@ function setupEventHandlers() {
     }
 
     // 批量导入
+    if (dom.selectAllResultsBtn) {
+        dom.selectAllResultsBtn.addEventListener("click", () => toggleSelectAllSearchResults(state, dom));
+    }
     if (dom.importSelectedBtn) {
         dom.importSelectedBtn.addEventListener("click", () => openImportSelectedMenu(dom));
     }
