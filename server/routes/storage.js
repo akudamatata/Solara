@@ -20,6 +20,18 @@ function jsonResponse(res, body, status = 200) {
   return res.status(status).set(JSON_HEADERS).json(body);
 }
 
+// 路由级认证：即使挂载顺序被改动，也强制校验登录 cookie（与 routes/auth.js 逻辑一致）
+function requireAuth(req, res, next) {
+  const password = process.env.PASSWORD;
+  if (typeof password !== 'string') return next(); // 未配置密码时保持开放访问设计
+
+  const cookieAuth = req.cookies && req.cookies.auth;
+  const expected = Buffer.from(password).toString('base64'); // 等价于 btoa(password)
+  if (cookieAuth && cookieAuth === expected) return next();
+
+  return jsonResponse(res, { error: 'Unauthorized', message: 'Login required' }, 401);
+}
+
 module.exports = function createStorageRouter() {
   const router = Router();
 
@@ -27,6 +39,8 @@ module.exports = function createStorageRouter() {
   router.options('/', (req, res) => {
     res.status(204).set(JSON_HEADERS).end();
   });
+
+  router.use(requireAuth);
 
   // GET /api/storage
   router.get('/', (req, res) => {
