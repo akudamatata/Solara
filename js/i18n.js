@@ -94,7 +94,37 @@
         "设置已保存": "Settings saved",
         "请至少选择一个风格": "Please select at least one genre",
         "请至少选择一个榜单": "Please select at least one chart",
-        "云端加载设置失败": "Failed to load settings from cloud"
+        "云端加载设置失败": "Failed to load settings from cloud",
+
+        // voice control
+        "语音控制": "Voice Control",
+        "语音指令": "Voice command",
+        "停止聆听": "Stop listening",
+        "开启语音控制": "Turn on voice control",
+        "关闭语音控制": "Turn off voice control",
+        "已开启语音控制，点击麦克风按钮说出指令": "Voice control on. Tap the mic button and say a command",
+        "已关闭语音控制": "Voice control off",
+        "开启后点击麦克风按钮，说出“下一首”“上一首”“暂停”或“继续”。": "When on, tap the mic button and say \"next track\", \"previous track\", \"pause\" or \"resume\".",
+        "浏览器支持本机识别时语音只在本设备处理；否则语音会发送到浏览器厂商的语音识别服务。": "If your browser supports on-device recognition, speech stays on this device. Otherwise it is sent to the browser vendor's speech recognition service.",
+        "识别语言": "Recognition language",
+        "自动": "Auto",
+        "中文": "Chinese",
+        "语音控制需要通过 HTTPS 或 localhost 访问": "Voice control requires HTTPS or localhost",
+        "当前浏览器不支持语音识别，请使用 Chrome、Edge 或 Safari": "This browser does not support speech recognition. Use Chrome, Edge or Safari",
+        "上次识别在本设备上完成": "Last recognition ran on this device",
+        "上次识别使用了浏览器厂商的云端语音服务": "Last recognition used the browser vendor's cloud speech service",
+        "没听清": "Didn't catch that",
+        "下一首": "Next track",
+        "上一首": "Previous track",
+        "暂停": "Pause",
+        "继续播放": "Resume",
+        "语音指令执行失败": "Voice command failed",
+        "麦克风权限被拒绝，请在浏览器设置中允许访问麦克风": "Microphone access denied. Allow it in your browser settings",
+        "未检测到可用的麦克风": "No microphone found",
+        "语音识别服务连接失败，请检查网络": "Could not reach the speech service. Check your network",
+        "当前浏览器不支持该识别语言": "This browser does not support that recognition language",
+        "当前浏览器不支持语音识别": "This browser does not support speech recognition",
+        "语音识别出错，请稍后重试": "Speech recognition error. Please try again"
     };
 
     window.t = function (str) {
