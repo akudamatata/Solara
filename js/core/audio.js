@@ -463,14 +463,19 @@ export function autoPlayNext(state, dom, callbacks = {}) {
     updatePlayPauseButton(dom);
 }
 
-export function playNext(state, dom, callbacks = {}) {
+// 语音等场景可强制切歌：单曲循环模式下本次按列表顺序前进/后退，其余模式不变
+function resolveNavigationMode(mode, options = {}) {
+    return options.forceAdvance && mode === "single" ? "list" : mode;
+}
+
+export function playNext(state, dom, callbacks = {}, options = {}) {
     if (state.currentList === "favorite") {
         const favorites = ensureFavoriteSongsArray(state);
         if (favorites.length === 0) {
             if (typeof callbacks.clearLyricsIfLibraryEmpty === "function") callbacks.clearLyricsIfLibraryEmpty();
             return;
         }
-        const mode = state.favoritePlayMode || "list";
+        const mode = resolveNavigationMode(state.favoritePlayMode || "list", options);
         let nextIndex = state.currentFavoriteIndex;
         if (mode === "random") {
             nextIndex = Math.floor(Math.random() * favorites.length);
@@ -502,7 +507,7 @@ export function playNext(state, dom, callbacks = {}) {
         return;
     }
 
-    const mode = state.playMode || "list";
+    const mode = resolveNavigationMode(state.playMode || "list", options);
     if (mode === "random") {
         nextIndex = Math.floor(Math.random() * playlist.length);
     } else if (mode === "list") {
@@ -526,13 +531,13 @@ export function playNext(state, dom, callbacks = {}) {
     }
 }
 
-export function playPrevious(state, dom, callbacks = {}) {
+export function playPrevious(state, dom, callbacks = {}, options = {}) {
     if (state.currentList === "favorite") {
         const favorites = ensureFavoriteSongsArray(state);
         if (favorites.length === 0) {
             return;
         }
-        const mode = state.favoritePlayMode || "list";
+        const mode = resolveNavigationMode(state.favoritePlayMode || "list", options);
         let prevIndex = state.currentFavoriteIndex;
         if (mode === "random") {
             prevIndex = Math.floor(Math.random() * favorites.length);
@@ -564,7 +569,7 @@ export function playPrevious(state, dom, callbacks = {}) {
 
     if (playlist.length === 0) return;
 
-    const mode = state.playMode || "list";
+    const mode = resolveNavigationMode(state.playMode || "list", options);
     if (mode === "random") {
         prevIndex = Math.floor(Math.random() * playlist.length);
     } else if (mode === "list") {

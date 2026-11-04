@@ -93,6 +93,12 @@ export const dom = {
     openSettingsBtn: document.getElementById("openSettingsBtn"),
     layoutToggleBtn: document.getElementById("layoutToggleBtn"),
     radarGenreList: document.getElementById("radarGenreList"),
+    voiceToggleBtn: document.getElementById("voiceToggleBtn"),
+    mobileVoiceToggle: document.getElementById("mobileVoiceToggle"),
+    voiceEnableBtn: document.getElementById("voiceEnableBtn"),
+    voiceEnableText: document.getElementById("voiceEnableText"),
+    voiceLangList: document.getElementById("voiceLangList"),
+    voiceStatusHint: document.getElementById("voiceStatusHint"),
     logo: document.querySelector(".header h1"),
     brandWrap: document.querySelector(".header-brand-wrap"),
 };

@@ -127,6 +127,12 @@ docker compose up -d
 - **Docker 部署：** 在 `docker-compose.yml` 的 `environment` 中设置 `PASSWORD` 环境变量，例如 `- PASSWORD=your_password`。如果不需要密码，可不配置该变量。
 - 部署完成后，未登录的访问者会被自动重定向到 `/login` 页面并需输入该口令；若想关闭访问口令，删除该环境变量并重新部署或重启容器即可。
 
+## 🎙️ 语音控制 (Voice Control)
+- **默认关闭**：在高级设置面板的「语音控制」中开启后，底栏（桌面端）或顶栏（移动端）会出现麦克风按钮；开启前不会请求麦克风权限。
+- **使用方式**：点击麦克风按钮后说出指令——「下一首 / 下一曲 / 切歌」「上一首 / 上一曲」「暂停 / 停止」「继续 / 继续播放 / 播放」，或英文 "next track"、"previous track"、"pause"、"resume"。语音切歌在单曲循环模式下也会切换到相邻歌曲。
+- **访问要求**：浏览器只允许在 **HTTPS** 或 `localhost` 下使用麦克风，通过纯 HTTP 访问时麦克风按钮会自动隐藏。
+- **隐私说明**：浏览器支持本机识别时（Chrome 139+ 实验特性）语音只在本设备处理；否则语音会发送到浏览器厂商的语音识别服务。Firefox 正式版暂不支持语音识别。
+
 ## 🌐 多语言设置 (English Version)
 - **Cloudflare Pages：** 在项目的 **Settings → Functions → Environment variables** 中新增名为 `LANGUAGE` 的环境变量，值为 `ENG`。
 - **Docker 部署：** 在 `docker-compose.yml` 的 `environment` 中设置 `language` 环境变量为 `ENG`，即 `- language=ENG`（注意：Docker 环境下环境变量名是小写 `language`，以与 wrangler 本地开发环境一致）。

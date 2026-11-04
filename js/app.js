@@ -125,6 +125,7 @@ import {
     cancelPendingPlayback
 } from "./core/audio.js";
 import { initMediaSession } from "./core/media-session.js";
+import { initVoiceControl } from "./features/voice/index.js";
 
 const debugLog = createDebugLogger(state, dom);
 initDebugShortcut(state, dom, debugLog);
@@ -673,6 +674,19 @@ export async function togglePlayPause() {
         debugLog(`[播放控制] 暂停播放: ${state.currentSong?.name || "当前歌曲"}`);
         dom.audioPlayer.pause();
     }
+}
+
+// 语音指令专用：只暂停不切换，已暂停时不做任何事
+function pauseIfPlaying() {
+    if (dom.audioPlayer && !dom.audioPlayer.paused) {
+        dom.audioPlayer.pause();
+    }
+}
+
+// 语音指令专用：只恢复不切换，正在播放时不做任何事
+async function resumePlayback() {
+    if (dom.audioPlayer.src && !dom.audioPlayer.paused) return;
+    await togglePlayPause();
 }
 
 // 全局事件装配
@@ -1605,6 +1619,20 @@ export async function bootstrap() {
         playPrevious: () => playPrevious(state, dom, getAudioCallbacks()),
         autoPlayNext: () => autoPlayNext(state, dom, getAudioCallbacks()),
         updatePlayPauseButton: () => updatePlayPauseButton(dom)
+    });
+    initVoiceControl({
+        dom,
+        debugLog,
+        notify: (message, type) => showNotification(message, type, dom),
+        t: (s) => (typeof window.t === "function" ? window.t(s) : s),
+        actions: {
+            next: () => playNext(state, dom, getAudioCallbacks(), { forceAdvance: true }),
+            previous: () => playPrevious(state, dom, getAudioCallbacks(), { forceAdvance: true }),
+            pause: pauseIfPlaying,
+            resume: resumePlayback,
+            duck: () => { if (dom.audioPlayer) dom.audioPlayer.volume = state.volume * 0.25; },
+            unduck: () => { if (dom.audioPlayer) dom.audioPlayer.volume = state.volume; },
+        },
     });
 
     // 渲染初始界面
