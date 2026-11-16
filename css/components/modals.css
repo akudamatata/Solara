@@ -338,3 +338,41 @@
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
 }
+
+/* 语音控制：识别语言单选（复用榜单胶囊样式） */
+.voice-lang-grid {
+    margin-top: 12px;
+}
+
+.genre-item input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    height: 0;
+    width: 0;
+}
+
+.genre-item input[type="radio"]:checked + .genre-label {
+    background: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: #ffffff !important;
+    font-weight: 600;
+    box-shadow: 0 4px 14px -2px var(--palette-glow);
+    transform: translateY(-1px);
+}
+
+.genre-item input[type="radio"]:focus-visible + .genre-label {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+.genre-item input:disabled + .genre-label,
+.settings-action-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.voice-status-hint {
+    margin: 10px 0 0;
+}

@@ -1,0 +1,66 @@
+/**
+ * Solara 语音控制样式 (麦克风按钮与聆听状态)
+ */
+
+/* ─── 语音控制麦克风按钮 ─────────────────────────────────────────────── */
+.voice-btn[hidden] {
+    display: none !important;
+}
+
+.voice-btn {
+    position: relative;
+}
+
+/* 桌面端底栏：与音量图标同款的轻量按钮 */
+.audio-tools .voice-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: transform 0.16s var(--spring-snappy), opacity 0.16s ease, color 0.16s ease;
+}
+
+.audio-tools .voice-btn .apple-svg-icon {
+    width: 18px;
+    height: 18px;
+}
+
+.audio-tools .voice-btn:hover {
+    opacity: 0.8;
+    color: var(--primary-color);
+}
+
+.audio-tools .voice-btn:active {
+    transform: scale(0.88);
+}
+
+/* 聆听中：主色高亮 + 外圈（仅在未开启“减少动态效果”时脉冲） */
+.voice-btn[data-voice-state="listening"] {
+    color: var(--primary-color) !important;
+    opacity: 1;
+}
+
+.voice-btn[data-voice-state="listening"]::after {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    border: 2px solid var(--primary-color);
+    pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .voice-btn[data-voice-state="listening"]::after {
+        animation: voice-pulse 1.2s ease-out infinite;
+    }
+}
+
+@keyframes voice-pulse {
+    from { transform: scale(0.85); opacity: 0.9; }
+    to { transform: scale(1.35); opacity: 0; }
+}

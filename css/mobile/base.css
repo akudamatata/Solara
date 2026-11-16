@@ -287,3 +287,9 @@ body.mobile-view.dark-mode .theme-icon--moon {
     color: #818cf8 !important;
     transform: scale(1) rotate(0deg) !important;
 }
+
+/* 语音按钮紧随左侧探索按钮，自动外边距吸收剩余空间，保持右侧操作组与居中标题不变 */
+body.mobile-view #mobileVoiceToggle {
+    margin-left: 10px;
+    margin-right: auto;
+}

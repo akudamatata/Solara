@@ -164,6 +164,9 @@
             <button class="mobile-toolbar__button" id="mobileExploreButton" type="button" aria-label="探索雷达" title="探索雷达">
                 <svg class="apple-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a10 10 0 0 1 10 10"/><path d="M12 6a6 6 0 0 1 6 6"/><circle cx="12" cy="12" r="2" fill="currentColor"/><path d="M12 12 4 20"/></svg>
             </button>
+            <button class="mobile-toolbar__button voice-btn" id="mobileVoiceToggle" type="button" aria-label="语音指令" title="语音指令" aria-pressed="false" hidden>
+                <svg class="apple-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="18" x2="12" y2="22"/></svg>
+            </button>
             <div class="mobile-toolbar__title" id="mobileToolbarTitle">Solara</div>
             <div class="mobile-toolbar__actions">
                 <button class="mobile-toolbar__button theme-toggle-button" id="mobileThemeToggle" type="button" aria-label="切换深浅色模式" title="切换深浅色模式">
@@ -589,6 +592,9 @@
             </div>
             <div class="control-trailing">
                 <div class="audio-tools">
+                    <button id="voiceToggleBtn" class="voice-btn" type="button" aria-label="语音指令" title="语音指令" aria-pressed="false" hidden>
+                        <svg class="apple-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="18" x2="12" y2="22"/></svg>
+                    </button>
                     <div class="player-quality">
                         <button id="qualityToggle" class="player-quality-btn" type="button">
                             <span id="qualityLabel">极高音质</span>
@@ -634,6 +640,32 @@
                 <div id="radarGenreList" class="genre-grid">
                     <!-- 榜单复选框将通过 JS 动态生成 -->
                 </div>
+            </section>
+            <section class="settings-section" id="voiceSettingsSection">
+                <h3>语音控制</h3>
+                <p class="settings-hint">开启后点击麦克风按钮，说出“下一首”“上一首”“暂停”或“继续”。</p>
+                <p class="settings-hint">浏览器支持本机识别时语音只在本设备处理；否则语音会发送到浏览器厂商的语音识别服务。</p>
+                <div class="settings-actions-group">
+                    <button type="button" id="voiceEnableBtn" class="settings-action-btn" aria-pressed="false">
+                        <svg class="apple-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="18" x2="12" y2="22"/></svg>
+                        <span id="voiceEnableText">开启语音控制</span>
+                    </button>
+                </div>
+                <div id="voiceLangList" class="genre-grid voice-lang-grid" role="radiogroup" aria-label="识别语言">
+                    <div class="genre-item">
+                        <input type="radio" name="voiceLang" id="voiceLang-auto" value="auto" checked>
+                        <label for="voiceLang-auto" class="genre-label">自动</label>
+                    </div>
+                    <div class="genre-item">
+                        <input type="radio" name="voiceLang" id="voiceLang-zh" value="zh-CN">
+                        <label for="voiceLang-zh" class="genre-label">中文</label>
+                    </div>
+                    <div class="genre-item">
+                        <input type="radio" name="voiceLang" id="voiceLang-en" value="en-US">
+                        <label for="voiceLang-en" class="genre-label">English</label>
+                    </div>
+                </div>
+                <p id="voiceStatusHint" class="settings-hint voice-status-hint" hidden></p>
             </section>
             <section class="settings-section">
                 <h3>系统与调试</h3>
