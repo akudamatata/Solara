@@ -15,9 +15,15 @@
 
 
 ## 🤝 参与贡献
-感谢 GD音乐台(music.gdstudio.xyz)提供的免费API
+- 感谢 GD音乐台 (music.gdstudio.xyz) 提供的免费 API
+- 感谢 来自 Linux.do 牛就是牛@ufoo 大佬 (https://linux.do/t/topic/942415) 提供的灵感
 
-感谢 来自Linux.do 牛就是牛@ufoo 大佬 https://linux.do/t/topic/942415 提供的灵感
+### 🌿 二创 / 分支项目
+- [Jy-EggRoll/solara](https://github.com/Jy-EggRoll/solara)：社区优秀二次开发分支，主打**低功耗优化**与**现代化工程化改造**：
+  - 🔋 **低功耗与能效优化**：新增低功耗省电模式与屏幕常亮控制，优化精简背景旋转与渲染开销，显著降低移动端发热与能耗。
+  - ⚡ **现代化工程架构**：接入 Vite 构建系统与渐进式 TypeScript 重构，资源自动 Content-Hash 缓存（告别手动维护版本号），统一 pnpm 工作区并升级 Node.js 24。
+  - 📂 **本地音乐播放**：支持选择本地音频文件（MP3/FLAC/WAV 等）即开即播，内置标签解析，无需上传。
+  - 🔗 **分享与操控增强**：支持单曲播放链接生成与分享、全屏播放模式、丰富快捷键支持（上下键调音量等）、歌单按歌手一键重排。
 
 
 ## 🌟 2.0 核心特性
